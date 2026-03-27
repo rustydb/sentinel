@@ -1,18 +1,11 @@
 <!--
 Sync Impact Report:
-- Version change: 0.0.0 → 1.0.0
+- Version change: 1.0.0 → 1.1.0
 - Modified principles:
-  - [PRINCIPLE_1_NAME] → I. Code Quality
-  - [PRINCIPLE_2_NAME] → II. Testing Standards
-  - [PRINCIPLE_3_NAME] → III. User Experience Consistency
-  - [PRINCIPLE_4_NAME] → IV. Performance Requirements
-  - [PRINCIPLE_5_NAME] → removed
+  - I. Code Quality: Added MUST for ESLint (TypeScript) and rustfmt (Rust)
 - Added sections: None
-- Removed sections: [SECTION_2_NAME], [SECTION_3_NAME] consolidated into principles and Governance.
-- Templates requiring updates:
-  ✅ .specify/templates/plan-template.md
-  ✅ .specify/templates/spec-template.md
-  ✅ .specify/templates/tasks-template.md
+- Removed sections: None
+- Templates requiring updates: None
 - Follow-up TODOs: None
 -->
 
@@ -24,6 +17,7 @@ Sync Impact Report:
 
 - MUST be written in TypeScript with strict typing.
 - MUST adhere to Docker best practices (multi-stage builds, non-root users, distroless for prod).
+- MUST enforce ESLint for TypeScript linting and rustfmt for Rust formatting.
 - **Rationale**: High code quality ensures maintainability and minimizes bugs in production.
 
 ### II. Testing Standards
@@ -49,6 +43,6 @@ Sync Impact Report:
 - The Constitution supersedes all other practices.
 - Amendments require documentation, approval, and semantic versioning bumps.
 - All PRs/reviews MUST verify compliance with these principles through automated CI/CD checks.
-- The extended reference is `docs/CONSTITUION.md`; this file is the speckit-consumable distillation.
+- The extended reference is `docs/CONSTITUTION.md`; this file is the speckit-consumable distillation.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-26 | **Last Amended**: 2026-03-26
+**Version**: 1.1.0 | **Ratified**: 2026-03-26 | **Last Amended**: 2026-03-27

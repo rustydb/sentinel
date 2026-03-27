@@ -26,8 +26,9 @@
 
 - [ ] T010 Setup `docker-compose.yml` with PostgreSQL and dependent services
 - [ ] T011 Setup apps/indexer database schema and Diesel migrations for `turret_events`
-- [ ] T012 Setup apps/api database connection pool and `network_node_systems` table
+- [ ] T012 Setup apps/api database connection pool and `network_node_mappings` table
 - [ ] T013 [P] Implement `TurretData`, `TurretEvent`, and GraphQL constants in packages/shared-types/src/index.ts
+- [ ] T013b [P] Unit test for shared-types exports and type validation
 - [ ] T014 [P] Scaffold basic API HTTP server with `/api/health` endpoint in apps/api/src/app.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
@@ -47,6 +48,7 @@
 - [ ] T015 [P] [US1] Unit test for TurretCard component in apps/dashboard/src/components/TurretCard.test.tsx
 - [ ] T016 [P] [US1] Contract test for fetching wallet assemblies in apps/dashboard/src/hooks/useTurrets.test.ts
 - [ ] T016b [US1] Playwright E2E test for Wallet Connection and Dashboard grid rendering
+- [ ] T016c [GATE] [US1] User approves failing tests before US1 implementation begins
 
 ### Implementation for User Story 1
 
@@ -54,6 +56,8 @@
 - [ ] T018 [P] [US1] Create `TurretCard` and `TurretList` components in apps/dashboard/src/components/TurretCard.tsx
 - [ ] T019 [US1] Implement `useTurrets` hook executing `GET_CHARACTER_AND_OWNED_OBJECTS` GraphQL query in apps/dashboard/src/hooks/useTurrets.ts
 - [ ] T020 [US1] Connect `TurretList` to `useTurrets` hook to display the grid in apps/dashboard/src/App.tsx
+- [ ] T020b [US1] Implement loading skeleton, error boundary, and empty state for dashboard
+- [ ] T020c [US1] Implement "orphaned" visual state for turrets with no network node assignment
 
 **Checkpoint**: User Story 1 MVP should be independently testable.
 
@@ -69,12 +73,14 @@
 
 - [ ] T021 [P] [US4] Unit test for parsing TurretStatusChanged events in apps/indexer/src/handlers.rs
 - [ ] T022 [P] [US4] Integration test for database insertion in apps/indexer/tests/db_tests.rs
+- [ ] T022c [GATE] [US4] User approves failing tests before US4 implementation begins
 
 ### Implementation for User Story 4
 
 - [ ] T023 [P] [US4] Implement `StoredTurretEvent` model in apps/indexer/src/models.rs
 - [ ] T024 [US4] Implement checkpoint subscriber and event filtering in apps/indexer/src/main.rs
 - [ ] T025 [US4] Implement `TurretEventHandler` to write events to database in apps/indexer/src/handlers.rs
+- [ ] T025b [US4] Implement RPC retry with exponential backoff (initial 1s, max 5 retries, 2x multiplier)
 
 ---
 
@@ -89,6 +95,7 @@
 - [ ] T026 [P] [US2] API test for network-nodes CRUD endpoints in apps/api/src/app.test.ts
 - [ ] T027 [P] [US2] Component test for TurretDetail drawer in apps/dashboard/src/components/TurretDetail.test.tsx
 - [ ] T027b [US2] Playwright E2E interaction test for TurretDetail drawer and network node assignment flow
+- [ ] T027c [GATE] [US2] User approves failing tests before US2 implementation begins
 
 ### Implementation for User Story 2
 
@@ -110,6 +117,7 @@
 
 - [ ] T033 [P] [US3] Unit test for MapEmbed postMessage logic in apps/dashboard/src/components/MapEmbed.test.tsx
 - [ ] T033b [US3] Playwright E2E visual test validating Map iframe embedding and spatial navigation constraints
+- [ ] T033c [GATE] [US3] User approves failing tests before US3 implementation begins
 
 ### Implementation for User Story 3
 
@@ -125,6 +133,9 @@
 - [ ] T036 Update `quickstart.md` with final run verification steps
 - [ ] T037 [P] Configure GitHub Actions CI/CD workflows in `.github/workflows/`
 - [ ] T038 Review all UI components for Brutalist design constraints (no gradients, sharp borders)
+- [ ] T039 [P] Create Playwright performance assertion: wallet connect to dashboard render < 3s (SC-001)
+- [ ] T040 [P] Add indexer integration test asserting checkpoint lag < 10s (SC-002)
+- [ ] T041 [P] Add API response time test asserting p95 < 200ms via supertest timing (SC-004)
 
 ---
 

@@ -11,7 +11,7 @@ Bootstrap the entire Frontier Sentinel monorepo from scratch, encompassing a Rea
 
 **Language/Version**: TypeScript (Bun runtime), Rust (Edition 2021)
 **Primary Dependencies**: React 19, Vite 6, Tailwind CSS 4, Express 5, `sui-indexer-alt-framework`, `diesel`, `@evefrontier/dapp-kit`
-**Storage**: PostgreSQL (production), SQLite in-memory (testing)
+**Storage**: PostgreSQL (production and indexer testing), SQLite in-memory (API unit testing only)
 **Testing**: Vitest, `@testing-library/react`, `supertest`, `cargo test`. TDD approach.
 **Target Platform**: Web browser, Node (via Bun), Linux (Podman containerized)
 **Project Type**: Monorepo Web Application, API, and Indexer

@@ -83,7 +83,7 @@ As a system administrator, I need a background service that listens to the Sui b
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
-- **SC-001**: Users can connect their wallet and view their turrets within 3 seconds of approval.
+- **SC-001**: Users can connect their wallet and view their turrets within 3 seconds measured from wallet connection callback to dashboard fully rendered.
 - **SC-002**: The event indexing service successfully processes Sui checkpoints without falling behind real-time by more than 10 seconds.
 - **SC-003**: The UI renders the brutalist design system consistently across all components.
 - **SC-004**: Dashboard API endpoints respond in under 200ms at the 95th percentile.
