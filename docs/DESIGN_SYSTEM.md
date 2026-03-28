@@ -21,11 +21,15 @@ Sui addresses are 32-byte indentifiers that appear in hexadecimal encoding with 
 
 - Addresses should use the a **`ResponsiveAddress` component**:
     - Uses `ResizeObserver` + hidden measurement span to dynamically abbreviate Sui addresses
-    - Props: `address`, `maxAbbreviation` (default 28), `as` (element type), `children`
+    - Props: `address`, `maxAbbreviation` (default 28), `as` (element type), `children`, `copyable`
+    - Chooses the largest address representation that fits the available container width
+    - Uses the upstream EVE Frontier `copy.svg` asset for copy-enabled surfaces
+    - On successful copy, swaps to the upstream `tick.svg`, inverts the control colors, and shows a `Copied to clipboard` tooltip
+    - Compact summary surfaces such as turret cards may set `copyable={false}` to keep the card visually lighter
     - **Critical CSS rule**: Parent flex items must have `minWidth: 0`
 
 Using a responsive address ensures that the address always fits within its container.
 
 ## Copy-paste
 
-All Sui addresses should have a copy-and-paste button or property available.
+Copy access should be available where operators are expected to move addresses into external tools, but compact summary cards do not need an inline copy button if the same address remains accessible elsewhere in the flow.

@@ -5,6 +5,7 @@ import { sampleEvents, sampleNodes, sampleTurrets } from './test-data';
 import { startTransition, useDeferredValue, useState } from 'react';
 
 import { MapEmbed } from './components/MapEmbed';
+import { ResponsiveAddress } from './components/ResponsiveAddress';
 import { TurretDetail } from './components/TurretDetail';
 import { TurretList } from './components/TurretCard';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
@@ -15,6 +16,7 @@ const search = new URLSearchParams(window.location.search);
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || search.get('demo') === 'true';
 const EVE_WALLET_DOWNLOAD_URL =
   'https://github.com/evefrontier/evevault/releases/download/v0.0.6/eve-vault-chrome.zip';
+const DEMO_WALLET_ADDRESS = '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd';
 
 function isSupportedWalletName(walletName: string | undefined): boolean {
   if (!walletName) {
@@ -86,6 +88,7 @@ export default function App() {
   const usingSupportedWallet = DEMO_MODE || isSupportedWalletName(currentWallet?.name);
   const connected = DEMO_MODE || (isConnected && usingSupportedWallet);
   const walletAddress = currentAccount?.address ?? 'Not connected';
+  const displayedWalletAddress = DEMO_MODE ? DEMO_WALLET_ADDRESS : walletAddress;
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
 
   const { turrets, loading, error } = useTurrets({
@@ -164,8 +167,16 @@ export default function App() {
             </p>
             <h1 className="mt-3 text-4xl uppercase">Command grid</h1>
           </div>
-          <div className="text-sm uppercase">
-            <p>Wallet: {DEMO_MODE ? '0xfrontier' : walletAddress}</p>
+          <div className="min-w-0 text-sm uppercase lg:max-w-xl">
+            <div className="flex min-w-0 items-start gap-2">
+              <span className="shrink-0">Wallet:</span>
+              <ResponsiveAddress
+                address={displayedWalletAddress}
+                as="div"
+                className="min-w-0 flex-1"
+                copyLabel="wallet address"
+              />
+            </div>
             <p>Turrets: {currentTurrets.length}</p>
             {!DEMO_MODE ? (
               <button

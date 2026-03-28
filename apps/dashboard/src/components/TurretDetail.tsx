@@ -1,6 +1,7 @@
 import type { NetworkNodeMapping, TurretData } from '@frontier-sentinel/shared-types';
 
 import type { useTurretEvents } from '../hooks/useTurretEvents';
+import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 
 type EventHook = ReturnType<typeof useTurretEvents>;
 
@@ -37,12 +38,17 @@ export function TurretDetail({
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Selected turret
             </p>
             <h2 className="mt-2 text-3xl uppercase">{turret.name ?? turret.id}</h2>
-            <p className="mt-2 font-mono text-sm">{turret.id}</p>
+            <ResponsiveAddress
+              address={turret.id}
+              as="div"
+              className="mt-2 max-w-full"
+              copyLabel="turret address"
+            />
           </div>
           <button
             className="border-2 border-sentinel-ink px-3 py-2 uppercase"
@@ -83,19 +89,43 @@ export function TurretDetail({
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Node assignment
             </p>
-            <p className="mt-3 text-lg uppercase">{turret.energySourceId}</p>
+            {isSuiAddress(turret.energySourceId) ? (
+              <ResponsiveAddress
+                address={turret.energySourceId}
+                as="div"
+                className="mt-3 max-w-full text-lg"
+                copyLabel="assigned node address"
+              />
+            ) : (
+              <p className="mt-3 text-lg uppercase">{turret.energySourceId}</p>
+            )}
             <div className="mt-4 flex flex-wrap gap-3">
               {nodes.map((node) => (
-                <button
+                <div
                   key={node.nodeId}
-                  type="button"
-                  className="border-2 border-sentinel-ink px-3 py-2 uppercase"
-                  onClick={() => {
-                    void onAssignNode(node.nodeId, node.solarSystemId);
-                  }}
+                  className="flex min-w-0 items-center gap-2 border-2 border-sentinel-ink bg-white px-3 py-2"
                 >
-                  {node.nodeId}
-                </button>
+                  {isSuiAddress(node.nodeId) ? (
+                    <ResponsiveAddress
+                      address={node.nodeId}
+                      as="div"
+                      className="min-w-0 max-w-56 flex-1"
+                      copyLabel="available node address"
+                    />
+                  ) : (
+                    <span>{node.nodeId}</span>
+                  )}
+                  <button
+                    type="button"
+                    className="border-2 border-sentinel-ink px-2 py-1 uppercase"
+                    aria-label={`Assign ${node.nodeId}`}
+                    onClick={() => {
+                      void onAssignNode(node.nodeId, node.solarSystemId);
+                    }}
+                  >
+                    Assign
+                  </button>
+                </div>
               ))}
             </div>
             <button

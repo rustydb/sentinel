@@ -11,11 +11,5 @@
       "path": "../../packages/shared-types"
     }
   ],
-  "include": [
-    "*.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "tests/**/*.ts",
-    "../../packages/shared-types/src/**/*.ts"
-  ]
+  "include": ["*.ts", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
 }

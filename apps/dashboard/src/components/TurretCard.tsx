@@ -1,5 +1,7 @@
 import type { TurretData } from '@frontier-sentinel/shared-types';
 
+import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
+
 const statusTone: Record<TurretData['status'], string> = {
   online: 'bg-sentinel-accent text-sentinel-ink',
   anchored: 'bg-sentinel-paper text-sentinel-ink',
@@ -15,12 +17,20 @@ interface TurretCardProps {
 
 export function TurretCard({ turret, onSelect }: TurretCardProps) {
   const orphaned = turret.energySourceId === 'orphaned';
+  const addressValuedNode = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
 
   return (
-    <button
-      type="button"
-      className="flex w-full flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-5 text-left shadow-[10px_10px_0_0_#111111]"
+    <article
+      className="flex w-full cursor-pointer flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-5 text-left shadow-[10px_10px_0_0_#111111]"
       onClick={() => onSelect?.(turret)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect?.(turret);
+        }
+      }}
+      role="button"
+      tabIndex={0}
       data-testid={`turret-card-${turret.id}`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -35,19 +45,30 @@ export function TurretCard({ turret, onSelect }: TurretCardProps) {
         </span>
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm uppercase">
-        <div>
+        <div className="min-w-0">
           <dt className="text-sentinel-muted">Node</dt>
-          <dd className={orphaned ? 'text-sentinel-danger' : ''}>{turret.energySourceId}</dd>
+          <dd className={orphaned ? 'text-sentinel-danger' : 'min-w-0'}>
+            {addressValuedNode ? (
+              <ResponsiveAddress
+                address={addressValuedNode}
+                as="div"
+                className="min-w-0"
+                copyable={false}
+              />
+            ) : (
+              turret.energySourceId
+            )}
+          </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-sentinel-muted">System</dt>
           <dd>{turret.locationHash ?? 'Unknown'}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-sentinel-muted">Aggressor</dt>
           <dd>{turret.aggressor ?? 'None'}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-sentinel-muted">Item</dt>
           <dd>{turret.itemId}</dd>
         </div>
@@ -57,7 +78,7 @@ export function TurretCard({ turret, onSelect }: TurretCardProps) {
           Orphaned node assignment
         </p>
       ) : null}
-    </button>
+    </article>
   );
 }
 
