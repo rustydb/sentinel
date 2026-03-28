@@ -29,3 +29,13 @@ Table: `network_node_systems`
 
 - `node_id`: TEXT (Primary Key)
 - `solar_system_id`: INTEGER
+
+## `IndexerCursor` (Database)
+
+Table: `indexer_cursors`
+
+- `pipeline_name`: TEXT (Primary Key)
+- `cursor_tx_digest`: TEXT (nullable)
+- `cursor_event_seq`: BIGINT (nullable)
+- `last_checkpoint_sequence_number`: BIGINT
+- `updated_at`: TIMESTAMPTZ

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 001-bootstrap-sentinel
+  pull_request:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install
+      - run: bun run lint
+      - run: bun run test:shared
+      - run: bun run test:api
+      - run: bun run test:dashboard
+
+  indexer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --manifest-path apps/indexer/Cargo.toml
+

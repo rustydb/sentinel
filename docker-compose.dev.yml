@@ -1,0 +1,86 @@
+name: frontier-sentinel-dev
+
+services:
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: frontier_sentinel
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d frontier_sentinel"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    image: docker.io/oven/bun:1.3.11
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - bun install && bun run --filter @frontier-sentinel/api dev
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      CHOKIDAR_USEPOLLING: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3002:3001"
+    volumes:
+      - .:/app
+      - bun-install-cache:/root/.bun/install/cache
+
+  dashboard:
+    image: docker.io/oven/bun:1.3.11
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - bun install && cd apps/dashboard && bunx vite --host 0.0.0.0 --port 5173
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_API_PROXY_TARGET: http://api:3001
+      VITE_GRAPHQL_PROXY_TARGET: https://graphql.testnet.sui.io
+    depends_on:
+      - api
+    ports:
+      - "5174:5173"
+    volumes:
+      - .:/app
+      - bun-install-cache:/root/.bun/install/cache
+
+  indexer:
+    image: docker.io/library/rust:1.94
+    working_dir: /app
+    command:
+      - cargo
+      - run
+      - --manifest-path
+      - apps/indexer/Cargo.toml
+    environment:
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      SUI_RPC_URL: https://fullnode.testnet.sui.io
+      SUI_TURRET_PACKAGE_ID: ${SUI_TURRET_PACKAGE_ID:-0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75}
+      SUI_TURRET_EVENT_MODULE: ${SUI_TURRET_EVENT_MODULE:-turret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - cargo-registry-cache:/usr/local/cargo/registry
+      - cargo-git-cache:/usr/local/cargo/git
+      - cargo-target-cache:/app/apps/indexer/target
+
+volumes:
+  postgres-dev-data:
+  bun-install-cache:
+  cargo-registry-cache:
+  cargo-git-cache:
+  cargo-target-cache:

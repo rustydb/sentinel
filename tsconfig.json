@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/shared-types"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./apps/dashboard"
+    }
+  ]
+}

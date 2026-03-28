@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-sentinel-canvas: #f3efe4;
+  --color-sentinel-paper: #fff7e8;
+  --color-sentinel-ink: #111111;
+  --color-sentinel-accent: #ff5f1f;
+  --color-sentinel-muted: #555555;
+  --color-sentinel-danger: #a21414;
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'JetBrains Mono', monospace;
+}
+
+:root {
+  color: var(--color-sentinel-ink);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-sentinel-canvas),
+    var(--color-sentinel-canvas) 16px,
+    #ebe3cf 16px,
+    #ebe3cf 32px
+  );
+  font-family: var(--font-body);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
