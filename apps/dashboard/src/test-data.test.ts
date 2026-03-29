@@ -14,8 +14,7 @@ describe('test-data', () => {
         (turret) => turret.energySourceId === 'orphaned' || isSuiAddress(turret.energySourceId),
       ),
     ).toBe(true);
-    expect(sampleNodes.every((node) => isSuiAddress(node.nodeId))).toBe(true);
-    expect(sampleNodes.some((node) => node.nodeId === sampleTurrets[0]?.energySourceId)).toBe(true);
+    expect(sampleNodes).toEqual([]);
   });
 
   it('keeps demo events aligned with the demo turret identifiers', () => {

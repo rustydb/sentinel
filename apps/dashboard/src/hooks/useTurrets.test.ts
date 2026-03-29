@@ -20,6 +20,16 @@ describe('useTurrets', () => {
                 contents: {
                   extract: {
                     asAddress: {
+                      asObject: {
+                        address: '0xcharacter',
+                        asMoveObject: {
+                          contents: {
+                            json: {
+                              name: 'Commander Nova',
+                            },
+                          },
+                        },
+                      },
                       objects: {
                         pageInfo: {
                           hasNextPage: false,
@@ -91,6 +101,7 @@ describe('useTurrets', () => {
       '/graphql',
       expect.objectContaining({ method: 'POST' }),
     );
+    expect(result.current.characterName).toBe('Commander Nova');
     expect(result.current.turrets[0]?.name).toBe('Alpha Bastion');
     expect(result.current.turrets[0]?.energySourceId).toBe('node-7');
   });

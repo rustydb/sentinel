@@ -12,6 +12,14 @@ export const GET_CHARACTER_AND_OWNED_OBJECTS = `
           contents {
             extract(path: "character_id") {
               asAddress {
+                asObject {
+                  address
+                  asMoveObject {
+                    contents {
+                      json
+                    }
+                  }
+                }
                 objects(first: 50, after: $after, filter: { type: $ownerCapType }) {
                   pageInfo {
                     hasNextPage

@@ -64,6 +64,23 @@ describe('ResponsiveAddress', () => {
     });
   });
 
+  it('continues responding when the container grows and then shrinks again', async () => {
+    render(<ResponsiveAddress address={FULL_ADDRESS} copyable={false} />);
+
+    emitResize(320);
+    await waitFor(() => {
+      expect((screen.getByTitle(FULL_ADDRESS).textContent ?? '').length).toBeGreaterThan(24);
+    });
+    const wideDisplay = screen.getByTitle(FULL_ADDRESS).textContent ?? '';
+
+    emitResize(140);
+    await waitFor(() => {
+      const nextDisplay = screen.getByTitle(FULL_ADDRESS).textContent ?? '';
+      expect(nextDisplay).toContain('…');
+      expect(nextDisplay.length).toBeLessThan(wideDisplay.length);
+    });
+  });
+
   it('renders a safe fallback for an invalid address', async () => {
     render(<ResponsiveAddress address="not-an-address" />);
 

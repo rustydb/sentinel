@@ -26,6 +26,14 @@ interface OwnerCapsQueryPayload {
           contents?: {
             extract?: {
               asAddress?: {
+                asObject?: {
+                  address?: string;
+                  asMoveObject?: {
+                    contents?: {
+                      json?: Record<string, unknown>;
+                    };
+                  };
+                };
                 objects?: {
                   pageInfo?: {
                     hasNextPage?: boolean;
@@ -91,10 +99,7 @@ function mapNodeToTurret(node: Record<string, unknown>): TurretData | null {
   const candidate: TurretData = {
     id: readString(node.address),
     itemId: readString(key.item_id, readString(json.itemId)),
-    name: readString(
-      metadata.name,
-      readString(json.name, readString(key.item_id, 'Unnamed Turret')),
-    ),
+    name: readString(metadata.name, ''),
     status: toTurretStatus(extractStatus(json.status)),
     locationHash: readString(location.location_hash, readString(json.locationHash)),
     isOnline: extractStatus(json.status) === 'online',
@@ -107,15 +112,39 @@ function mapNodeToTurret(node: Record<string, unknown>): TurretData | null {
   return isTurretData(candidate) ? candidate : null;
 }
 
+function parseCharacterName(characterJson: Record<string, unknown> | undefined): string | null {
+  if (!characterJson) {
+    return null;
+  }
+
+  const metadata = (characterJson.metadata as Record<string, unknown> | undefined) ?? {};
+  const profile = (characterJson.profile as Record<string, unknown> | undefined) ?? {};
+  const display = (characterJson.display as Record<string, unknown> | undefined) ?? {};
+  const candidate = [
+    characterJson.name,
+    characterJson.character_name,
+    characterJson.characterName,
+    metadata.name,
+    profile.name,
+    display.name,
+  ].find((value) => typeof value === 'string' && value.trim());
+
+  return typeof candidate === 'string' ? candidate.trim() : null;
+}
+
 export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: UseTurretsOptions) {
   const [turrets, setTurrets] = useState<TurretData[]>([]);
   const [loading, setLoading] = useState(Boolean(enabled && owner));
   const [error, setError] = useState<Error | null>(null);
+  const [characterName, setCharacterName] = useState<string | null>(null);
+  const [characterAddress, setCharacterAddress] = useState<string | null>(null);
 
   useEffect(() => {
     if (!enabled || !owner) {
       setTurrets([]);
       setLoading(false);
+      setCharacterName(null);
+      setCharacterAddress(null);
       return;
     }
 
@@ -154,9 +183,23 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
           }
 
           const characterConnection = ownerCapsPayload.data?.address?.objects;
+          const characterProfile =
+            characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.asObject;
+          const characterJson = characterProfile?.asMoveObject?.contents?.json;
+          const nextCharacterName =
+            characterJson && typeof characterJson === 'object'
+              ? parseCharacterName(characterJson)
+              : null;
+          const nextCharacterAddress =
+            typeof characterProfile?.address === 'string' ? characterProfile.address : null;
           const ownedObjectsConnection =
             characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.objects;
           const pageNodes = ownedObjectsConnection?.nodes ?? [];
+
+          if (!cancelled) {
+            setCharacterName(nextCharacterName);
+            setCharacterAddress(nextCharacterAddress);
+          }
 
           for (const pageNode of pageNodes) {
             const contents =
@@ -210,5 +253,5 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
     };
   }, [enabled, endpoint, owner]);
 
-  return { turrets, loading, error };
+  return { turrets, loading, error, characterName, characterAddress };
 }

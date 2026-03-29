@@ -27,16 +27,7 @@ export const sampleTurrets: TurretData[] = [
   },
 ];
 
-export const sampleNodes: NetworkNodeMapping[] = [
-  {
-    nodeId: '0x0413288062cb50edd1629957cd566d841b49d88241c36b8dc46084ceb698486e',
-    solarSystemId: 31002477,
-  },
-  {
-    nodeId: '0x0f1e2d3c4b5a69788796a5b4c3d2e1f00112233445566778899aabbccddeeff0',
-    solarSystemId: 31002478,
-  },
-];
+export const sampleNodes: NetworkNodeMapping[] = [];
 
 export const sampleEvents: TurretEvent[] = [
   {

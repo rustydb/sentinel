@@ -5,6 +5,15 @@ import { defineConfig } from 'vite';
 const apiProxyTarget = process.env.VITE_API_PROXY_TARGET ?? 'http://127.0.0.1:3001';
 const graphQlProxyTarget =
   process.env.VITE_GRAPHQL_PROXY_TARGET ?? 'https://graphql.testnet.sui.io';
+const eveServerName = process.env.VITE_EVE_SERVER_NAME ?? 'utopia';
+const defaultWorldApiProxyTargets: Record<string, string> = {
+  stillness: 'https://world-api-stillness.live.tech.evefrontier.com',
+  utopia: 'https://world-api-utopia.uat.pub.evefrontier.com',
+};
+const worldApiProxyTarget =
+  process.env.VITE_WORLD_API_PROXY_TARGET ??
+  defaultWorldApiProxyTargets[eveServerName] ??
+  defaultWorldApiProxyTargets.utopia;
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -18,6 +27,12 @@ export default defineConfig({
         target: graphQlProxyTarget,
         changeOrigin: true,
         secure: true,
+      },
+      '/world-api': {
+        target: worldApiProxyTarget,
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/world-api/, ''),
       },
     },
   },

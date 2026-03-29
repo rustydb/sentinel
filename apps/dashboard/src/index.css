@@ -45,3 +45,89 @@ select {
 * {
   box-sizing: border-box;
 }
+
+.sentinel-action-button {
+  background: white;
+  color: var(--color-sentinel-ink);
+  box-shadow: 4px 4px 0 0 var(--color-sentinel-ink);
+  transition:
+    transform 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    box-shadow 140ms ease-out;
+}
+
+.sentinel-action-button:hover {
+  background: var(--color-sentinel-accent);
+  box-shadow: 6px 6px 0 0 var(--color-sentinel-ink);
+  transform: translate(-1px, -1px);
+}
+
+.sentinel-action-button:active {
+  background: var(--color-sentinel-ink);
+  box-shadow: 0 0 0 0 var(--color-sentinel-ink);
+  color: var(--color-sentinel-paper);
+  transform: translate(0, 0);
+}
+
+.sentinel-action-button:focus-visible {
+  outline: 3px solid var(--color-sentinel-accent);
+  outline-offset: 2px;
+}
+
+.sentinel-action-button:disabled {
+  background: var(--color-sentinel-muted);
+  box-shadow: none;
+  color: var(--color-sentinel-paper);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sentinel-action-button--primary {
+  background: var(--color-sentinel-accent);
+}
+
+.sentinel-action-button--primary:hover {
+  background: #ff7d4d;
+}
+
+.sentinel-action-button--danger:hover {
+  background: var(--color-sentinel-danger);
+  color: var(--color-sentinel-paper);
+}
+
+.sentinel-interactive-card {
+  transition:
+    transform 160ms ease-out,
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    box-shadow 160ms ease-out;
+}
+
+.sentinel-interactive-card:hover {
+  background: white;
+  box-shadow: 14px 14px 0 0 var(--color-sentinel-ink);
+  transform: translate(-2px, -2px);
+}
+
+.sentinel-interactive-card:active {
+  box-shadow: 8px 8px 0 0 var(--color-sentinel-ink);
+  transform: translate(0, 0);
+}
+
+.sentinel-interactive-card:focus-visible {
+  outline: 3px solid var(--color-sentinel-accent);
+  outline-offset: 4px;
+}
+
+.sentinel-interactive-card.is-selected,
+.sentinel-interactive-card[data-selected='true'] {
+  background: white;
+  border-color: var(--color-sentinel-accent);
+  box-shadow: 14px 14px 0 0 var(--color-sentinel-accent);
+}
+
+.sentinel-interactive-card.is-selected:hover,
+.sentinel-interactive-card[data-selected='true']:hover {
+  box-shadow: 16px 16px 0 0 var(--color-sentinel-accent);
+}

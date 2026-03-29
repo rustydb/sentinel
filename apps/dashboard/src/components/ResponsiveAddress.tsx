@@ -40,9 +40,27 @@ function abbreviateAddress(address: string, totalVisibleChars: number): string {
 
 function buildCandidateSequence(address: string, maxAbbreviation: number): string[] {
   const candidates = [address];
-  const cappedAbbreviation = Math.max(MIN_ABBREVIATION, maxAbbreviation);
+  const lowestVisibleChars = Math.max(
+    MIN_ABBREVIATION,
+    Math.min(maxAbbreviation, address.length - 1),
+  );
 
-  for (let visibleChars = cappedAbbreviation; visibleChars >= MIN_ABBREVIATION; visibleChars -= 2) {
+  for (
+    let visibleChars = address.length - 1;
+    visibleChars >= lowestVisibleChars;
+    visibleChars -= 1
+  ) {
+    const abbreviated = abbreviateAddress(address, visibleChars);
+    if (!candidates.includes(abbreviated)) {
+      candidates.push(abbreviated);
+    }
+  }
+
+  for (
+    let visibleChars = lowestVisibleChars - 1;
+    visibleChars >= MIN_ABBREVIATION;
+    visibleChars -= 1
+  ) {
     const abbreviated = abbreviateAddress(address, visibleChars);
     if (!candidates.includes(abbreviated)) {
       candidates.push(abbreviated);
@@ -71,6 +89,8 @@ export function ResponsiveAddress({
   const prefixRef = useRef<HTMLSpanElement | null>(null);
   const controlRef = useRef<HTMLButtonElement | null>(null);
   const feedbackTimerRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const observedWidthRef = useRef<number | null>(null);
   const [displayAddress, setDisplayAddress] = useState(address ?? '');
   const [copied, setCopied] = useState(false);
   const measurementId = useId();
@@ -89,13 +109,19 @@ export function ResponsiveAddress({
     const containerEl = containerRef.current;
     const measureEl = measureRef.current;
 
-    const syncDisplayAddress = (observedWidth = containerEl.clientWidth) => {
+    const syncDisplayAddress = () => {
       if (!isSuiAddress(normalizedAddress)) {
         setDisplayAddress('Unavailable');
         return;
       }
 
-      const containerWidth = Math.max(0, Math.floor(observedWidth));
+      const observedWidth = observedWidthRef.current;
+      const containerWidth = Math.max(
+        0,
+        Math.floor(
+          observedWidth ?? (containerEl.getBoundingClientRect().width || containerEl.clientWidth),
+        ),
+      );
       if (containerWidth <= 0) {
         setDisplayAddress(normalizedAddress);
         return;
@@ -118,24 +144,36 @@ export function ResponsiveAddress({
       setDisplayAddress(nextDisplay);
     };
 
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) {
-        syncDisplayAddress(entry.contentRect.width);
+    const scheduleSyncDisplayAddress = (nextObservedWidth?: number) => {
+      if (typeof nextObservedWidth === 'number' && Number.isFinite(nextObservedWidth)) {
+        observedWidthRef.current = nextObservedWidth;
       }
+
+      if (animationFrameRef.current != null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(() => {
+        animationFrameRef.current = null;
+        syncDisplayAddress();
+      });
+    };
+
+    const observer = new ResizeObserver((entries) => {
+      scheduleSyncDisplayAddress(entries[0]?.contentRect.width);
     });
 
     observer.observe(containerEl);
-    if (prefixRef.current instanceof HTMLElement) {
-      observer.observe(prefixRef.current);
-    }
-    if (controlRef.current instanceof HTMLElement) {
-      observer.observe(controlRef.current);
-    }
-    syncDisplayAddress();
+    window.addEventListener('resize', scheduleSyncDisplayAddress);
+    scheduleSyncDisplayAddress();
 
     return () => {
+      window.removeEventListener('resize', scheduleSyncDisplayAddress);
       observer.disconnect();
+      if (animationFrameRef.current != null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
     };
   }, [copyAvailable, maxAbbreviation, normalizedAddress]);
 
@@ -143,6 +181,9 @@ export function ResponsiveAddress({
     return () => {
       if (feedbackTimerRef.current != null) {
         window.clearTimeout(feedbackTimerRef.current);
+      }
+      if (animationFrameRef.current != null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, []);

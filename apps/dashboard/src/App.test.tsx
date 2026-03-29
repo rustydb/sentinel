@@ -11,6 +11,7 @@ const hooks = vi.hoisted(() => ({
   useTurrets: vi.fn(),
   useNetworkNodes: vi.fn(),
   useTurretEvents: vi.fn(),
+  useTypeInfo: vi.fn(),
 }));
 
 vi.mock('@evefrontier/dapp-kit', () => ({
@@ -33,16 +34,23 @@ vi.mock('./hooks/useTurretEvents', () => ({
   useTurretEvents: hooks.useTurretEvents,
 }));
 
+vi.mock('./hooks/useTypeInfo', () => ({
+  useTypeInfo: hooks.useTypeInfo,
+}));
+
 import App from './App';
 
 const WALLET_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const NODE_ADDRESS = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+const CHARACTER_NAME = 'Commander Nova';
 const clipboardWriteText = vi.fn();
+const disconnectMock = vi.fn();
 
 describe('App', () => {
   beforeEach(() => {
     installResizeObserverMock();
     clipboardWriteText.mockReset();
+    disconnectMock.mockReset();
     Object.defineProperty(navigator, 'clipboard', {
       value: {
         writeText: clipboardWriteText.mockResolvedValue(undefined),
@@ -53,7 +61,7 @@ describe('App', () => {
     hooks.useConnection.mockReturnValue({
       currentAccount: { address: WALLET_ADDRESS },
       handleConnect: vi.fn(),
-      handleDisconnect: vi.fn(),
+      handleDisconnect: disconnectMock,
       hasEveVault: true,
       isConnected: true,
     });
@@ -74,6 +82,8 @@ describe('App', () => {
       ],
       loading: false,
       error: null,
+      characterName: CHARACTER_NAME,
+      characterAddress: '0xcharacter',
     });
     hooks.useNetworkNodes.mockReturnValue({
       nodes: [],
@@ -89,6 +99,11 @@ describe('App', () => {
       next: vi.fn(),
       reset: vi.fn(),
     });
+    hooks.useTypeInfo.mockReturnValue({
+      id: '92404',
+      name: 'Heavy Turret',
+      iconUrl: 'https://assets.example.com/heavy-turret.png',
+    });
   });
 
   afterEach(() => {
@@ -96,9 +111,16 @@ describe('App', () => {
     vi.restoreAllMocks();
   });
 
-  it('keeps the wallet address responsive in the dashboard header', async () => {
+  it('shows the character name in the wallet dropdown trigger', () => {
     render(<App />);
 
+    expect(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') })).toBeTruthy();
+  });
+
+  it('keeps the wallet address responsive inside the wallet dropdown', async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') }));
     emitResizeForAll(120);
 
     await waitFor(() => {
@@ -106,9 +128,10 @@ describe('App', () => {
     });
   });
 
-  it('copies the full wallet address from the dashboard header', async () => {
+  it('copies the full wallet address from the wallet dropdown', async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') }));
     fireEvent.click(screen.getByRole('button', { name: /copy wallet address/i }));
 
     await waitFor(() => {
@@ -119,8 +142,36 @@ describe('App', () => {
   it('uses the shared responsive-address pattern for both wallet and turret node surfaces', () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') }));
     expect(screen.getByRole('button', { name: /copy wallet address/i })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /copy node address/i })).toBeNull();
+    expect(screen.getByText('Network Node')).toBeTruthy();
     expect(screen.getByTitle(NODE_ADDRESS)).toBeTruthy();
+    expect(screen.queryByText('J101')).toBeNull();
+  });
+
+  it('shows the wallet address and disconnect action when the dropdown is expanded', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') }));
+
+    expect(screen.getByText(/sui address/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^disconnect$/i })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^disconnect$/i }));
+    expect(disconnectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the selected turret card highlighted until it is toggled off or replaced', () => {
+    render(<App />);
+
+    const card = screen.getByTestId(
+      'turret-card-0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    );
+
+    expect(card.getAttribute('aria-selected')).toBe('false');
+    fireEvent.click(card);
+    expect(card.getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(card);
+    expect(card.getAttribute('aria-selected')).toBe('false');
   });
 });

@@ -1,5 +1,6 @@
-import type { TurretData } from '@frontier-sentinel/shared-types';
+import type { NetworkNodeMapping, TurretData } from '@frontier-sentinel/shared-types';
 
+import { useTypeInfo } from '../hooks/useTypeInfo';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 
 const statusTone: Record<TurretData['status'], string> = {
@@ -12,16 +13,33 @@ const statusTone: Record<TurretData['status'], string> = {
 
 interface TurretCardProps {
   turret: TurretData;
+  nodes?: NetworkNodeMapping[];
   onSelect?: (turret: TurretData) => void;
+  selected?: boolean;
 }
 
-export function TurretCard({ turret, onSelect }: TurretCardProps) {
+function joinClasses(...classNames: Array<string | false | null | undefined>): string {
+  return classNames.filter(Boolean).join(' ');
+}
+
+export function TurretCard({ turret, nodes = [], onSelect, selected = false }: TurretCardProps) {
   const orphaned = turret.energySourceId === 'orphaned';
   const addressValuedNode = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
+  const assignedNode = addressValuedNode
+    ? nodes.find((node) => node.nodeId === addressValuedNode)
+    : undefined;
+  const typeInfo = useTypeInfo(turret.typeId);
+  const customName = turret.name?.trim() ? turret.name.trim() : null;
+  const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
+  const displayName = customName ?? typeName ?? turret.itemId;
+  const typeSubtitle = customName && typeName ? typeName : null;
 
   return (
     <article
-      className="flex w-full cursor-pointer flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-5 text-left shadow-[10px_10px_0_0_#111111]"
+      className={joinClasses(
+        'sentinel-interactive-card flex w-full cursor-pointer flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-5 text-left shadow-[10px_10px_0_0_#111111]',
+        selected && 'is-selected',
+      )}
       onClick={() => onSelect?.(turret)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -31,22 +49,50 @@ export function TurretCard({ turret, onSelect }: TurretCardProps) {
       }}
       role="button"
       tabIndex={0}
+      aria-selected={selected}
+      data-selected={selected ? 'true' : 'false'}
       data-testid={`turret-card-${turret.id}`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Turret</p>
-          <h3 className="mt-2 text-2xl uppercase">{turret.name ?? turret.itemId}</h3>
+      <div className="grid min-w-0 grid-cols-[3.5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2">
+        <div className="col-start-1 row-start-1 flex size-14 items-center justify-center overflow-hidden border-2 border-sentinel-ink bg-white">
+          {typeInfo?.iconUrl ? (
+            <img
+              src={typeInfo.iconUrl}
+              alt={`${typeName ?? 'Turret'} icon`}
+              className="h-full w-full object-cover object-center"
+            />
+          ) : (
+            <span className="px-1 text-center text-[10px] uppercase tracking-[0.2em] text-sentinel-muted">
+              {typeName ? typeName.slice(0, 2) : 'TR'}
+            </span>
+          )}
         </div>
-        <span
-          className={`border-2 border-sentinel-ink px-3 py-1 text-xs uppercase ${statusTone[turret.status]}`}
-        >
-          {turret.status}
-        </span>
+        <div className="col-start-2 row-start-1 min-w-0">
+          <ResponsiveAddress
+            address={turret.id}
+            as="div"
+            className="w-full min-w-0 text-xs uppercase tracking-[0.3em] text-sentinel-muted"
+            copyable={false}
+          />
+          <h3 className="mt-2 text-2xl uppercase">{displayName}</h3>
+          {typeSubtitle ? (
+            <p className="mt-1 truncate text-xs uppercase tracking-[0.2em] text-sentinel-muted">
+              {typeSubtitle}
+            </p>
+          ) : null}
+        </div>
+        <div className="col-start-1 row-start-2 flex w-full items-center gap-2 self-start text-[10px] uppercase tracking-[0.2em]">
+          <span className="text-sentinel-muted">Status:</span>
+          <span
+            className={`border-2 border-sentinel-ink px-3 py-1 text-xs uppercase ${statusTone[turret.status]}`}
+          >
+            {turret.status}
+          </span>
+        </div>
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm uppercase">
         <div className="min-w-0">
-          <dt className="text-sentinel-muted">Node</dt>
+          <dt className="text-sentinel-muted">Network Node</dt>
           <dd className={orphaned ? 'text-sentinel-danger' : 'min-w-0'}>
             {addressValuedNode ? (
               <ResponsiveAddress
@@ -61,16 +107,12 @@ export function TurretCard({ turret, onSelect }: TurretCardProps) {
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-sentinel-muted">System</dt>
-          <dd>{turret.locationHash ?? 'Unknown'}</dd>
+          <dt className="text-sentinel-muted">Solar System</dt>
+          <dd>{assignedNode ? assignedNode.solarSystemId : 'Unassigned'}</dd>
         </div>
         <div className="min-w-0">
           <dt className="text-sentinel-muted">Aggressor</dt>
           <dd>{turret.aggressor ?? 'None'}</dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="text-sentinel-muted">Item</dt>
-          <dd>{turret.itemId}</dd>
         </div>
       </dl>
       {orphaned ? (
@@ -84,14 +126,22 @@ export function TurretCard({ turret, onSelect }: TurretCardProps) {
 
 interface TurretListProps {
   turrets: TurretData[];
+  nodes?: NetworkNodeMapping[];
   onSelect?: (turret: TurretData) => void;
+  selectedTurretId?: string | null;
 }
 
-export function TurretList({ turrets, onSelect }: TurretListProps) {
+export function TurretList({ turrets, nodes = [], onSelect, selectedTurretId }: TurretListProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {turrets.map((turret) => (
-        <TurretCard key={turret.id} turret={turret} onSelect={onSelect} />
+        <TurretCard
+          key={turret.id}
+          turret={turret}
+          nodes={nodes}
+          onSelect={onSelect}
+          selected={selectedTurretId === turret.id}
+        />
       ))}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const MAP_EMBED_URL = 'https://ef-map.com/embed?performance=1';
+const MAP_EMBED_URL = 'https://ef-map.com/embed?performance=1&orbit=1&color=random&fit=1&angle=45';
 
 interface MapEmbedProps {
   selectedSystemId: number | null;

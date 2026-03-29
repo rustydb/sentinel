@@ -110,4 +110,12 @@ describe('TurretDetail', () => {
     expect(screen.getByRole('button', { name: /copy assigned node address/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /copy available node address/i })).toBeTruthy();
   });
+
+  it('lets the selected turret and assigned node address rows grow to fill available width', () => {
+    render(<TurretDetail {...baseProps} />);
+
+    const addressRows = screen.getAllByTestId('responsive-address');
+    expect(addressRows[0]?.className).toContain('w-full');
+    expect(addressRows[1]?.className).toContain('w-full');
+  });
 });

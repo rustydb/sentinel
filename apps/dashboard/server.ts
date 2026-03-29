@@ -3,6 +3,15 @@ const port = Number(process.env.PORT ?? '5173');
 const distRoot = new URL('./dist/', import.meta.url);
 const apiProxyUrl = process.env.API_PROXY_URL ?? 'http://api:3001';
 const graphQlProxyUrl = process.env.GRAPHQL_PROXY_URL ?? 'https://graphql.testnet.sui.io';
+const eveServerName = process.env.EVE_SERVER_NAME ?? 'utopia';
+const defaultWorldApiProxyUrls: Record<string, string> = {
+  stillness: 'https://world-api-stillness.live.tech.evefrontier.com',
+  utopia: 'https://world-api-utopia.uat.pub.evefrontier.com',
+};
+const worldApiProxyUrl =
+  process.env.WORLD_API_PROXY_URL ??
+  defaultWorldApiProxyUrls[eveServerName] ??
+  defaultWorldApiProxyUrls.utopia;
 
 const contentTypes = new Map<string, string>([
   ['.css', 'text/css; charset=utf-8'],
@@ -33,9 +42,16 @@ async function serveFile(pathname: string): Promise<Response | null> {
   });
 }
 
-async function proxyRequest(request: Request, targetBaseUrl: string): Promise<Response> {
+async function proxyRequest(
+  request: Request,
+  targetBaseUrl: string,
+  strippedPrefix = '',
+): Promise<Response> {
   const incomingUrl = new URL(request.url);
-  const targetUrl = new URL(`${incomingUrl.pathname}${incomingUrl.search}`, targetBaseUrl);
+  const pathname = strippedPrefix
+    ? incomingUrl.pathname.replace(strippedPrefix, '') || '/'
+    : incomingUrl.pathname;
+  const targetUrl = new URL(`${pathname}${incomingUrl.search}`, targetBaseUrl);
   const method = request.method.toUpperCase();
   const headers = new Headers(request.headers);
   headers.delete('host');
@@ -64,6 +80,10 @@ Bun.serve({
 
     if (url.pathname === '/graphql') {
       return proxyRequest(request, graphQlProxyUrl);
+    }
+
+    if (url.pathname === '/world-api' || url.pathname.startsWith('/world-api/')) {
+      return proxyRequest(request, worldApiProxyUrl, '/world-api');
     }
 
     const direct = await serveFile(url.pathname);

@@ -14,6 +14,15 @@ description: Styling, typography, and colors for use in Frontier Sentinel.
 - Applies sharp borders, hard shadows, and uppercase labels across cards, drawers, and action buttons.
 - Avoids gradients and rounded corners; the only atmospheric treatment is a repeating paper-stripe background.
 - Reserves `#ff5f1f` as the primary accent for wallet connection and high-signal status emphasis.
+- Even within the brutalist aesthetic, the UI should feel fluid, responsive, and alive rather than static.
+
+# Interaction Feel
+
+- Interactive surfaces should acknowledge hover, focus, and active states with quick, tactile transitions.
+- Buttons should feel pressable: hover fills them with signal color, and active states should visibly invert or collapse their shadow.
+- Clickable cards should react on hover and maintain a persistent highlighted state when selected.
+- Motion should stay subtle and fast. Favor tiny shifts in position, shadow, and fill over flashy animation.
+- Stateful changes should be legible at a glance, especially for selected cards, copied controls, and destructive actions.
 
 # Sui Addresses
 

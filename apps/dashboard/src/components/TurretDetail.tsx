@@ -4,6 +4,10 @@ import type { useTurretEvents } from '../hooks/useTurretEvents';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 
 type EventHook = ReturnType<typeof useTurretEvents>;
+const ACTION_BUTTON_CLASS =
+  'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
+const DANGER_ACTION_BUTTON_CLASS =
+  'sentinel-action-button sentinel-action-button--danger border-2 border-sentinel-danger px-3 py-2 uppercase text-sentinel-danger';
 
 interface TurretDetailProps {
   turret: TurretData | null;
@@ -38,7 +42,7 @@ export function TurretDetail({
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Selected turret
             </p>
@@ -46,21 +50,17 @@ export function TurretDetail({
             <ResponsiveAddress
               address={turret.id}
               as="div"
-              className="mt-2 max-w-full"
+              className="mt-2 w-full min-w-0 max-w-full"
               copyLabel="turret address"
             />
           </div>
-          <button
-            className="border-2 border-sentinel-ink px-3 py-2 uppercase"
-            type="button"
-            onClick={onClose}
-          >
+          <button className={ACTION_BUTTON_CLASS} type="button" onClick={onClose}>
             Close
           </button>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-          <section className="border-2 border-sentinel-ink p-4">
+          <section className="min-w-0 border-2 border-sentinel-ink p-4">
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Event log</p>
             {eventsState.loading ? <p className="mt-4">Loading events...</p> : null}
             <ul className="mt-4 space-y-3">
@@ -77,7 +77,7 @@ export function TurretDetail({
             {eventsState.nextPage ? (
               <button
                 type="button"
-                className="mt-4 border-2 border-sentinel-ink px-3 py-2 uppercase"
+                className={`mt-4 ${ACTION_BUTTON_CLASS}`}
                 onClick={eventsState.next}
               >
                 Load more
@@ -85,20 +85,22 @@ export function TurretDetail({
             ) : null}
           </section>
 
-          <section className="border-2 border-sentinel-ink p-4">
+          <section className="min-w-0 border-2 border-sentinel-ink p-4">
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Node assignment
             </p>
-            {isSuiAddress(turret.energySourceId) ? (
-              <ResponsiveAddress
-                address={turret.energySourceId}
-                as="div"
-                className="mt-3 max-w-full text-lg"
-                copyLabel="assigned node address"
-              />
-            ) : (
-              <p className="mt-3 text-lg uppercase">{turret.energySourceId}</p>
-            )}
+            <div className="mt-3 min-w-0">
+              {isSuiAddress(turret.energySourceId) ? (
+                <ResponsiveAddress
+                  address={turret.energySourceId}
+                  as="div"
+                  className="w-full min-w-0 max-w-full text-lg"
+                  copyLabel="assigned node address"
+                />
+              ) : (
+                <p className="text-lg uppercase">{turret.energySourceId}</p>
+              )}
+            </div>
             <div className="mt-4 flex flex-wrap gap-3">
               {nodes.map((node) => (
                 <div
@@ -117,7 +119,7 @@ export function TurretDetail({
                   )}
                   <button
                     type="button"
-                    className="border-2 border-sentinel-ink px-2 py-1 uppercase"
+                    className="sentinel-action-button border-2 border-sentinel-ink px-2 py-1 uppercase"
                     aria-label={`Assign ${node.nodeId}`}
                     onClick={() => {
                       void onAssignNode(node.nodeId, node.solarSystemId);
@@ -130,7 +132,7 @@ export function TurretDetail({
             </div>
             <button
               type="button"
-              className="mt-4 border-2 border-sentinel-danger px-3 py-2 uppercase text-sentinel-danger"
+              className={`mt-4 ${DANGER_ACTION_BUTTON_CLASS}`}
               onClick={() => {
                 void onUnassignNode(turret.energySourceId);
               }}
@@ -139,7 +141,7 @@ export function TurretDetail({
             </button>
             <button
               type="button"
-              className="mt-4 block border-2 border-sentinel-ink px-3 py-2 uppercase"
+              className={`mt-4 block ${ACTION_BUTTON_CLASS}`}
               onClick={() => onLocationSelect(locationTarget)}
             >
               View system on map

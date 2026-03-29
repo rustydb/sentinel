@@ -15,7 +15,7 @@ Every EVE world has an API.
 | World     | URL                                                    |
 | --------- | ------------------------------------------------------ |
 | Stillness | https://world-api-stillness.live.tech.evefrontier.com/ |
-| Utopia    | https://world-api-utopia.live.tech.evefrontier.com/    |
+| Utopia    | https://world-api-utopia.uat.pub.evefrontier.com/      |
 
 Agents can learn the API through the `doc.json` file located at `/docs/doc.json` on either API URL.
 
@@ -25,7 +25,7 @@ Agents can learn the API through the `doc.json` file located at `/docs/doc.json`
 
 Types in EVE Frontier may have icons associated with them. These icons may be pulled by querying the type API with that type's ID.
 
-For example: `https://world-api-${EVE_SERVER_NAME}.uat.pub.evefrontier.com/v2/types/${typeId}` would return an icon for that typeId or null.
+For example: `https://world-api-utopia.uat.pub.evefrontier.com/v2/types/${typeId}` would return an icon for that typeId or null on Utopia. Stillness currently serves the equivalent type data from `https://world-api-stillness.live.tech.evefrontier.com/v2/types/${typeId}`.
 
 If any object in EVE is pulled by Frontier Security, its icon should also be fetched when an appropriate context for presenting information to the user.
 
@@ -60,7 +60,7 @@ The turret is available as the following types:
 | Turret       |
 | Heavy Turret |
 
-All turrets can be found in https://world-api-stillness.live.tech.evefrontier.com/v2/types by querying for their `type_id` returned from their onchain node.
+All turrets can be found by querying the world-specific `/v2/types` endpoint for their `type_id` returned from their onchain node.
 
 ### Data Structures
 

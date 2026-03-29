@@ -2,7 +2,7 @@ import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
 import type { TurretData } from '@frontier-sentinel/shared-types';
 import { sampleEvents, sampleNodes, sampleTurrets } from './test-data';
-import { startTransition, useDeferredValue, useState } from 'react';
+import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react';
 
 import { MapEmbed } from './components/MapEmbed';
 import { ResponsiveAddress } from './components/ResponsiveAddress';
@@ -17,6 +17,13 @@ const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || search.get('demo'
 const EVE_WALLET_DOWNLOAD_URL =
   'https://github.com/evefrontier/evevault/releases/download/v0.0.6/eve-vault-chrome.zip';
 const DEMO_WALLET_ADDRESS = '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd';
+const DEMO_CHARACTER_NAME = 'Captain Rusty';
+const ACTION_BUTTON_CLASS =
+  'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
+const PRIMARY_ACTION_BUTTON_CLASS =
+  'sentinel-action-button sentinel-action-button--primary border-4 border-sentinel-ink px-6 py-4 text-lg uppercase';
+const DANGER_ACTION_BUTTON_CLASS =
+  'sentinel-action-button sentinel-action-button--danger border-2 border-sentinel-danger px-3 py-2 uppercase text-sentinel-danger';
 
 function isSupportedWalletName(walletName: string | undefined): boolean {
   if (!walletName) {
@@ -38,7 +45,7 @@ function WalletConnect({ onConnect, canConnect }: { onConnect: () => void; canCo
       </p>
       <button
         type="button"
-        className="mt-8 w-fit border-4 border-sentinel-ink bg-sentinel-accent px-6 py-4 text-lg uppercase shadow-[8px_8px_0_0_#111111] disabled:cursor-not-allowed disabled:bg-sentinel-muted disabled:text-sentinel-paper disabled:shadow-none"
+        className={`${PRIMARY_ACTION_BUTTON_CLASS} mt-8 w-fit disabled:cursor-not-allowed disabled:bg-sentinel-muted disabled:text-sentinel-paper disabled:shadow-none`}
         onClick={onConnect}
         disabled={!canConnect}
       >
@@ -78,6 +85,80 @@ function EmptyState() {
   );
 }
 
+function WalletDropdown({
+  characterName,
+  walletAddress,
+  onDisconnect,
+}: {
+  characterName: string;
+  walletAddress: string;
+  onDisconnect: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!(menuRef.current instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={menuRef} className="relative w-full max-w-md">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={`${ACTION_BUTTON_CLASS} flex w-full items-center justify-between gap-3`}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="truncate">{characterName}</span>
+        <span aria-hidden="true" className="text-lg leading-none">
+          {open ? '−' : '+'}
+        </span>
+      </button>
+      {open ? (
+        <div
+          className="absolute right-0 top-full z-20 mt-3 flex min-w-[22rem] max-w-[26rem] flex-col gap-4 border-4 border-sentinel-ink bg-white p-5 shadow-[10px_10px_0_0_#111111]"
+          role="menu"
+        >
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Sui address</p>
+            <ResponsiveAddress
+              address={walletAddress}
+              as="div"
+              className="mt-3 min-w-0 text-base"
+              copyLabel="wallet address"
+            />
+          </div>
+          <button
+            type="button"
+            className={`${DANGER_ACTION_BUTTON_CLASS} w-full justify-center text-center`}
+            onClick={onDisconnect}
+          >
+            Disconnect
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function App() {
   const [selectedTurret, setSelectedTurret] = useState<TurretData | null>(null);
   const [selectedSystemId, setSelectedSystemId] = useState<number | null>(null);
@@ -91,7 +172,7 @@ export default function App() {
   const displayedWalletAddress = DEMO_MODE ? DEMO_WALLET_ADDRESS : walletAddress;
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
 
-  const { turrets, loading, error } = useTurrets({
+  const { turrets, loading, error, characterName } = useTurrets({
     owner: connected && !DEMO_MODE ? currentAccount?.address : undefined,
     endpoint: graphQlEndpoint,
     enabled: connected && !DEMO_MODE,
@@ -119,6 +200,9 @@ export default function App() {
         reset: () => undefined,
       }
     : eventsState;
+  const displayedCharacterName = DEMO_MODE
+    ? DEMO_CHARACTER_NAME
+    : (characterName ?? 'Loading character');
 
   if (!connected) {
     return (
@@ -132,7 +216,7 @@ export default function App() {
         {!hasEveVault ? (
           <p className="mx-auto mt-3 max-w-2xl text-sm uppercase">
             <a
-              className="border-2 border-sentinel-ink bg-white px-3 py-2 text-sentinel-ink"
+              className={ACTION_BUTTON_CLASS}
               href={EVE_WALLET_DOWNLOAD_URL}
               target="_blank"
               rel="noreferrer"
@@ -146,7 +230,7 @@ export default function App() {
             <p>Connected wallet is not supported. Frontier Sentinel requires EVE Wallet.</p>
             <button
               type="button"
-              className="w-fit border-2 border-sentinel-danger px-3 py-2"
+              className={`w-fit ${DANGER_ACTION_BUTTON_CLASS}`}
               onClick={handleDisconnect}
             >
               Disconnect Current Wallet
@@ -163,30 +247,19 @@ export default function App() {
         <header className="flex flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-sentinel-muted">
-              Live turret overview
+              Security Dashboard
             </p>
-            <h1 className="mt-3 text-4xl uppercase">Command grid</h1>
+            <h1 className="mt-3 text-4xl uppercase">Frontier Sentinel</h1>
           </div>
           <div className="min-w-0 text-sm uppercase lg:max-w-xl">
-            <div className="flex min-w-0 items-start gap-2">
-              <span className="shrink-0">Wallet:</span>
-              <ResponsiveAddress
-                address={displayedWalletAddress}
-                as="div"
-                className="min-w-0 flex-1"
-                copyLabel="wallet address"
+            <p>Turrets: {currentTurrets.length}</p>
+            <div className="mt-3">
+              <WalletDropdown
+                characterName={displayedCharacterName}
+                walletAddress={displayedWalletAddress}
+                onDisconnect={handleDisconnect}
               />
             </div>
-            <p>Turrets: {currentTurrets.length}</p>
-            {!DEMO_MODE ? (
-              <button
-                type="button"
-                className="mt-3 border-2 border-sentinel-ink px-3 py-2"
-                onClick={handleDisconnect}
-              >
-                Disconnect
-              </button>
-            ) : null}
           </div>
         </header>
 
@@ -198,10 +271,12 @@ export default function App() {
             {!loading && !error && currentTurrets.length > 0 ? (
               <TurretList
                 turrets={currentTurrets}
+                nodes={currentNodes}
+                selectedTurretId={selectedTurret?.id ?? null}
                 onSelect={(turret) => {
                   startTransition(() => {
-                    setSelectedTurret(turret);
-                    eventsState.reset();
+                    setSelectedTurret((current) => (current?.id === turret.id ? null : turret));
+                    currentEventsState.reset();
                   });
                 }}
               />
