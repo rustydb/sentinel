@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   sampleEvents,
+  sampleNetworkNodes,
+  sampleResolvedTurretSolarSystems,
   sampleNodes,
   sampleRetainedTurretSolarSystems,
   sampleTurrets,
@@ -40,6 +42,40 @@ describe('test-data', () => {
     expect(
       sampleRetainedTurretSolarSystems.every((entry) =>
         sampleTurrets.some((turret) => turret.id === entry.turretId),
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps active node-backed solar-system fixtures aligned for demo map focus', () => {
+    const alphaBastion = sampleTurrets.find((turret) => turret.name === 'Alpha Bastion');
+    expect(alphaBastion).toBeTruthy();
+    expect(alphaBastion?.energySourceId).not.toBe('orphaned');
+
+    const mappedNode = sampleNodes.find((node) => node.nodeId === alphaBastion?.energySourceId);
+    expect(mappedNode).toMatchObject({
+      solarSystemId: 30000004,
+      solarSystemName: 'O3H-1FN',
+    });
+
+    const resolvedSolarSystem = sampleResolvedTurretSolarSystems.find(
+      (entry) => entry.turretId === alphaBastion?.id,
+    );
+    expect(resolvedSolarSystem).toMatchObject({
+      solarSystemId: 30000004,
+      solarSystemName: 'O3H-1FN',
+      resolutionSource: 'node',
+    });
+  });
+
+  it('keeps demo network-node cards aligned with node mappings', () => {
+    expect(
+      sampleNetworkNodes.every((node) =>
+        sampleNodes.some(
+          (mapping) =>
+            mapping.nodeId === node.nodeId &&
+            mapping.solarSystemId === node.solarSystemId &&
+            mapping.solarSystemName === node.solarSystemName,
+        ),
       ),
     ).toBe(true);
   });

@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 
 import App from './App';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import DemoApp from './DemoApp';
 import './index.css';
 
 const isDemoRoute =

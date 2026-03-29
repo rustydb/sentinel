@@ -5,6 +5,21 @@ import type {
   TurretSolarSystemMapping,
 } from '@frontier-sentinel/shared-types';
 
+export interface DemoNetworkNode {
+  nodeId: string;
+  solarSystemId: number;
+  solarSystemName: string;
+  typeId: string;
+  displayName: string;
+}
+
+export interface DemoResolvedTurretSolarSystem {
+  turretId: string;
+  solarSystemId: number | null;
+  solarSystemName: string | null;
+  resolutionSource: 'node' | 'retained' | 'none';
+}
+
 export const sampleTurrets: TurretData[] = [
   {
     id: '0x4c5a81b8b7e928cbbd29c4e74aba4447f4cb9d81d52167d2644758061baf8914',
@@ -35,17 +50,42 @@ export const sampleTurrets: TurretData[] = [
 export const sampleNodes: NetworkNodeMapping[] = [
   {
     nodeId: '0x0413288062cb50edd1629957cd566d841b49d88241c36b8dc46084ceb698486e',
-    solarSystemId: 30000004,
-    solarSystemName: 'O3H-1FN',
+    solarSystemId: 30000016,
+    solarSystemName: 'O60-F49',
+  },
+];
+
+export const sampleNetworkNodes: DemoNetworkNode[] = [
+  {
+    nodeId: '0x0413288062cb50edd1629957cd566d841b49d88241c36b8dc46084ceb698486e',
+    solarSystemId: 30000016,
+    solarSystemName: 'O60-F49',
+    typeId: '92401',
+    displayName: 'Network Node',
   },
 ];
 
 export const sampleRetainedTurretSolarSystems: TurretSolarSystemMapping[] = [
   {
     turretId: '0x06c29785207a87fba7795b940686efa9c5df0a67115ac0df258bb46c6529f37b',
-    solarSystemId: 30000005,
-    solarSystemName: 'I9T-0FN',
+    solarSystemId: 30000036,
+    solarSystemName: 'ELS-5C8',
     sourceNodeId: null,
+  },
+];
+
+export const sampleResolvedTurretSolarSystems: DemoResolvedTurretSolarSystem[] = [
+  {
+    turretId: '0x4c5a81b8b7e928cbbd29c4e74aba4447f4cb9d81d52167d2644758061baf8914',
+    solarSystemId: 30000016,
+    solarSystemName: 'O60-F49',
+    resolutionSource: 'node',
+  },
+  {
+    turretId: '0x06c29785207a87fba7795b940686efa9c5df0a67115ac0df258bb46c6529f37b',
+    solarSystemId: 30000036,
+    solarSystemName: 'ELS-5C8',
+    resolutionSource: 'retained',
   },
 ];
 

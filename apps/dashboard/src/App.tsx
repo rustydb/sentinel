@@ -1,30 +1,17 @@
 import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
 import type { TurretData } from '@frontier-sentinel/shared-types';
-import {
-  sampleEvents,
-  sampleNodes,
-  sampleRetainedTurretSolarSystems,
-  sampleTurrets,
-} from './test-data';
-import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react';
+import { useDeferredValue } from 'react';
+import { useState } from 'react';
 
-import { MapEmbed } from './components/MapEmbed';
-import { NetworkNodeDrawer } from './components/NetworkNodeDrawer';
-import { ResponsiveAddress } from './components/ResponsiveAddress';
-import { TurretDetail } from './components/TurretDetail';
-import { TurretList } from './components/TurretCard';
+import { DashboardScreen } from './components/DashboardScreen';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
 import { useTurretEvents } from './hooks/useTurretEvents';
 import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
 import { useTurrets } from './hooks/useTurrets';
 
-const search = new URLSearchParams(window.location.search);
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || search.get('demo') === 'true';
 const EVE_WALLET_DOWNLOAD_URL =
   'https://github.com/evefrontier/evevault/releases/download/v0.0.6/eve-vault-chrome.zip';
-const DEMO_WALLET_ADDRESS = '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd';
-const DEMO_CHARACTER_NAME = 'Captain Rusty';
 const ACTION_BUTTON_CLASS =
   'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
 const PRIMARY_ACTION_BUTTON_CLASS =
@@ -62,232 +49,45 @@ function WalletConnect({ onConnect, canConnect }: { onConnect: () => void; canCo
   );
 }
 
-function DashboardError({ error }: { error: Error }) {
-  return (
-    <div className="border-4 border-sentinel-danger bg-white p-6 text-sentinel-danger">
-      <p className="text-xs uppercase tracking-[0.3em]">Telemetry fault</p>
-      <p className="mt-3 text-lg uppercase">{error.message}</p>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-48 animate-pulse border-4 border-sentinel-ink bg-sentinel-paper p-5"
-        />
-      ))}
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border-4 border-dashed border-sentinel-ink p-8 text-center uppercase">
-      No turret assemblies detected for this wallet.
-    </div>
-  );
-}
-
-function WalletDropdown({
-  characterName,
-  walletAddress,
-  onDisconnect,
-}: {
-  characterName: string;
-  walletAddress: string;
-  onDisconnect: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!(menuRef.current instanceof HTMLElement)) {
-        return;
-      }
-
-      if (!menuRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-    };
-  }, [open]);
-
-  return (
-    <div ref={menuRef} className="relative w-full max-w-md">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        className={`${ACTION_BUTTON_CLASS} flex w-full items-center justify-between gap-3`}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <span className="truncate">{characterName}</span>
-        <span aria-hidden="true" className="text-lg leading-none">
-          {open ? '−' : '+'}
-        </span>
-      </button>
-      {open ? (
-        <div
-          className="absolute right-0 top-full z-20 mt-3 flex min-w-[22rem] max-w-[26rem] flex-col gap-4 border-4 border-sentinel-ink bg-white p-5 shadow-[10px_10px_0_0_#111111]"
-          role="menu"
-        >
-          <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Sui address</p>
-            <ResponsiveAddress
-              address={walletAddress}
-              as="div"
-              className="mt-3 min-w-0 text-base"
-              copyLabel="wallet address"
-            />
-          </div>
-          <button
-            type="button"
-            className={`${DANGER_ACTION_BUTTON_CLASS} w-full justify-center text-center`}
-            onClick={onDisconnect}
-          >
-            Disconnect
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
+function toggleSelectedTurret(
+  current: TurretData | null,
+  nextTurret: TurretData,
+): TurretData | null {
+  return current?.id === nextTurret.id ? null : nextTurret;
 }
 
 export default function App() {
   const [selectedTurret, setSelectedTurret] = useState<TurretData | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [manualFocusedSystemId, setManualFocusedSystemId] = useState<number | null>(null);
   const { currentAccount, handleConnect, handleDisconnect, hasEveVault, isConnected } =
     useConnection();
   const currentWallet = useCurrentWallet();
 
-  const usingSupportedWallet = DEMO_MODE || isSupportedWalletName(currentWallet?.name);
-  const connected = DEMO_MODE || (isConnected && usingSupportedWallet);
+  const usingSupportedWallet = isSupportedWalletName(currentWallet?.name);
+  const connected = isConnected && usingSupportedWallet;
   const walletAddress = currentAccount?.address ?? 'Not connected';
-  const displayedWalletAddress = DEMO_MODE ? DEMO_WALLET_ADDRESS : walletAddress;
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
 
   const { turrets, loading, error, characterName } = useTurrets({
-    owner: connected && !DEMO_MODE ? currentAccount?.address : undefined,
+    owner: connected ? currentAccount?.address : undefined,
     endpoint: graphQlEndpoint,
-    enabled: connected && !DEMO_MODE,
+    enabled: connected,
   });
-  const eventsState = useTurretEvents({ turretId: selectedTurret?.id, enabled: !DEMO_MODE });
-  const deferredTurrets = useDeferredValue(DEMO_MODE ? sampleTurrets : turrets);
+  const eventsState = useTurretEvents({ turretId: selectedTurret?.id, enabled: connected });
+  const deferredTurrets = useDeferredValue(turrets);
   const candidateNodeIds = deferredTurrets
     .map((turret) => turret.energySourceId)
     .filter((nodeId): nodeId is string => /^0x[a-fA-F0-9]{64}$/.test(nodeId));
   const networkNodes = useNetworkNodes({
-    enabled: !DEMO_MODE,
+    enabled: connected,
     candidateNodeIds,
     graphQlEndpoint,
   });
   const turretSolarSystems = useTurretSolarSystems({
     turrets: deferredTurrets,
-    nodeMappings: DEMO_MODE ? sampleNodes : networkNodes.mappings,
+    nodeMappings: networkNodes.mappings,
     apiBaseUrl: '',
-    enabled: !DEMO_MODE,
+    enabled: connected,
   });
-
-  const currentTurrets = deferredTurrets;
-  const currentNodes = DEMO_MODE
-    ? sampleNodes.map((node) => ({
-        ...node,
-        typeId: '92401',
-        displayName: 'Network Node',
-      }))
-    : networkNodes.nodes;
-  const nodeActions = DEMO_MODE
-    ? {
-        assignNode: () => Promise.resolve(),
-        unassignNode: () => Promise.resolve(),
-      }
-    : networkNodes;
-  const currentEventsState = DEMO_MODE
-    ? {
-        events: sampleEvents,
-        loading: false,
-        error: null,
-        page: 1,
-        nextPage: null,
-        next: () => undefined,
-        reset: () => undefined,
-      }
-    : eventsState;
-  const displayedCharacterName = DEMO_MODE
-    ? DEMO_CHARACTER_NAME
-    : (characterName ?? 'Loading character');
-  const demoSolarSystemsByTurretId = new Map(
-    sampleTurrets.map((turret) => {
-      if (/^0x[a-fA-F0-9]{64}$/.test(turret.energySourceId)) {
-        const currentMapping = sampleNodes.find((node) => node.nodeId === turret.energySourceId);
-        if (currentMapping) {
-          return [
-            turret.id,
-            {
-              turretId: turret.id,
-              solarSystemId: currentMapping.solarSystemId,
-              solarSystemName: currentMapping.solarSystemName,
-              resolutionSource: 'node' as const,
-            },
-          ];
-        }
-      }
-
-      const retained = sampleRetainedTurretSolarSystems.find(
-        (entry) => entry.turretId === turret.id,
-      );
-      return [
-        turret.id,
-        retained
-          ? {
-              turretId: turret.id,
-              solarSystemId: retained.solarSystemId,
-              solarSystemName: retained.solarSystemName,
-              resolutionSource: 'retained' as const,
-            }
-          : {
-              turretId: turret.id,
-              solarSystemId: null,
-              solarSystemName: null,
-              resolutionSource: 'none' as const,
-            },
-      ];
-    }),
-  );
-  const solarSystemsByTurretId = DEMO_MODE
-    ? demoSolarSystemsByTurretId
-    : turretSolarSystems.byTurretId;
-  const selectedTurretSolarSystem = selectedTurret
-    ? (solarSystemsByTurretId.get(selectedTurret.id) ?? null)
-    : null;
-  const highlightedSystemIds = selectedTurret
-    ? []
-    : [
-        ...new Set(
-          [...solarSystemsByTurretId.values()]
-            .map((entry) => entry.solarSystemId)
-            .filter((value): value is number => typeof value === 'number'),
-        ),
-      ];
-  const focusedSystemId = selectedTurretSolarSystem?.solarSystemId ?? manualFocusedSystemId ?? null;
-
-  useEffect(() => {
-    setManualFocusedSystemId(null);
-  }, [selectedTurret?.id]);
 
   if (!connected) {
     return (
@@ -327,77 +127,23 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-sentinel-canvas px-6 py-8 text-sentinel-ink">
-      <div className="mx-auto flex max-w-7xl flex-col gap-8">
-        <header className="flex flex-col gap-4 border-4 border-sentinel-ink bg-sentinel-paper p-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-sentinel-muted">
-              Security Dashboard
-            </p>
-            <h1 className="mt-3 text-4xl uppercase">Frontier Sentinel</h1>
-          </div>
-          <div className="min-w-0 text-sm uppercase lg:max-w-xl">
-            <div className="flex flex-wrap items-center gap-3">
-              <p>Turrets: {currentTurrets.length}</p>
-              <button
-                type="button"
-                className={ACTION_BUTTON_CLASS}
-                onClick={() => setDrawerOpen(true)}
-              >
-                Network Nodes
-              </button>
-            </div>
-            <div className="mt-3">
-              <WalletDropdown
-                characterName={displayedCharacterName}
-                walletAddress={displayedWalletAddress}
-                onDisconnect={handleDisconnect}
-              />
-            </div>
-          </div>
-        </header>
-
-        <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
-          <section className="space-y-6">
-            {loading ? <LoadingSkeleton /> : null}
-            {error ? <DashboardError error={error} /> : null}
-            {!loading && !error && currentTurrets.length === 0 ? <EmptyState /> : null}
-            {!loading && !error && currentTurrets.length > 0 ? (
-              <TurretList
-                turrets={currentTurrets}
-                solarSystemsByTurretId={solarSystemsByTurretId}
-                selectedTurretId={selectedTurret?.id ?? null}
-                onSelect={(turret) => {
-                  startTransition(() => {
-                    setSelectedTurret((current) => (current?.id === turret.id ? null : turret));
-                    currentEventsState.reset();
-                  });
-                }}
-              />
-            ) : null}
-          </section>
-
-          <MapEmbed focusedSystemId={focusedSystemId} highlightedSystemIds={highlightedSystemIds} />
-        </div>
-      </div>
-
-      <NetworkNodeDrawer
-        open={drawerOpen}
-        nodes={currentNodes}
-        loading={!DEMO_MODE && networkNodes.loading}
-        onClose={() => setDrawerOpen(false)}
-        onAssign={nodeActions.assignNode}
-        onUnassign={nodeActions.unassignNode}
-      />
-
-      <TurretDetail
-        turret={selectedTurret}
-        currentSolarSystem={selectedTurretSolarSystem}
-        eventsState={currentEventsState}
-        onAssignSolarSystem={nodeActions.assignNode}
-        onUnassignSolarSystem={nodeActions.unassignNode}
-        onClose={() => setSelectedTurret(null)}
-      />
-    </main>
+    <DashboardScreen
+      turrets={deferredTurrets}
+      loading={loading}
+      error={error}
+      characterName={characterName ?? 'Loading character'}
+      walletAddress={walletAddress}
+      onDisconnect={handleDisconnect}
+      selectedTurret={selectedTurret}
+      onSelectTurret={(turret) => setSelectedTurret(toggleSelectedTurret(selectedTurret, turret))}
+      onCloseTurret={() => setSelectedTurret(null)}
+      nodes={networkNodes.nodes}
+      drawerLoading={networkNodes.loading}
+      eventsState={eventsState}
+      solarSystemsByTurretId={turretSolarSystems.byTurretId}
+      onAssignSolarSystem={networkNodes.assignNode}
+      onUnassignSolarSystem={networkNodes.unassignNode}
+      onResetEvents={eventsState.reset}
+    />
   );
 }
