@@ -33,6 +33,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 ### Fixed
 
 - Base task implementation formatting for automated spec-runners.
+- Fixed fatal dashboard render failures to fall back to a recoverable error screen instead of a white page.
 - Fixed dashboard white-screen crashes caused by over-broad wallet/provider usage.
 - Fixed dashboard GraphQL and API proxying so the UI no longer depends on browser-side CORS workarounds.
 - Fixed `ef-map` embedding to use the supported iframe contract.
