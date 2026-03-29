@@ -1,9 +1,9 @@
 ---
 title: Frontier Sentinel - EVE Frontier
-version: 1.0.0
+version: 1.1.0
 status: draft
 created: 2026-03-27
-updated: 2026-03-27
+updated: 2026-03-28
 author: rustydb
 description: Descriptions of the EVE Frontier game relevant for Frontier Sentinel
 ---
@@ -18,6 +18,15 @@ Every EVE world has an API.
 | Utopia    | https://world-api-utopia.uat.pub.evefrontier.com/      |
 
 Agents can learn the API through the `doc.json` file located at `/docs/doc.json` on either API URL.
+
+### Solar systems
+
+Solar systems should be treated as a friendly-name and numeric-ID pair:
+
+- `name` is what operators search for and what the dashboard displays
+- `id` is what `ef-map` needs for dynamic highlight and focus messaging
+
+For Frontier Sentinel, solar-system data is bundled locally and refreshed with `scripts/update-solar-systems.ts` rather than fetched on every search interaction.
 
 ## Game items (types)
 
@@ -47,6 +56,16 @@ The Turret is a programmable defense structure in the EVE Frontier world. It is 
 The Turret is defined by [turret.move](https://github.com/evefrontier/world-contracts/blob/main/contracts/world/sources/assemblies/turret.move) from the EVE Frontier world-contracts repository. The definition changes constantly, the upstream `turret.move` file should be referred to for latest.
 
 The information contained in this file is for quick reference, but the upstream `turret.move` file should be the source of truth.
+
+### Location presentation
+
+When Frontier Sentinel presents a turret location:
+
+1. use the network-node solar-system assignment if the current node is assigned
+2. if the turret is orphaned, fall back to the retained last-known solar-system mapping when available
+3. otherwise show `Unassigned`
+
+Do not display `location.location_hash` as the human-readable solar-system label.
 
 ### Naming
 

@@ -1,39 +1,46 @@
-import type { NetworkNodeMapping, TurretData } from '@frontier-sentinel/shared-types';
+import type { TurretData } from '@frontier-sentinel/shared-types';
+import { useState } from 'react';
 
 import type { useTurretEvents } from '../hooks/useTurretEvents';
+import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
+import { SolarSystemAutocomplete } from './SolarSystemAutocomplete';
 
 type EventHook = ReturnType<typeof useTurretEvents>;
 const ACTION_BUTTON_CLASS =
   'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
-const DANGER_ACTION_BUTTON_CLASS =
-  'sentinel-action-button sentinel-action-button--danger border-2 border-sentinel-danger px-3 py-2 uppercase text-sentinel-danger';
+const INLINE_ACTION_BUTTON_CLASS =
+  'sentinel-action-button border-2 border-sentinel-ink px-2 py-1 text-xs uppercase';
+const INLINE_DANGER_ACTION_BUTTON_CLASS =
+  'sentinel-action-button sentinel-action-button--danger border-2 border-sentinel-danger px-2 py-1 text-xs uppercase text-sentinel-danger';
 
 interface TurretDetailProps {
   turret: TurretData | null;
-  nodes: NetworkNodeMapping[];
+  currentSolarSystem: ResolvedTurretSolarSystem | null;
   eventsState: EventHook;
-  onAssignNode: (nodeId: string, solarSystemId: number) => Promise<void>;
-  onUnassignNode: (nodeId: string) => Promise<void>;
+  onAssignSolarSystem: (
+    nodeId: string,
+    assignment: { solarSystemId: number; solarSystemName: string | null },
+  ) => Promise<void>;
+  onUnassignSolarSystem: (nodeId: string) => Promise<void>;
   onClose: () => void;
-  onLocationSelect: (systemId: number) => void;
 }
 
 export function TurretDetail({
   turret,
-  nodes,
+  currentSolarSystem,
   eventsState,
-  onAssignNode,
-  onUnassignNode,
+  onAssignSolarSystem,
+  onUnassignSolarSystem,
   onClose,
-  onLocationSelect,
 }: TurretDetailProps) {
+  const [editingSolarSystem, setEditingSolarSystem] = useState(false);
+
   if (!turret) {
     return null;
   }
 
-  const currentNode = nodes.find((node) => node.nodeId === turret.energySourceId);
-  const locationTarget = currentNode?.solarSystemId ?? 31000000;
+  const currentNodeId = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
 
   return (
     <aside
@@ -89,63 +96,69 @@ export function TurretDetail({
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Node assignment
             </p>
-            <div className="mt-3 min-w-0">
-              {isSuiAddress(turret.energySourceId) ? (
-                <ResponsiveAddress
-                  address={turret.energySourceId}
-                  as="div"
-                  className="w-full min-w-0 max-w-full text-lg"
-                  copyLabel="assigned node address"
-                />
-              ) : (
-                <p className="text-lg uppercase">{turret.energySourceId}</p>
-              )}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-3">
-              {nodes.map((node) => (
-                <div
-                  key={node.nodeId}
-                  className="flex min-w-0 items-center gap-2 border-2 border-sentinel-ink bg-white px-3 py-2"
-                >
-                  {isSuiAddress(node.nodeId) ? (
-                    <ResponsiveAddress
-                      address={node.nodeId}
-                      as="div"
-                      className="min-w-0 max-w-56 flex-1"
-                      copyLabel="available node address"
-                    />
-                  ) : (
-                    <span>{node.nodeId}</span>
-                  )}
+            <div className="mt-3 flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                {currentNodeId ? (
+                  <ResponsiveAddress
+                    address={currentNodeId}
+                    as="div"
+                    className="w-full min-w-0 max-w-full text-lg"
+                    copyLabel="assigned node address"
+                  />
+                ) : (
+                  <p className="text-lg uppercase">{turret.energySourceId}</p>
+                )}
+              </div>
+              {currentNodeId ? (
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    className="sentinel-action-button border-2 border-sentinel-ink px-2 py-1 uppercase"
-                    aria-label={`Assign ${node.nodeId}`}
-                    onClick={() => {
-                      void onAssignNode(node.nodeId, node.solarSystemId);
-                    }}
+                    className={INLINE_ACTION_BUTTON_CLASS}
+                    onClick={() => setEditingSolarSystem((current) => !current)}
                   >
-                    Assign
+                    {currentSolarSystem?.solarSystemId ? 'Reassign' : 'Assign'}
                   </button>
+                  {currentSolarSystem?.solarSystemId ? (
+                    <button
+                      type="button"
+                      className={INLINE_DANGER_ACTION_BUTTON_CLASS}
+                      onClick={() => {
+                        void onUnassignSolarSystem(currentNodeId);
+                      }}
+                    >
+                      Unassign
+                    </button>
+                  ) : null}
                 </div>
-              ))}
+              ) : null}
             </div>
-            <button
-              type="button"
-              className={`mt-4 ${DANGER_ACTION_BUTTON_CLASS}`}
-              onClick={() => {
-                void onUnassignNode(turret.energySourceId);
-              }}
-            >
-              Unassign node
-            </button>
-            <button
-              type="button"
-              className={`mt-4 block ${ACTION_BUTTON_CLASS}`}
-              onClick={() => onLocationSelect(locationTarget)}
-            >
-              View system on map
-            </button>
+            <div className="mt-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Solar System</p>
+              <p className="mt-2 text-lg uppercase">
+                {currentSolarSystem?.solarSystemName ?? 'Unassigned'}
+              </p>
+            </div>
+            {editingSolarSystem && currentNodeId ? (
+              <div className="mt-4">
+                <SolarSystemAutocomplete
+                  initialQuery={currentSolarSystem?.solarSystemName ?? ''}
+                  onSelect={(result) => {
+                    void onAssignSolarSystem(currentNodeId, {
+                      solarSystemId: result.id,
+                      solarSystemName: result.name,
+                    })
+                      .then(() => setEditingSolarSystem(false))
+                      .catch(() => undefined);
+                  }}
+                  onCancel={() => setEditingSolarSystem(false)}
+                />
+              </div>
+            ) : null}
+            {currentSolarSystem?.resolutionSource === 'retained' ? (
+              <p className="mt-4 border-2 border-sentinel-ink bg-white px-3 py-2 text-xs uppercase">
+                Using retained solar-system mapping from the last assigned network node.
+              </p>
+            ) : null}
           </section>
         </div>
       </div>

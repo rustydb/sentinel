@@ -17,6 +17,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - `003-responsive-sui-addresses`, including the shared `ResponsiveAddress` component and themed copy/tick feedback.
 - Podman-friendly local development stack via `docker-compose.dev.yml`.
 - EVE Wallet-first dashboard connection flow and ADR coverage for wallet-selection behavior.
+- `004-solar-system-assignment`, including bundled solar-system catalogs, assignment UI, retained orphan mappings, and a network node side drawer.
 
 ### Changed
 
@@ -26,6 +27,8 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Updated network-node presentation to use explicit `Network Node` terminology and mapped solar-system state instead of leaking `locationHash`.
 - Updated the indexer to poll real Sui turret events for Utopia with durable cursor/checkpoint handling.
 - Updated docs and ADR conventions to use numbered `ADR-XXX-...` filenames.
+- Updated the dashboard map integration to use dynamic `ef-map-highlight` and `ef-map-navigate` messaging instead of iframe reloads.
+- Updated API persistence to retain solar-system names and last-known turret mappings for orphaned turrets.
 
 ### Fixed
 
@@ -35,3 +38,4 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Fixed `ef-map` embedding to use the supported iframe contract.
 - Fixed responsive Sui address behavior across resize, card, and detail surfaces.
 - Fixed Podman container/build issues across the dashboard, API, and indexer stack.
+- Fixed turret solar-system display so cards and detail panes show friendly names instead of raw IDs or hashes.

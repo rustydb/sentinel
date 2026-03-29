@@ -53,12 +53,33 @@ export const GET_CHARACTER_AND_OWNED_OBJECTS = `
   }
 `;
 
+export const GET_OBJECTS_BY_IDS = `
+  query GetObjectsByIds($ids: [String!]!) {
+    objects(filter: { objectIds: $ids }, first: 100) {
+      nodes {
+        address
+        asMoveObject {
+          contents {
+            type {
+              repr
+            }
+            json
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_OBJECT_WITH_JSON = `
   query GetObjectWithJson($id: String!) {
     object(address: $id) {
       address
       asMoveObject {
         contents {
+          type {
+            repr
+          }
           json
         }
       }
@@ -120,6 +141,14 @@ export interface TurretEvent {
 export interface NetworkNodeMapping {
   nodeId: string;
   solarSystemId: number;
+  solarSystemName: string | null;
+}
+
+export interface TurretSolarSystemMapping {
+  turretId: string;
+  solarSystemId: number;
+  solarSystemName: string | null;
+  sourceNodeId: string | null;
 }
 
 export function isTurretData(value: unknown): value is TurretData {
@@ -144,3 +173,5 @@ export function toTurretStatus(input: string): TurretStatus {
   const statuses: readonly string[] = TURRET_STATUSES;
   return statuses.includes(input) ? (input as TurretStatus) : 'offline';
 }
+
+export * from './solarSystems';

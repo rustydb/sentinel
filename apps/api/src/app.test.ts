@@ -38,7 +38,10 @@ describe('API', () => {
 
     const createResponse = createMockResponse();
     await handlers.upsertNetworkNode(
-      { params: { id: 'node-7' }, body: { solarSystemId: 31002477 } } as never,
+      {
+        params: { id: 'node-7' },
+        body: { solarSystemId: 31002477, solarSystemName: 'Jita' },
+      } as never,
       createResponse as never,
     );
     expect(createResponse.statusCode).toBe(201);
@@ -46,8 +49,12 @@ describe('API', () => {
     const listResponse = createMockResponse();
     await handlers.listNetworkNodes({} as never, listResponse as never);
     expect(
-      (listResponse.body as { data: Array<{ nodeId: string; solarSystemId: number }> }).data,
-    ).toEqual([{ nodeId: 'node-7', solarSystemId: 31002477 }]);
+      (
+        listResponse.body as {
+          data: Array<{ nodeId: string; solarSystemId: number; solarSystemName: string | null }>;
+        }
+      ).data,
+    ).toEqual([{ nodeId: 'node-7', solarSystemId: 31002477, solarSystemName: 'Jita' }]);
 
     const deleteResponse = createMockResponse();
     await handlers.deleteNetworkNode(
@@ -55,6 +62,48 @@ describe('API', () => {
       deleteResponse as never,
     );
     expect(deleteResponse.statusCode).toBe(204);
+  });
+
+  it('stores and returns retained turret solar-system mappings', async () => {
+    const handlers = createApiHandlers(createInMemoryRepositories());
+
+    await handlers.upsertNetworkNode(
+      {
+        params: { id: 'node-7' },
+        body: { solarSystemId: 31002477, solarSystemName: 'Jita' },
+      } as never,
+      createMockResponse() as never,
+    );
+
+    const syncResponse = createMockResponse();
+    await handlers.syncTurretSolarSystems(
+      {
+        body: {
+          turrets: [{ turretId: '0xturret-1', nodeId: 'node-7' }],
+        },
+      } as never,
+      syncResponse as never,
+    );
+
+    expect(syncResponse.statusCode).toBe(200);
+    expect((syncResponse.body as { data: { updated: number } }).data.updated).toBe(1);
+
+    const listResponse = createMockResponse();
+    await handlers.listTurretSolarSystems(
+      { query: { ids: '0xturret-1' } } as never,
+      listResponse as never,
+    );
+
+    expect((listResponse.body as { data: Array<{ solarSystemName: string | null }> }).data).toEqual(
+      [
+        {
+          turretId: '0xturret-1',
+          solarSystemId: 31002477,
+          solarSystemName: 'Jita',
+          sourceNodeId: 'node-7',
+        },
+      ],
+    );
   });
 
   it('returns paginated turret events', async () => {

@@ -22,4 +22,4 @@ apps/dashboard/.playwright/
 apps/dashboard/test-results/
 apps/api/.turbo/
 apps/indexer/.cargo/
-
+*.tsbuildinfo

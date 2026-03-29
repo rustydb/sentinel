@@ -1,4 +1,9 @@
-import type { NetworkNodeMapping, TurretData, TurretEvent } from '@frontier-sentinel/shared-types';
+import type {
+  NetworkNodeMapping,
+  TurretData,
+  TurretEvent,
+  TurretSolarSystemMapping,
+} from '@frontier-sentinel/shared-types';
 
 export const sampleTurrets: TurretData[] = [
   {
@@ -27,7 +32,22 @@ export const sampleTurrets: TurretData[] = [
   },
 ];
 
-export const sampleNodes: NetworkNodeMapping[] = [];
+export const sampleNodes: NetworkNodeMapping[] = [
+  {
+    nodeId: '0x0413288062cb50edd1629957cd566d841b49d88241c36b8dc46084ceb698486e',
+    solarSystemId: 30000004,
+    solarSystemName: 'O3H-1FN',
+  },
+];
+
+export const sampleRetainedTurretSolarSystems: TurretSolarSystemMapping[] = [
+  {
+    turretId: '0x06c29785207a87fba7795b940686efa9c5df0a67115ac0df258bb46c6529f37b',
+    solarSystemId: 30000005,
+    solarSystemName: 'I9T-0FN',
+    sourceNodeId: null,
+  },
+];
 
 export const sampleEvents: TurretEvent[] = [
   {

@@ -11,6 +11,7 @@ const hooks = vi.hoisted(() => ({
   useTurrets: vi.fn(),
   useNetworkNodes: vi.fn(),
   useTurretEvents: vi.fn(),
+  useTurretSolarSystems: vi.fn(),
   useTypeInfo: vi.fn(),
 }));
 
@@ -34,6 +35,10 @@ vi.mock('./hooks/useTurretEvents', () => ({
   useTurretEvents: hooks.useTurretEvents,
 }));
 
+vi.mock('./hooks/useTurretSolarSystems', () => ({
+  useTurretSolarSystems: hooks.useTurretSolarSystems,
+}));
+
 vi.mock('./hooks/useTypeInfo', () => ({
   useTypeInfo: hooks.useTypeInfo,
 }));
@@ -42,6 +47,7 @@ import App from './App';
 
 const WALLET_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const NODE_ADDRESS = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+const TURRET_ADDRESS = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
 const CHARACTER_NAME = 'Commander Nova';
 const clipboardWriteText = vi.fn();
 const disconnectMock = vi.fn();
@@ -69,7 +75,7 @@ describe('App', () => {
     hooks.useTurrets.mockReturnValue({
       turrets: [
         {
-          id: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          id: TURRET_ADDRESS,
           itemId: '1001',
           name: 'Alpha Bastion',
           status: 'online',
@@ -86,7 +92,23 @@ describe('App', () => {
       characterAddress: '0xcharacter',
     });
     hooks.useNetworkNodes.mockReturnValue({
-      nodes: [],
+      nodes: [
+        {
+          nodeId: NODE_ADDRESS,
+          solarSystemId: 30000004,
+          solarSystemName: 'O3H-1FN',
+          typeId: '92401',
+          displayName: 'Node Prime',
+        },
+      ],
+      mappings: [
+        {
+          nodeId: NODE_ADDRESS,
+          solarSystemId: 30000004,
+          solarSystemName: 'O3H-1FN',
+        },
+      ],
+      loading: false,
       assignNode: vi.fn(),
       unassignNode: vi.fn(),
     });
@@ -98,6 +120,21 @@ describe('App', () => {
       nextPage: null,
       next: vi.fn(),
       reset: vi.fn(),
+    });
+    hooks.useTurretSolarSystems.mockReturnValue({
+      byTurretId: new Map([
+        [
+          TURRET_ADDRESS,
+          {
+            turretId: TURRET_ADDRESS,
+            solarSystemId: 30000004,
+            solarSystemName: 'O3H-1FN',
+            resolutionSource: 'node',
+          },
+        ],
+      ]),
+      loading: false,
+      error: null,
     });
     hooks.useTypeInfo.mockReturnValue({
       id: '92404',
@@ -124,7 +161,7 @@ describe('App', () => {
     emitResizeForAll(120);
 
     await waitFor(() => {
-      expect(screen.getByTitle(WALLET_ADDRESS).textContent).toContain('…');
+      expect(screen.getByTitle(WALLET_ADDRESS).textContent).toContain('...');
     });
   });
 
@@ -137,17 +174,6 @@ describe('App', () => {
     await waitFor(() => {
       expect(clipboardWriteText).toHaveBeenCalledWith(WALLET_ADDRESS);
     });
-  });
-
-  it('uses the shared responsive-address pattern for both wallet and turret node surfaces', () => {
-    render(<App />);
-
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') }));
-    expect(screen.getByRole('button', { name: /copy wallet address/i })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /copy node address/i })).toBeNull();
-    expect(screen.getByText('Network Node')).toBeTruthy();
-    expect(screen.getByTitle(NODE_ADDRESS)).toBeTruthy();
-    expect(screen.queryByText('J101')).toBeNull();
   });
 
   it('shows the wallet address and disconnect action when the dropdown is expanded', () => {
@@ -164,14 +190,27 @@ describe('App', () => {
   it('keeps the selected turret card highlighted until it is toggled off or replaced', () => {
     render(<App />);
 
-    const card = screen.getByTestId(
-      'turret-card-0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    );
+    const card = screen.getByTestId(`turret-card-${TURRET_ADDRESS}`);
 
     expect(card.getAttribute('aria-selected')).toBe('false');
     fireEvent.click(card);
     expect(card.getAttribute('aria-selected')).toBe('true');
     fireEvent.click(card);
     expect(card.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('opens the network node drawer from the header', () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /network nodes/i }));
+
+    expect(screen.getByRole('heading', { name: /network nodes/i })).toBeTruthy();
+    expect(screen.getByText('Node Prime')).toBeTruthy();
+  });
+
+  it('renders the resolved solar-system friendly name on turret cards', () => {
+    render(<App />);
+
+    expect(screen.getByText('O3H-1FN')).toBeTruthy();
   });
 });

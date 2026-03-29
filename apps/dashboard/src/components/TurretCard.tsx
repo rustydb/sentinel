@@ -1,4 +1,6 @@
-import type { NetworkNodeMapping, TurretData } from '@frontier-sentinel/shared-types';
+import type { TurretData } from '@frontier-sentinel/shared-types';
+
+import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 
 import { useTypeInfo } from '../hooks/useTypeInfo';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
@@ -13,7 +15,7 @@ const statusTone: Record<TurretData['status'], string> = {
 
 interface TurretCardProps {
   turret: TurretData;
-  nodes?: NetworkNodeMapping[];
+  solarSystem?: ResolvedTurretSolarSystem | null;
   onSelect?: (turret: TurretData) => void;
   selected?: boolean;
 }
@@ -22,12 +24,9 @@ function joinClasses(...classNames: Array<string | false | null | undefined>): s
   return classNames.filter(Boolean).join(' ');
 }
 
-export function TurretCard({ turret, nodes = [], onSelect, selected = false }: TurretCardProps) {
+export function TurretCard({ turret, solarSystem, onSelect, selected = false }: TurretCardProps) {
   const orphaned = turret.energySourceId === 'orphaned';
   const addressValuedNode = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
-  const assignedNode = addressValuedNode
-    ? nodes.find((node) => node.nodeId === addressValuedNode)
-    : undefined;
   const typeInfo = useTypeInfo(turret.typeId);
   const customName = turret.name?.trim() ? turret.name.trim() : null;
   const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
@@ -108,7 +107,7 @@ export function TurretCard({ turret, nodes = [], onSelect, selected = false }: T
         </div>
         <div className="min-w-0">
           <dt className="text-sentinel-muted">Solar System</dt>
-          <dd>{assignedNode ? assignedNode.solarSystemId : 'Unassigned'}</dd>
+          <dd>{solarSystem?.solarSystemName ?? 'Unassigned'}</dd>
         </div>
         <div className="min-w-0">
           <dt className="text-sentinel-muted">Aggressor</dt>
@@ -126,19 +125,24 @@ export function TurretCard({ turret, nodes = [], onSelect, selected = false }: T
 
 interface TurretListProps {
   turrets: TurretData[];
-  nodes?: NetworkNodeMapping[];
+  solarSystemsByTurretId?: Map<string, ResolvedTurretSolarSystem>;
   onSelect?: (turret: TurretData) => void;
   selectedTurretId?: string | null;
 }
 
-export function TurretList({ turrets, nodes = [], onSelect, selectedTurretId }: TurretListProps) {
+export function TurretList({
+  turrets,
+  solarSystemsByTurretId,
+  onSelect,
+  selectedTurretId,
+}: TurretListProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {turrets.map((turret) => (
         <TurretCard
           key={turret.id}
           turret={turret}
-          nodes={nodes}
+          solarSystem={solarSystemsByTurretId?.get(turret.id) ?? null}
           onSelect={onSelect}
           selected={selectedTurretId === turret.id}
         />

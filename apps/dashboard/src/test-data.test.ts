@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { sampleEvents, sampleNodes, sampleTurrets } from './test-data';
+import {
+  sampleEvents,
+  sampleNodes,
+  sampleRetainedTurretSolarSystems,
+  sampleTurrets,
+} from './test-data';
 
 function isSuiAddress(value: string): boolean {
   return /^0x[a-f0-9]{64}$/i.test(value);
@@ -14,7 +19,7 @@ describe('test-data', () => {
         (turret) => turret.energySourceId === 'orphaned' || isSuiAddress(turret.energySourceId),
       ),
     ).toBe(true);
-    expect(sampleNodes).toEqual([]);
+    expect(sampleNodes.every((node) => isSuiAddress(node.nodeId))).toBe(true);
   });
 
   it('keeps demo events aligned with the demo turret identifiers', () => {
@@ -29,5 +34,13 @@ describe('test-data', () => {
 
     expect(firstTurretId).toBeTruthy();
     expect(eventTurretIds).toContain(firstTurretId);
+  });
+
+  it('keeps retained solar-system mappings aligned with demo turret identifiers', () => {
+    expect(
+      sampleRetainedTurretSolarSystems.every((entry) =>
+        sampleTurrets.some((turret) => turret.id === entry.turretId),
+      ),
+    ).toBe(true);
   });
 });

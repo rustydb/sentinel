@@ -109,6 +109,7 @@ Current world/API assumptions:
 - `Utopia` is the current active world for development
 - `Stillness` is the future production target
 - world APIs differ by host; do not assume Stillness and Utopia share the same hostname pattern
+- solar-system catalogs are bundled locally from both world `/v2/solarsystems` endpoints via `scripts/update-solar-systems.ts`
 
 Turret naming precedence:
 
@@ -135,6 +136,12 @@ Solar system display on the turret card should come from the local `network_node
 
 Do not use `locationHash` as a fallback solar system label.
 
+Retained mapping rules:
+
+- `network_node_mappings` stores the active node-to-solar-system assignment
+- `turret_solar_system_mappings` stores last-known solar systems for turrets that later become orphaned
+- active node mappings win over retained mappings when both exist
+
 ## Turret Card Rules
 
 Current card conventions matter:
@@ -157,6 +164,7 @@ Keep it aligned with:
 - current ownership assumptions
 - current network-node assumptions
 - current UI expectations
+- current solar-system assignment and retained-mapping assumptions
 
 Do not leave stale fake relationships in demo mode just to make the screen look busy.
 

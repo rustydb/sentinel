@@ -8,45 +8,51 @@ const TURRET_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 const NODE_ADDRESS = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
 const clipboardWriteText = vi.fn();
 
-const baseProps = {
-  turret: {
-    id: TURRET_ADDRESS,
-    itemId: '42',
-    name: 'Alpha Bastion',
-    status: 'online' as const,
-    locationHash: 'J101',
-    isOnline: true,
-    typeId: 'turret.mk1',
-    energySourceId: NODE_ADDRESS,
-  },
-  nodes: [{ nodeId: NODE_ADDRESS, solarSystemId: 31002477 }],
-  eventsState: {
-    events: [
-      {
-        txDigest: '0xabc',
-        eventSeq: 1,
-        checkpointSequenceNumber: 1,
-        eventType: 'TurretCreatedEvent',
-        jsonData: {
-          turret_id: TURRET_ADDRESS,
-          turret_key: { tenant: 'utopia', item_id: '42' },
-          owner_cap_id: '0xowner-cap',
+function createProps() {
+  return {
+    turret: {
+      id: TURRET_ADDRESS,
+      itemId: '42',
+      name: 'Alpha Bastion',
+      status: 'online' as const,
+      locationHash: 'J101',
+      isOnline: true,
+      typeId: 'turret.mk1',
+      energySourceId: NODE_ADDRESS,
+    },
+    currentSolarSystem: {
+      turretId: TURRET_ADDRESS,
+      solarSystemId: 30000004,
+      solarSystemName: 'O3H-1FN',
+      resolutionSource: 'node' as const,
+    },
+    eventsState: {
+      events: [
+        {
+          txDigest: '0xabc',
+          eventSeq: 1,
+          checkpointSequenceNumber: 1,
+          eventType: 'TurretCreatedEvent',
+          jsonData: {
+            turret_id: TURRET_ADDRESS,
+            turret_key: { tenant: 'utopia', item_id: '42' },
+            owner_cap_id: '0xowner-cap',
+          },
+          timestamp: '2026-03-26T12:00:00.000Z',
         },
-        timestamp: '2026-03-26T12:00:00.000Z',
-      },
-    ],
-    loading: false,
-    error: null,
-    page: 1,
-    nextPage: null,
-    next: vi.fn(),
-    reset: vi.fn(),
-  },
-  onAssignNode: vi.fn().mockResolvedValue(undefined),
-  onUnassignNode: vi.fn().mockResolvedValue(undefined),
-  onClose: vi.fn(),
-  onLocationSelect: vi.fn(),
-};
+      ],
+      loading: false,
+      error: null,
+      page: 1,
+      nextPage: null,
+      next: vi.fn(),
+      reset: vi.fn(),
+    },
+    onAssignSolarSystem: vi.fn().mockResolvedValue(undefined),
+    onUnassignSolarSystem: vi.fn().mockResolvedValue(undefined),
+    onClose: vi.fn(),
+  };
+}
 
 describe('TurretDetail', () => {
   beforeEach(() => {
@@ -66,35 +72,47 @@ describe('TurretDetail', () => {
   });
 
   it('renders drawer details and events', () => {
-    render(<TurretDetail {...baseProps} />);
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
     expect(screen.getByTestId('turret-detail')).toBeTruthy();
     expect(screen.getByText('Alpha Bastion')).toBeTruthy();
     expect(screen.getByText('TurretCreatedEvent')).toBeTruthy();
+    expect(screen.getByText('O3H-1FN')).toBeTruthy();
   });
 
-  it('allows node actions and map navigation', () => {
-    render(<TurretDetail {...baseProps} />);
+  it('allows solar-system reassignment from the detail panel', async () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
-    fireEvent.click(screen.getByRole('button', { name: `Assign ${NODE_ADDRESS}` }));
-    fireEvent.click(screen.getByRole('button', { name: /view system on map/i }));
+    fireEvent.click(screen.getByRole('button', { name: /reassign/i }));
+    fireEvent.change(screen.getByPlaceholderText(/search by system name/i), {
+      target: { value: 'O3H' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'O3H-1FN' }));
 
-    expect(baseProps.onAssignNode).toHaveBeenCalledWith(NODE_ADDRESS, 31002477);
-    expect(baseProps.onLocationSelect).toHaveBeenCalledWith(31002477);
+    await waitFor(() => {
+      expect(props.onAssignSolarSystem).toHaveBeenCalledWith(NODE_ADDRESS, {
+        solarSystemId: 30000004,
+        solarSystemName: 'O3H-1FN',
+      });
+    });
   });
 
   it('abbreviates turret addresses in the detail drawer when space is tight', async () => {
-    render(<TurretDetail {...baseProps} />);
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
     emitResizeForAll(120);
 
     await waitFor(() => {
-      expect(screen.getByTitle(TURRET_ADDRESS).textContent).toContain('…');
+      expect(screen.getByTitle(TURRET_ADDRESS).textContent).toContain('...');
     });
   });
 
   it('copies the full turret address from the detail drawer', async () => {
-    render(<TurretDetail {...baseProps} />);
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
     fireEvent.click(screen.getByRole('button', { name: /copy turret address/i }));
 
@@ -104,15 +122,16 @@ describe('TurretDetail', () => {
   });
 
   it('uses the shared copy controls for turret and node address surfaces', () => {
-    render(<TurretDetail {...baseProps} />);
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
     expect(screen.getByRole('button', { name: /copy turret address/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /copy assigned node address/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /copy available node address/i })).toBeTruthy();
   });
 
   it('lets the selected turret and assigned node address rows grow to fill available width', () => {
-    render(<TurretDetail {...baseProps} />);
+    const props = createProps();
+    render(<TurretDetail {...props} />);
 
     const addressRows = screen.getAllByTestId('responsive-address');
     expect(addressRows[0]?.className).toContain('w-full');

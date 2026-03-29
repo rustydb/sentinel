@@ -1,15 +1,22 @@
 import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
 import type { TurretData } from '@frontier-sentinel/shared-types';
-import { sampleEvents, sampleNodes, sampleTurrets } from './test-data';
+import {
+  sampleEvents,
+  sampleNodes,
+  sampleRetainedTurretSolarSystems,
+  sampleTurrets,
+} from './test-data';
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react';
 
 import { MapEmbed } from './components/MapEmbed';
+import { NetworkNodeDrawer } from './components/NetworkNodeDrawer';
 import { ResponsiveAddress } from './components/ResponsiveAddress';
 import { TurretDetail } from './components/TurretDetail';
 import { TurretList } from './components/TurretCard';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
 import { useTurretEvents } from './hooks/useTurretEvents';
+import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
 import { useTurrets } from './hooks/useTurrets';
 
 const search = new URLSearchParams(window.location.search);
@@ -161,7 +168,8 @@ function WalletDropdown({
 
 export default function App() {
   const [selectedTurret, setSelectedTurret] = useState<TurretData | null>(null);
-  const [selectedSystemId, setSelectedSystemId] = useState<number | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [manualFocusedSystemId, setManualFocusedSystemId] = useState<number | null>(null);
   const { currentAccount, handleConnect, handleDisconnect, hasEveVault, isConnected } =
     useConnection();
   const currentWallet = useCurrentWallet();
@@ -177,12 +185,31 @@ export default function App() {
     endpoint: graphQlEndpoint,
     enabled: connected && !DEMO_MODE,
   });
-  const networkNodes = useNetworkNodes({ enabled: !DEMO_MODE });
   const eventsState = useTurretEvents({ turretId: selectedTurret?.id, enabled: !DEMO_MODE });
   const deferredTurrets = useDeferredValue(DEMO_MODE ? sampleTurrets : turrets);
+  const candidateNodeIds = deferredTurrets
+    .map((turret) => turret.energySourceId)
+    .filter((nodeId): nodeId is string => /^0x[a-fA-F0-9]{64}$/.test(nodeId));
+  const networkNodes = useNetworkNodes({
+    enabled: !DEMO_MODE,
+    candidateNodeIds,
+    graphQlEndpoint,
+  });
+  const turretSolarSystems = useTurretSolarSystems({
+    turrets: deferredTurrets,
+    nodeMappings: DEMO_MODE ? sampleNodes : networkNodes.mappings,
+    apiBaseUrl: '',
+    enabled: !DEMO_MODE,
+  });
 
   const currentTurrets = deferredTurrets;
-  const currentNodes = DEMO_MODE ? sampleNodes : networkNodes.nodes;
+  const currentNodes = DEMO_MODE
+    ? sampleNodes.map((node) => ({
+        ...node,
+        typeId: '92401',
+        displayName: 'Network Node',
+      }))
+    : networkNodes.nodes;
   const nodeActions = DEMO_MODE
     ? {
         assignNode: () => Promise.resolve(),
@@ -203,6 +230,64 @@ export default function App() {
   const displayedCharacterName = DEMO_MODE
     ? DEMO_CHARACTER_NAME
     : (characterName ?? 'Loading character');
+  const demoSolarSystemsByTurretId = new Map(
+    sampleTurrets.map((turret) => {
+      if (/^0x[a-fA-F0-9]{64}$/.test(turret.energySourceId)) {
+        const currentMapping = sampleNodes.find((node) => node.nodeId === turret.energySourceId);
+        if (currentMapping) {
+          return [
+            turret.id,
+            {
+              turretId: turret.id,
+              solarSystemId: currentMapping.solarSystemId,
+              solarSystemName: currentMapping.solarSystemName,
+              resolutionSource: 'node' as const,
+            },
+          ];
+        }
+      }
+
+      const retained = sampleRetainedTurretSolarSystems.find(
+        (entry) => entry.turretId === turret.id,
+      );
+      return [
+        turret.id,
+        retained
+          ? {
+              turretId: turret.id,
+              solarSystemId: retained.solarSystemId,
+              solarSystemName: retained.solarSystemName,
+              resolutionSource: 'retained' as const,
+            }
+          : {
+              turretId: turret.id,
+              solarSystemId: null,
+              solarSystemName: null,
+              resolutionSource: 'none' as const,
+            },
+      ];
+    }),
+  );
+  const solarSystemsByTurretId = DEMO_MODE
+    ? demoSolarSystemsByTurretId
+    : turretSolarSystems.byTurretId;
+  const selectedTurretSolarSystem = selectedTurret
+    ? (solarSystemsByTurretId.get(selectedTurret.id) ?? null)
+    : null;
+  const highlightedSystemIds = selectedTurret
+    ? []
+    : [
+        ...new Set(
+          [...solarSystemsByTurretId.values()]
+            .map((entry) => entry.solarSystemId)
+            .filter((value): value is number => typeof value === 'number'),
+        ),
+      ];
+  const focusedSystemId = selectedTurretSolarSystem?.solarSystemId ?? manualFocusedSystemId ?? null;
+
+  useEffect(() => {
+    setManualFocusedSystemId(null);
+  }, [selectedTurret?.id]);
 
   if (!connected) {
     return (
@@ -252,7 +337,16 @@ export default function App() {
             <h1 className="mt-3 text-4xl uppercase">Frontier Sentinel</h1>
           </div>
           <div className="min-w-0 text-sm uppercase lg:max-w-xl">
-            <p>Turrets: {currentTurrets.length}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p>Turrets: {currentTurrets.length}</p>
+              <button
+                type="button"
+                className={ACTION_BUTTON_CLASS}
+                onClick={() => setDrawerOpen(true)}
+              >
+                Network Nodes
+              </button>
+            </div>
             <div className="mt-3">
               <WalletDropdown
                 characterName={displayedCharacterName}
@@ -271,7 +365,7 @@ export default function App() {
             {!loading && !error && currentTurrets.length > 0 ? (
               <TurretList
                 turrets={currentTurrets}
-                nodes={currentNodes}
+                solarSystemsByTurretId={solarSystemsByTurretId}
                 selectedTurretId={selectedTurret?.id ?? null}
                 onSelect={(turret) => {
                   startTransition(() => {
@@ -283,18 +377,26 @@ export default function App() {
             ) : null}
           </section>
 
-          <MapEmbed selectedSystemId={selectedSystemId} />
+          <MapEmbed focusedSystemId={focusedSystemId} highlightedSystemIds={highlightedSystemIds} />
         </div>
       </div>
 
+      <NetworkNodeDrawer
+        open={drawerOpen}
+        nodes={currentNodes}
+        loading={!DEMO_MODE && networkNodes.loading}
+        onClose={() => setDrawerOpen(false)}
+        onAssign={nodeActions.assignNode}
+        onUnassign={nodeActions.unassignNode}
+      />
+
       <TurretDetail
         turret={selectedTurret}
-        nodes={currentNodes}
+        currentSolarSystem={selectedTurretSolarSystem}
         eventsState={currentEventsState}
-        onAssignNode={nodeActions.assignNode}
-        onUnassignNode={nodeActions.unassignNode}
+        onAssignSolarSystem={nodeActions.assignNode}
+        onUnassignSolarSystem={nodeActions.unassignNode}
         onClose={() => setSelectedTurret(null)}
-        onLocationSelect={setSelectedSystemId}
       />
     </main>
   );

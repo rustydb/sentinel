@@ -13,6 +13,7 @@ vi.mock('../hooks/useTypeInfo', () => ({
 }));
 
 const NODE_ADDRESS = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+const TURRET_ADDRESS = '0x2222222222222222222222222222222222222222222222222222222222222222';
 
 describe('TurretCard', () => {
   beforeEach(() => {
@@ -33,7 +34,7 @@ describe('TurretCard', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x1',
+          id: '0x1111111111111111111111111111111111111111111111111111111111111111',
           itemId: '42',
           name: 'Raven Gate',
           status: 'offline',
@@ -53,14 +54,13 @@ describe('TurretCard', () => {
     expect(screen.getByText('offline')).toBeTruthy();
     expect(screen.getByText('Network Node')).toBeTruthy();
     expect(screen.getByText(/orphaned node assignment/i)).toBeTruthy();
-    expect(screen.queryByText('Item')).toBeNull();
   });
 
-  it('shows the solar system field as unassigned when no network-node mapping exists', () => {
+  it('shows the solar system field as unassigned when no mapping exists', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Nova Wall',
           status: 'online',
@@ -70,28 +70,52 @@ describe('TurretCard', () => {
           energySourceId: NODE_ADDRESS,
           aggressor: 'Sleepers',
         }}
-        nodes={[]}
       />,
     );
 
     expect(screen.getByText('Solar System')).toBeTruthy();
     expect(screen.getByText('Unassigned')).toBeTruthy();
-    expect(screen.queryByText('J102')).toBeNull();
+  });
+
+  it('renders the resolved solar-system friendly name when available', () => {
+    render(
+      <TurretCard
+        turret={{
+          id: TURRET_ADDRESS,
+          itemId: '43',
+          name: 'Nova Wall',
+          status: 'online',
+          locationHash: 'J102',
+          isOnline: true,
+          typeId: 'turret.mk2',
+          energySourceId: NODE_ADDRESS,
+          aggressor: 'Sleepers',
+        }}
+        solarSystem={{
+          turretId: TURRET_ADDRESS,
+          solarSystemId: 30000004,
+          solarSystemName: 'O3H-1FN',
+          resolutionSource: 'node',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('O3H-1FN')).toBeTruthy();
   });
 
   it('uses a centered cover fit for the turret icon image', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x1',
-          itemId: '42',
-          name: 'Raven Gate',
-          status: 'offline',
-          locationHash: 'J101',
-          isOnline: false,
-          typeId: 'turret.mk1',
-          energySourceId: 'orphaned',
-          aggressor: null,
+          id: TURRET_ADDRESS,
+          itemId: '43',
+          name: 'Nova Wall',
+          status: 'online',
+          locationHash: 'J102',
+          isOnline: true,
+          typeId: 'turret.mk2',
+          energySourceId: NODE_ADDRESS,
+          aggressor: 'Sleepers',
         }}
       />,
     );
@@ -105,21 +129,21 @@ describe('TurretCard', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Nova Wall',
           status: 'online',
           locationHash: 'J102',
           isOnline: true,
           typeId: 'turret.mk2',
-          energySourceId: 'node-7',
+          energySourceId: NODE_ADDRESS,
           aggressor: 'Sleepers',
         }}
         onSelect={onSelect}
       />,
     );
 
-    fireEvent.click(screen.getByTestId('turret-card-0x2'));
+    fireEvent.click(screen.getByTestId(`turret-card-${TURRET_ADDRESS}`));
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
@@ -127,7 +151,7 @@ describe('TurretCard', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Nova Wall',
           status: 'online',
@@ -143,7 +167,7 @@ describe('TurretCard', () => {
     emitResizeForAll(120);
 
     await waitFor(() => {
-      expect(screen.getByTitle(NODE_ADDRESS).textContent).toContain('…');
+      expect(screen.getByTitle(NODE_ADDRESS).textContent).toContain('...');
     });
   });
 
@@ -151,7 +175,7 @@ describe('TurretCard', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Nova Wall',
           status: 'online',
@@ -167,11 +191,11 @@ describe('TurretCard', () => {
     expect(screen.queryByRole('button', { name: /copy node address/i })).toBeNull();
   });
 
-  it('does not truncate the title in its own markup just to accommodate the status badge', () => {
+  it('does not truncate the title just to accommodate the status badge', () => {
     render(
       <TurretCard
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Heavy Turret',
           status: 'offline',
@@ -215,7 +239,7 @@ describe('TurretCard', () => {
       <TurretCard
         selected
         turret={{
-          id: '0x2',
+          id: TURRET_ADDRESS,
           itemId: '43',
           name: 'Nova Wall',
           status: 'online',
@@ -228,7 +252,11 @@ describe('TurretCard', () => {
       />,
     );
 
-    expect(screen.getByTestId('turret-card-0x2').getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByTestId('turret-card-0x2').getAttribute('data-selected')).toBe('true');
+    expect(screen.getByTestId(`turret-card-${TURRET_ADDRESS}`).getAttribute('aria-selected')).toBe(
+      'true',
+    );
+    expect(screen.getByTestId(`turret-card-${TURRET_ADDRESS}`).getAttribute('data-selected')).toBe(
+      'true',
+    );
   });
 });

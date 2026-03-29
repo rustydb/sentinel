@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/node_modules/**',
       '**/target/**',
+      '**/*.d.ts',
       '**/*.min.js',
     ],
   },

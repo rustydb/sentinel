@@ -1,13 +1,40 @@
-import type { NetworkNodeMapping } from '@frontier-sentinel/shared-types';
-import { startTransition, useEffect, useState } from 'react';
+import { GET_OBJECT_WITH_JSON, type NetworkNodeMapping } from '@frontier-sentinel/shared-types';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 
 interface UseNetworkNodesOptions {
   apiBaseUrl?: string;
+  graphQlEndpoint?: string;
+  candidateNodeIds?: string[];
   enabled?: boolean;
 }
 
 interface NetworkNodesResponse {
   data?: NetworkNodeMapping[];
+}
+
+interface NetworkNodeObjectPayload {
+  data?: {
+    object?: {
+      address?: string;
+      asMoveObject?: {
+        contents?: {
+          type?: {
+            repr?: string;
+          };
+          json?: Record<string, unknown>;
+        };
+      };
+    };
+  };
+}
+
+export interface NetworkNodeView extends NetworkNodeMapping {
+  typeId: string | null;
+  displayName: string | null;
+}
+
+function isSuiAddress(value: string | null | undefined): value is string {
+  return typeof value === 'string' && /^0x[a-fA-F0-9]{64}$/.test(value);
 }
 
 function isNetworkNodeMapping(value: unknown): value is NetworkNodeMapping {
@@ -28,14 +55,61 @@ function parseNetworkNodesPayload(payload: unknown): NetworkNodeMapping[] {
   return Array.isArray(data) ? data.filter(isNetworkNodeMapping) : [];
 }
 
-export function useNetworkNodes({ apiBaseUrl = '', enabled = true }: UseNetworkNodesOptions = {}) {
-  const [nodes, setNodes] = useState<NetworkNodeMapping[]>([]);
+function parseNodeObjects(payload: unknown): Array<{
+  nodeId: string;
+  typeId: string | null;
+  displayName: string | null;
+}> {
+  if (!payload || typeof payload !== 'object') {
+    return [];
+  }
+
+  const node = (payload as NetworkNodeObjectPayload).data?.object;
+  if (!node) {
+    return [];
+  }
+
+  const json = node.asMoveObject?.contents?.json ?? {};
+  const metadata = (json.metadata as Record<string, unknown> | undefined) ?? {};
+  const candidateName =
+    typeof metadata.name === 'string' && metadata.name.trim() ? metadata.name.trim() : null;
+  const rawTypeId = json.type_id;
+  const typeId =
+    typeof rawTypeId === 'string'
+      ? rawTypeId
+      : typeof rawTypeId === 'number'
+        ? String(rawTypeId)
+        : null;
+
+  return [
+    {
+      nodeId: typeof node.address === 'string' ? node.address : '',
+      typeId,
+      displayName: candidateName,
+    },
+  ].filter((entry) => entry.nodeId);
+}
+
+export function useNetworkNodes({
+  apiBaseUrl = '',
+  graphQlEndpoint = '/graphql',
+  candidateNodeIds = [],
+  enabled = true,
+}: UseNetworkNodesOptions = {}) {
+  const [mappings, setMappings] = useState<NetworkNodeMapping[]>([]);
+  const [nodes, setNodes] = useState<NetworkNodeView[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
+
+  const normalizedCandidateNodeIds = useMemo(
+    () => [...new Set(candidateNodeIds.filter((nodeId) => isSuiAddress(nodeId)))],
+    [candidateNodeIds.join(',')],
+  );
 
   async function refresh(): Promise<void> {
     if (!enabled) {
       setNodes([]);
+      setMappings([]);
       setLoading(false);
       return;
     }
@@ -44,8 +118,62 @@ export function useNetworkNodes({ apiBaseUrl = '', enabled = true }: UseNetworkN
     try {
       const response = await fetch(`${apiBaseUrl}/api/network-nodes`);
       const payload: unknown = await response.json();
+      const parsedMappings = parseNetworkNodesPayload(payload);
+      const candidateIds = [
+        ...new Set([...normalizedCandidateNodeIds, ...parsedMappings.map((entry) => entry.nodeId)]),
+      ];
+      let discoveredNodes: Array<{
+        nodeId: string;
+        typeId: string | null;
+        displayName: string | null;
+      }> = [];
+
+      if (candidateIds.length > 0) {
+        const objectPayloads = await Promise.all(
+          candidateIds.map(async (nodeId) => {
+            const objectResponse = await fetch(graphQlEndpoint, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                query: GET_OBJECT_WITH_JSON,
+                variables: { id: nodeId },
+              }),
+            });
+
+            if (!objectResponse.ok) {
+              return null;
+            }
+
+            return (await objectResponse.json()) as unknown;
+          }),
+        );
+
+        discoveredNodes = objectPayloads.flatMap((payload) => parseNodeObjects(payload));
+      }
+
       startTransition(() => {
-        setNodes(parseNetworkNodesPayload(payload));
+        setMappings(parsedMappings);
+        const objectById = new Map(discoveredNodes.map((entry) => [entry.nodeId, entry]));
+        const mappingById = new Map(parsedMappings.map((entry) => [entry.nodeId, entry]));
+        const mergedNodeIds = [
+          ...new Set([
+            ...normalizedCandidateNodeIds,
+            ...discoveredNodes.map((entry) => entry.nodeId),
+          ]),
+        ];
+        setNodes(
+          mergedNodeIds.map((nodeId) => {
+            const object = objectById.get(nodeId);
+            const mapping = mappingById.get(nodeId);
+            return {
+              nodeId,
+              solarSystemId: mapping?.solarSystemId ?? 0,
+              solarSystemName: mapping?.solarSystemName ?? null,
+              typeId: object?.typeId ?? null,
+              displayName: object?.displayName ?? null,
+            };
+          }),
+        );
         setError(null);
       });
     } catch (reason) {
@@ -58,14 +186,18 @@ export function useNetworkNodes({ apiBaseUrl = '', enabled = true }: UseNetworkN
   useEffect(() => {
     if (!enabled) {
       setNodes([]);
+      setMappings([]);
       setLoading(false);
       return;
     }
 
     void refresh();
-  }, [apiBaseUrl, enabled]);
+  }, [apiBaseUrl, enabled, graphQlEndpoint, normalizedCandidateNodeIds.join(',')]);
 
-  async function assignNode(nodeId: string, solarSystemId: number): Promise<void> {
+  async function assignNode(
+    nodeId: string,
+    assignment: { solarSystemId: number; solarSystemName: string | null },
+  ): Promise<void> {
     if (!enabled) {
       return;
     }
@@ -73,7 +205,7 @@ export function useNetworkNodes({ apiBaseUrl = '', enabled = true }: UseNetworkN
     await fetch(`${apiBaseUrl}/api/network-nodes/${nodeId}/solar-system`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ solarSystemId }),
+      body: JSON.stringify(assignment),
     });
     await refresh();
   }
@@ -87,5 +219,5 @@ export function useNetworkNodes({ apiBaseUrl = '', enabled = true }: UseNetworkN
     await refresh();
   }
 
-  return { nodes, loading, error, refresh, assignNode, unassignNode };
+  return { nodes, mappings, loading, error, refresh, assignNode, unassignNode };
 }
