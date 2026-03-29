@@ -1,7 +1,17 @@
-import { type MouseEvent, type ReactNode, useId, useLayoutEffect, useRef, useState } from 'react';
+import {
+  createElement,
+  type HTMLAttributes,
+  type MouseEvent,
+  type ReactNode,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { abbreviateAddress as eveAbbreviateAddress } from '@evefrontier/dapp-kit/utils';
 
-const DEFAULT_MAX_ABBREVIATION = 28;
-const MIN_ABBREVIATION = 12;
+const DEFAULT_MAX_ABBREVIATION = 64;
+const MIN_PRECISION = 4;
 const COPY_FEEDBACK_DURATION_MS = 1600;
 const copyIconUrl = new URL('../assets/copy.svg', import.meta.url).href;
 const tickIconUrl = new URL('../assets/tick.svg', import.meta.url).href;
@@ -21,52 +31,28 @@ export function isSuiAddress(address: string | null | undefined): address is str
   return typeof address === 'string' && /^0x[a-f0-9]{64}$/i.test(address);
 }
 
-function abbreviateAddress(address: string, totalVisibleChars: number): string {
-  if (totalVisibleChars >= address.length) {
-    return address;
-  }
-
-  const safeVisibleChars = Math.max(MIN_ABBREVIATION, totalVisibleChars);
-  const availableCharacters = Math.max(10, safeVisibleChars - 1);
-  const prefixLength = Math.max(6, Math.ceil(availableCharacters * 0.65));
-  const suffixLength = Math.max(4, availableCharacters - prefixLength);
-
-  if (prefixLength + suffixLength >= address.length) {
-    return address;
-  }
-
-  return `${address.slice(0, prefixLength)}…${address.slice(-suffixLength)}`;
+/**
+ * Translate a target display width into the dapp-kit precision value.
+ * The utility keeps `precision` characters on each side plus `...` in the middle.
+ */
+function toPrecision(totalVisibleChars: number): number {
+  return Math.max(MIN_PRECISION, Math.floor(Math.max(0, totalVisibleChars - 3) / 2));
 }
 
+/**
+ * Build the ordered set of candidate renderings we will try against the measured width.
+ * We always prefer the largest display that fits, starting with the full address.
+ */
 function buildCandidateSequence(address: string, maxAbbreviation: number): string[] {
-  const candidates = [address];
-  const lowestVisibleChars = Math.max(
-    MIN_ABBREVIATION,
-    Math.min(maxAbbreviation, address.length - 1),
-  );
+  const candidates = [eveAbbreviateAddress(address, 5, true)];
+  const maxPrecision = toPrecision(Math.min(maxAbbreviation, address.length));
 
-  for (
-    let visibleChars = address.length - 1;
-    visibleChars >= lowestVisibleChars;
-    visibleChars -= 1
-  ) {
-    const abbreviated = abbreviateAddress(address, visibleChars);
-    if (!candidates.includes(abbreviated)) {
+  for (let precision = maxPrecision; precision >= MIN_PRECISION; precision -= 1) {
+    const abbreviated = eveAbbreviateAddress(address, precision, false);
+    if (abbreviated && !candidates.includes(abbreviated)) {
       candidates.push(abbreviated);
     }
   }
-
-  for (
-    let visibleChars = lowestVisibleChars - 1;
-    visibleChars >= MIN_ABBREVIATION;
-    visibleChars -= 1
-  ) {
-    const abbreviated = abbreviateAddress(address, visibleChars);
-    if (!candidates.includes(abbreviated)) {
-      candidates.push(abbreviated);
-    }
-  }
-
   return candidates;
 }
 
@@ -84,7 +70,7 @@ export function ResponsiveAddress({
   copyLabel = 'Sui address',
   copyable = true,
 }: ResponsiveAddressProps) {
-  const containerRef = useRef<HTMLSpanElement | HTMLDivElement | HTMLParagraphElement | null>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
   const measureRef = useRef<HTMLSpanElement | null>(null);
   const prefixRef = useRef<HTMLSpanElement | null>(null);
   const controlRef = useRef<HTMLButtonElement | null>(null);
@@ -109,6 +95,10 @@ export function ResponsiveAddress({
     const containerEl = containerRef.current;
     const measureEl = measureRef.current;
 
+    /**
+     * Recompute the visible address for the current container width.
+     * This preserves the largest candidate that still fits alongside any prefix/copy controls.
+     */
     const syncDisplayAddress = () => {
       if (!isSuiAddress(normalizedAddress)) {
         setDisplayAddress('Unavailable');
@@ -144,6 +134,10 @@ export function ResponsiveAddress({
       setDisplayAddress(nextDisplay);
     };
 
+    /**
+     * Batch resize reactions into the next animation frame so measurement happens
+     * after layout settles instead of during a resize burst.
+     */
     const scheduleSyncDisplayAddress = (nextObservedWidth?: number) => {
       if (typeof nextObservedWidth === 'number' && Number.isFinite(nextObservedWidth)) {
         observedWidthRef.current = nextObservedWidth;
@@ -162,13 +156,16 @@ export function ResponsiveAddress({
     const observer = new ResizeObserver((entries) => {
       scheduleSyncDisplayAddress(entries[0]?.contentRect.width);
     });
+    const handleWindowResize = () => {
+      scheduleSyncDisplayAddress();
+    };
 
     observer.observe(containerEl);
-    window.addEventListener('resize', scheduleSyncDisplayAddress);
+    window.addEventListener('resize', handleWindowResize);
     scheduleSyncDisplayAddress();
 
     return () => {
-      window.removeEventListener('resize', scheduleSyncDisplayAddress);
+      window.removeEventListener('resize', handleWindowResize);
       observer.disconnect();
       if (animationFrameRef.current != null) {
         window.cancelAnimationFrame(animationFrameRef.current);
@@ -188,6 +185,9 @@ export function ResponsiveAddress({
     };
   }, []);
 
+  /**
+   * Copy the full address and briefly switch the control into its success state.
+   */
   async function handleCopy(): Promise<void> {
     if (!copyAvailable || !navigator.clipboard?.writeText) {
       return;
@@ -206,12 +206,19 @@ export function ResponsiveAddress({
     }, COPY_FEEDBACK_DURATION_MS);
   }
 
-  return (
-    <Component
-      ref={containerRef}
-      className={joinClasses('relative flex min-w-0 items-center gap-2 font-mono', className)}
-      data-testid="responsive-address"
-    >
+  const componentProps = {
+    ref: containerRef,
+    className: joinClasses('relative flex min-w-0 items-center gap-2 font-mono', className),
+    'data-testid': 'responsive-address',
+  } satisfies HTMLAttributes<HTMLElement> & {
+    ref: typeof containerRef;
+    'data-testid': string;
+  };
+
+  return createElement(
+    Component,
+    componentProps,
+    <>
       {children ? <span ref={prefixRef}>{children}</span> : null}
       <span
         className={joinClasses(
@@ -264,6 +271,6 @@ export function ResponsiveAddress({
         className="pointer-events-none absolute -z-10 whitespace-nowrap opacity-0 font-mono"
         data-testid={measurementId}
       />
-    </Component>
+    </>,
   );
 }

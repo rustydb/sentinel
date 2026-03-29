@@ -41,7 +41,7 @@ describe('ResponsiveAddress', () => {
     emitResize(140);
 
     await waitFor(() => {
-      expect(screen.getByTitle(FULL_ADDRESS).textContent).toContain('…');
+      expect(screen.getByTitle(FULL_ADDRESS).textContent).toContain('...');
     });
 
     expect(screen.queryByText(FULL_ADDRESS)).toBeNull();
@@ -52,7 +52,7 @@ describe('ResponsiveAddress', () => {
 
     emitResize(120);
     await waitFor(() => {
-      expect(screen.getByTitle(FULL_ADDRESS).textContent).toContain('…');
+      expect(screen.getByTitle(FULL_ADDRESS).textContent).toContain('...');
     });
     const narrowDisplay = screen.getByTitle(FULL_ADDRESS).textContent ?? '';
 
@@ -76,7 +76,7 @@ describe('ResponsiveAddress', () => {
     emitResize(140);
     await waitFor(() => {
       const nextDisplay = screen.getByTitle(FULL_ADDRESS).textContent ?? '';
-      expect(nextDisplay).toContain('…');
+      expect(nextDisplay).toContain('...');
       expect(nextDisplay.length).toBeLessThan(wideDisplay.length);
     });
   });
