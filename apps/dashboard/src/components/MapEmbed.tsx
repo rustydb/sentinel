@@ -88,7 +88,7 @@ export function MapEmbed({ focusedSystemId, highlightedSystemIds }: MapEmbedProp
   }, [focusedSystemId, normalizedHighlightedSystemIds]);
 
   return (
-    <section className="border-4 border-sentinel-ink bg-white p-4">
+    <section className="h-fit self-start border-4 border-sentinel-ink bg-white p-4">
       <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">Universe map</p>
       <div className="mt-4 overflow-hidden border-2 border-sentinel-ink">
         <iframe
