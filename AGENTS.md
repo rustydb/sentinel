@@ -26,12 +26,10 @@ Before making meaningful changes, read these project documents:
 
 - [CONTRIBUTING.md](./CONTRIBUTING.md)
 - [CHANGELOG.md](./CHANGELOG.md)
-- [CONSITUTION.md](./docs/CONSITUTION.md)
+- [CONSTITUTION.md](./docs/CONSTITUTION.md)
 
 Notes:
 
-- The constitution file currently lives at the misspelled path `docs/CONSITUTION.md`.
-- `CONTRIBUTING.md` also contains historical typos pointing at that document. Treat the file above as the intended constitution source of truth until the repo renames it.
 - Update `CHANGELOG.md` alongside notable user-facing, architectural, and workflow changes. Do not leave major feature work undocumented.
 
 ## Local Workflow
