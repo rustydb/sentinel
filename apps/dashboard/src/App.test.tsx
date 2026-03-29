@@ -137,9 +137,12 @@ describe('App', () => {
       error: null,
     });
     hooks.useTypeInfo.mockReturnValue({
-      id: '92404',
-      name: 'Heavy Turret',
-      iconUrl: 'https://assets.example.com/heavy-turret.png',
+      typeInfo: {
+        id: '92404',
+        name: 'Heavy Turret',
+        iconUrl: 'https://assets.example.com/heavy-turret.png',
+      },
+      isLoading: false,
     });
   });
 

@@ -16,8 +16,9 @@ interface NetworkNodeCardProps {
 
 export function NetworkNodeCard({ node, onAssign, onUnassign }: NetworkNodeCardProps) {
   const [editing, setEditing] = useState(false);
-  const typeInfo = useTypeInfo(node.typeId);
-  const displayName = node.displayName ?? typeInfo?.name ?? 'Network Node';
+  const { typeInfo, isLoading } = useTypeInfo(node.typeId);
+  const displayName =
+    node.displayName ?? typeInfo?.name ?? (isLoading ? '<Loading>' : 'Network Node');
   const hasAssignment = node.solarSystemId > 0;
 
   return (

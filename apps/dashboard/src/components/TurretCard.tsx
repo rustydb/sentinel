@@ -27,11 +27,11 @@ function joinClasses(...classNames: Array<string | false | null | undefined>): s
 export function TurretCard({ turret, solarSystem, onSelect, selected = false }: TurretCardProps) {
   const orphaned = turret.energySourceId === 'orphaned';
   const addressValuedNode = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
-  const typeInfo = useTypeInfo(turret.typeId);
+  const { typeInfo, isLoading } = useTypeInfo(turret.typeId);
   const customName = turret.name?.trim() ? turret.name.trim() : null;
   const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
-  const displayName = customName ?? typeName ?? turret.itemId;
-  const typeSubtitle = customName && typeName ? typeName : null;
+  const displayName = customName ?? typeName ?? (isLoading ? '<Loading>' : 'Turret');
+  const typeSubtitle = customName ? (typeName ?? (isLoading ? '<Loading>' : null)) : null;
 
   return (
     <article
@@ -62,7 +62,7 @@ export function TurretCard({ turret, solarSystem, onSelect, selected = false }: 
             />
           ) : (
             <span className="px-1 text-center text-[10px] uppercase tracking-[0.2em] text-sentinel-muted">
-              {typeName ? typeName.slice(0, 2) : 'TR'}
+              {typeName ? typeName.slice(0, 2) : isLoading ? '<>' : 'TR'}
             </span>
           )}
         </div>

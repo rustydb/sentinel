@@ -4,6 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TurretDetail } from './TurretDetail';
 import { emitResizeForAll, installResizeObserverMock } from '../test-utils/resizeObserver';
 
+const hooks = vi.hoisted(() => ({
+  useTypeInfo: vi.fn(),
+}));
+
+vi.mock('../hooks/useTypeInfo', () => ({
+  useTypeInfo: hooks.useTypeInfo,
+}));
+
 const TURRET_ADDRESS = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const NODE_ADDRESS = '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc';
 const clipboardWriteText = vi.fn();
@@ -57,6 +65,14 @@ function createProps() {
 describe('TurretDetail', () => {
   beforeEach(() => {
     installResizeObserverMock();
+    hooks.useTypeInfo.mockReturnValue({
+      typeInfo: {
+        id: '92404',
+        name: 'Heavy Turret',
+        iconUrl: 'https://assets.example.com/heavy-turret.png',
+      },
+      isLoading: false,
+    });
     clipboardWriteText.mockReset();
     Object.defineProperty(navigator, 'clipboard', {
       value: {
@@ -79,6 +95,15 @@ describe('TurretDetail', () => {
     expect(screen.getByText('Alpha Bastion')).toBeTruthy();
     expect(screen.getByText('TurretCreatedEvent')).toBeTruthy();
     expect(screen.getByText('O3H-1FN')).toBeTruthy();
+  });
+
+  it('does not use the raw turret id as the large title when a custom name is missing', () => {
+    const props = createProps();
+    props.turret.name = '';
+    render(<TurretDetail {...props} />);
+
+    expect(screen.getByText('Heavy Turret')).toBeTruthy();
+    expect(screen.getByTitle(TURRET_ADDRESS)).toBeTruthy();
   });
 
   it('allows solar-system reassignment from the detail panel', async () => {

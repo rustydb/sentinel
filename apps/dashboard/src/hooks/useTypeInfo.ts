@@ -20,6 +20,11 @@ export interface TypeInfo {
   categoryName?: string;
 }
 
+export interface UseTypeInfoResult {
+  typeInfo: TypeInfo | null;
+  isLoading: boolean;
+}
+
 const typeCache = new Map<string, TypeInfo | null>();
 const inflight = new Map<string, Promise<TypeInfo | null>>();
 const TYPE_INFO_TIMEOUT_MS = 5000;
@@ -96,27 +101,33 @@ async function fetchTypeInfo(typeId: string): Promise<TypeInfo | null> {
   return request;
 }
 
-export function useTypeInfo(typeId: string | null | undefined): TypeInfo | null {
+export function useTypeInfo(typeId: string | null | undefined): UseTypeInfoResult {
   const normalizedTypeId = typeof typeId === 'string' ? typeId.trim() : '';
+  const hasCachedValue = normalizedTypeId ? typeCache.has(normalizedTypeId) : false;
   const [typeInfo, setTypeInfo] = useState<TypeInfo | null>(
     normalizedTypeId ? (typeCache.get(normalizedTypeId) ?? null) : null,
   );
+  const [isLoading, setIsLoading] = useState<boolean>(normalizedTypeId ? !hasCachedValue : false);
 
   useEffect(() => {
     if (!normalizedTypeId) {
       setTypeInfo(null);
+      setIsLoading(false);
       return;
     }
 
     if (typeCache.has(normalizedTypeId)) {
       setTypeInfo(typeCache.get(normalizedTypeId) ?? null);
+      setIsLoading(false);
       return;
     }
 
     let cancelled = false;
+    setIsLoading(true);
     void fetchTypeInfo(normalizedTypeId).then((result) => {
       if (!cancelled) {
         setTypeInfo(result);
+        setIsLoading(false);
       }
     });
 
@@ -125,5 +136,5 @@ export function useTypeInfo(typeId: string | null | undefined): TypeInfo | null 
     };
   }, [normalizedTypeId]);
 
-  return typeInfo;
+  return { typeInfo, isLoading };
 }

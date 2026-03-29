@@ -14,9 +14,12 @@ vi.mock('../hooks/useTypeInfo', () => ({
 describe('NetworkNodeCard', () => {
   beforeEach(() => {
     hooks.useTypeInfo.mockReturnValue({
-      id: '92401',
-      name: 'Network Node',
-      iconUrl: 'https://assets.example.com/network-node.png',
+      typeInfo: {
+        id: '92401',
+        name: 'Network Node',
+        iconUrl: 'https://assets.example.com/network-node.png',
+      },
+      isLoading: false,
     });
   });
 

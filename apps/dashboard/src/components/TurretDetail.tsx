@@ -5,6 +5,7 @@ import type { useTurretEvents } from '../hooks/useTurretEvents';
 import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 import { SolarSystemAutocomplete } from './SolarSystemAutocomplete';
+import { useTypeInfo } from '../hooks/useTypeInfo';
 
 type EventHook = ReturnType<typeof useTurretEvents>;
 const ACTION_BUTTON_CLASS =
@@ -35,12 +36,18 @@ export function TurretDetail({
   onClose,
 }: TurretDetailProps) {
   const [editingSolarSystem, setEditingSolarSystem] = useState(false);
+  const { typeInfo, isLoading } = useTypeInfo(turret?.typeId);
 
   if (!turret) {
     return null;
   }
 
   const currentNodeId = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
+  const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
+  const detailTitle =
+    typeof turret.name === 'string' && turret.name.trim()
+      ? turret.name.trim()
+      : (typeName ?? (isLoading ? '<Loading>' : 'Turret'));
 
   return (
     <aside
@@ -53,7 +60,7 @@ export function TurretDetail({
             <p className="text-xs uppercase tracking-[0.3em] text-sentinel-muted">
               Selected turret
             </p>
-            <h2 className="mt-2 text-3xl uppercase">{turret.name ?? turret.id}</h2>
+            <h2 className="mt-2 min-w-0 text-3xl uppercase">{detailTitle}</h2>
             <ResponsiveAddress
               address={turret.id}
               as="div"
