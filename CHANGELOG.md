@@ -13,11 +13,25 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Project Constitution establishing strict guidelines for Type Safety, DDD, and Brutalist UI.
 - Initial monorepo specifications for `001-bootstrap-sentinel` and `002-local-demo-mode`.
 - Design constraints ensuring deterministic code generation and strict code formatting.
+- Root [AGENTS.md] guidance for future agent sessions.
+- `003-responsive-sui-addresses`, including the shared `ResponsiveAddress` component and themed copy/tick feedback.
+- Podman-friendly local development stack via `docker-compose.dev.yml`.
+- EVE Wallet-first dashboard connection flow and ADR coverage for wallet-selection behavior.
 
 ### Changed
 
 - Refined project layout to support Bun monorepo and Docker-first infrastructure.
+- Updated the dashboard to use the EVE Frontier copy/tick assets, responsive address rendering, and richer interactive polish across cards, buttons, and wallet controls.
+- Updated turret rendering to follow the real EVE ownership chain and world type-info APIs for names and icons.
+- Updated network-node presentation to use explicit `Network Node` terminology and mapped solar-system state instead of leaking `locationHash`.
+- Updated the indexer to poll real Sui turret events for Utopia with durable cursor/checkpoint handling.
+- Updated docs and ADR conventions to use numbered `ADR-XXX-...` filenames.
 
 ### Fixed
 
 - Base task implementation formatting for automated spec-runners.
+- Fixed dashboard white-screen crashes caused by over-broad wallet/provider usage.
+- Fixed dashboard GraphQL and API proxying so the UI no longer depends on browser-side CORS workarounds.
+- Fixed `ef-map` embedding to use the supported iframe contract.
+- Fixed responsive Sui address behavior across resize, card, and detail surfaces.
+- Fixed Podman container/build issues across the dashboard, API, and indexer stack.
