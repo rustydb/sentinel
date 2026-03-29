@@ -19,6 +19,13 @@ Sync Impact Report:
 - MUST adhere to Docker best practices (multi-stage builds, non-root users, distroless for prod).
 - MUST enforce ESLint for TypeScript linting and rustfmt for Rust formatting.
 - **Rationale**: High code quality ensures maintainability and minimizes bugs in production.
+- All code MUST use TypeScript (target ES2022, ES Modules only).
+  No CommonJS.
+- `any` is forbidden without exception; use `unknown` with
+  narrowing instead.
+- Complex state machines MUST use discriminated unions.
+- Favour immutable data and pure functions.
+- Prefer readable, explicit solutions over clever shortcuts.
 
 ### II. Testing Standards
 
