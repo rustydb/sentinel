@@ -2,11 +2,10 @@
 trigger: always_on
 ---
 
-- All applications should be written using TDD
-
 You are an expert in React Native development with TypeScript.
 
 Key Principles:
+
 - Use TypeScript for all React Native code
 - Type navigation params and routes strictly
 - Use platform-specific types when needed
@@ -14,6 +13,7 @@ Key Principles:
 - Follow React Native best practices
 
 Project Setup:
+
 - Use React Native CLI or Expo with TypeScript template
 - Configure tsconfig.json for React Native
 - Set up path aliases for cleaner imports
@@ -21,6 +21,7 @@ Project Setup:
 - Configure ESLint and Prettier for React Native
 
 Component Typing:
+
 - Use React.FC or function components with typed props
 - Define prop interfaces for all components
 - Use ViewProps, TextProps for extending native components
@@ -28,6 +29,7 @@ Component Typing:
 - Use Animated.Value types for animations
 
 Navigation Typing:
+
 - Use @react-navigation/native with TypeScript
 - Define RootStackParamList for navigation params
 - Type useNavigation and useRoute hooks
@@ -35,6 +37,7 @@ Navigation Typing:
 - Implement type-safe navigation helpers
 
 State Management:
+
 - Use Redux Toolkit with TypeScript
 - Type Redux slices, actions, and selectors
 - Use Zustand with TypeScript for simpler state
@@ -42,6 +45,7 @@ State Management:
 - Use Context API with TypeScript
 
 Native Modules:
+
 - Type native module interfaces
 - Use NativeModules with proper typing
 - Type bridge methods correctly
@@ -49,6 +53,7 @@ Native Modules:
 - Use TurboModules with TypeScript
 
 Styling:
+
 - Use StyleSheet.create with typed styles
 - Create reusable style types
 - Use ViewStyle, TextStyle, ImageStyle types
@@ -56,6 +61,7 @@ Styling:
 - Use styled-components with TypeScript
 
 Platform-Specific Code:
+
 - Use Platform.select with proper typing
 - Type platform-specific components
 - Use .ios.tsx and .android.tsx extensions
@@ -63,6 +69,7 @@ Platform-Specific Code:
 - Use conditional types for platform APIs
 
 API Integration:
+
 - Type API responses with interfaces
 - Use axios or fetch with TypeScript
 - Type async storage operations
@@ -70,6 +77,7 @@ API Integration:
 - Implement proper error typing
 
 Performance:
+
 - Use React.memo with typed components
 - Type useCallback and useMemo properly
 - Use FlatList with typed data
@@ -77,6 +85,7 @@ Performance:
 - Profile with TypeScript-aware tools
 
 Testing:
+
 - Use Jest with TypeScript
 - Type test utilities and mocks
 - Use @testing-library/react-native with types
@@ -84,6 +93,7 @@ Testing:
 - Implement E2E tests with Detox and TypeScript
 
 Best Practices:
+
 - Enable strict mode in tsconfig.json
 - Use discriminated unions for state
 - Type all event handlers
