@@ -1,0 +1,38 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/apps/api"
+      - "/apps/dashboard"
+      - "/packages/shared-types"
+      - "/tools/scripts"
+    schedule:
+      interval: "daily"
+    groups:
+      monorepo-dependencies:
+        group-by: dependency-name
+
+  - package-ecosystem: "docker"
+    directories:
+      - "/apps/api"
+      - "/apps/dashboard"
+      - "/apps/indexer"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "cargo"
+    directory: "/apps/indexer"
+    schedule:
+      interval: "daily"
