@@ -27,8 +27,6 @@ Sentinel is an EVE Frontier dashboard for live monitoring of a user's turret ass
 
 The project combines a React dashboard, a Bun/Express support API, and a Rust indexer that follows turret activity on Sui blockchain.
 
-The product direction is intentional:
-
 ## What It Covers
 
 - Displaying Turret Smart Assembly objects owned by the logged in wallet
