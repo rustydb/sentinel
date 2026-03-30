@@ -439,7 +439,7 @@ export function DashboardScreen({
         loading={drawerLoading}
         selectedNodeId={filterState.selectedNetworkNodeId}
         onClose={() => setDrawerOpen(false)}
-        onSelectNode={(nodeId) => onSelectedNetworkNodeChange(nodeId)}
+        onSelectNode={onSelectedNetworkNodeChange}
         onAssign={onAssignSolarSystem}
         onUnassign={onUnassignSolarSystem}
       />

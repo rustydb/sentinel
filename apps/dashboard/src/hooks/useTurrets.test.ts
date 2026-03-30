@@ -5,6 +5,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useTurrets } from './useTurrets';
 
+function getRequestBody(init: RequestInit | undefined): string | null {
+  return typeof init?.body === 'string' ? init.body : null;
+}
+
 describe('useTurrets', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -86,9 +90,9 @@ describe('useTurrets', () => {
       },
     };
 
-    const fetchMock = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(new Response(JSON.stringify(ownerCapsPayload), { status: 200 }));
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(JSON.stringify(ownerCapsPayload), { status: 200 }),
+    );
 
     const { result } = renderHook(() =>
       useTurrets({ owner: '0xfrontier', world: 'utopia', endpoint: '/graphql' }),
@@ -98,17 +102,15 @@ describe('useTurrets', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      '/graphql',
-      expect.objectContaining({
-        method: 'POST',
-        cache: 'no-store',
-        body: expect.stringContaining(
-          '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::character::PlayerProfile',
-        ),
-      }),
+    const firstFetchCall = vi.mocked(globalThis.fetch).mock.calls[0];
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(firstFetchCall).toBeDefined();
+    expect(firstFetchCall?.[0]).toBe('/graphql');
+    expect(firstFetchCall?.[1]?.method).toBe('POST');
+    expect(firstFetchCall?.[1]?.cache).toBe('no-store');
+    expect(getRequestBody(firstFetchCall?.[1])).toContain(
+      '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::character::PlayerProfile',
     );
     expect(result.current.characterName).toBe('Commander Nova');
     expect(result.current.turrets[0]?.name).toBe('Alpha Bastion');
@@ -299,7 +301,7 @@ describe('useTurrets', () => {
       '0xstillnesspackage0000000000000000000000000000000000000000000000000001',
     );
 
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           data: {
@@ -322,13 +324,12 @@ describe('useTurrets', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/graphql',
-      expect.objectContaining({
-        body: expect.stringContaining(
-          '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
-        ),
-      }),
+    const stillnessFetchCall = vi.mocked(globalThis.fetch).mock.calls[0];
+
+    expect(stillnessFetchCall).toBeDefined();
+    expect(stillnessFetchCall?.[0]).toBe('/graphql');
+    expect(getRequestBody(stillnessFetchCall?.[1])).toContain(
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
     );
   });
 });

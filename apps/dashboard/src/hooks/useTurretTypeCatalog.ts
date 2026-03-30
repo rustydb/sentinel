@@ -91,6 +91,7 @@ export function useTurretTypeCatalog({
             typeInfo: entry.typeInfo,
             isLoading: entry.isLoading,
             error: entry.error,
+            typeId: entry.typeId,
           },
         ]),
       ),

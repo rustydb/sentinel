@@ -1,3 +1,5 @@
+import type { IncomingMessage } from 'node:http';
+
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -36,7 +38,7 @@ export default defineConfig({
         target: defaultWorldApiProxyTargets.utopia,
         changeOrigin: true,
         secure: true,
-        router: (request) => {
+        router: (request: IncomingMessage) => {
           const match = request.url?.match(/^\/world-api\/(utopia|stillness)(?:\/|$)/i);
           const worldName =
             match?.[1]?.toLowerCase() ?? process.env.VITE_EVE_SERVER_NAME ?? 'utopia';
