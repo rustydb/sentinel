@@ -400,11 +400,7 @@ export function TurretDetail({
                 {currentSolarSystem?.solarSystemName ? (
                   <button
                     type="button"
-                    className={`flex size-7 shrink-0 items-center justify-center border-2 border-sentinel-ink bg-sentinel-panel-inset text-sentinel-ink transition-all duration-200 ease-out ${
-                      copiedSolarSystem
-                        ? 'bg-sentinel-ink text-sentinel-paper shadow-[2px_2px_0_0_#ff5f1f]'
-                        : 'hover:bg-sentinel-accent hover:text-sentinel-paper'
-                    }`}
+                    className="sentinel-action-button border border-sentinel-line px-3 py-2 uppercase shrink-0 leading-none"
                     aria-label="Copy solar system"
                     onClick={() => {
                       void handleCopySolarSystem();
@@ -414,7 +410,7 @@ export function TurretDetail({
                       src={copiedSolarSystem ? tickIconUrl : copyIconUrl}
                       alt=""
                       aria-hidden="true"
-                      className={copiedSolarSystem ? 'h-3.5 w-3.5' : 'size-3'}
+                      className="size-4 brightness-0 invert contrast-200"
                     />
                   </button>
                 ) : null}

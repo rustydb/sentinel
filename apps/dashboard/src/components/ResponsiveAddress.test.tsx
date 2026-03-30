@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ResponsiveAddress } from './ResponsiveAddress';
@@ -97,7 +97,9 @@ describe('ResponsiveAddress', () => {
     render(<ResponsiveAddress address={FULL_ADDRESS} copyLabel="wallet address" />);
 
     emitResize(140);
-    fireEvent.click(screen.getByRole('button', { name: /copy wallet address/i }));
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /copy wallet address/i }));
+    });
 
     await waitFor(() => {
       expect(clipboardWriteText).toHaveBeenCalledWith(FULL_ADDRESS);
@@ -108,12 +110,14 @@ describe('ResponsiveAddress', () => {
     render(<ResponsiveAddress address={FULL_ADDRESS} copyLabel="wallet address" />);
 
     emitResize(140);
-    fireEvent.click(screen.getByRole('button', { name: /copy wallet address/i }));
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /copy wallet address/i }));
+    });
 
     await waitFor(() => {
       expect(screen.getByRole('status').textContent).toBe('Copied to clipboard');
       expect(screen.getByRole('button', { name: /copy wallet address/i }).className).toContain(
-        'bg-sentinel-ink',
+        'border-sentinel-line',
       );
     });
 
@@ -124,7 +128,7 @@ describe('ResponsiveAddress', () => {
     await waitFor(() => {
       expect(screen.getByRole('status').textContent).toBe('');
       expect(screen.getByRole('button', { name: /copy wallet address/i }).className).not.toContain(
-        'bg-sentinel-ink',
+        'border-sentinel-glow',
       );
     });
   });

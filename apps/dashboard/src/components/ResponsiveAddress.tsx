@@ -235,10 +235,8 @@ export function ResponsiveAddress({
             ref={controlRef}
             type="button"
             className={joinClasses(
-              'flex size-7 items-center justify-center border-2 border-sentinel-ink bg-sentinel-panel-inset text-sentinel-ink transition-all duration-200 ease-out',
-              copied
-                ? 'bg-sentinel-ink text-sentinel-paper shadow-[2px_2px_0_0_#ff5f1f]'
-                : 'hover:bg-sentinel-accent hover:text-sentinel-paper',
+              'sentinel-action-button border border-sentinel-line px-3 py-2 uppercase',
+              'shrink-0 leading-none',
             )}
             aria-label={`Copy ${copyLabel}`}
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -250,7 +248,7 @@ export function ResponsiveAddress({
               src={copied ? tickIconUrl : copyIconUrl}
               alt=""
               aria-hidden="true"
-              className={copied ? 'h-3.5 w-3.5' : 'size-3'}
+              className="size-4 brightness-0 invert contrast-200"
             />
           </button>
           <span
