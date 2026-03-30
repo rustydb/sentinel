@@ -3,7 +3,7 @@ import { useCurrentWallet } from '@mysten/dapp-kit-react';
 import type { TurretData } from '@frontier-sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
-import frontierSentinelLogo from '../../../assets/logo.svg';
+import frontierSentinelLogo from '../../../assets/logo.png';
 import { DashboardScreen } from './components/DashboardScreen';
 import { useDashboardRefresh } from './hooks/useDashboardRefresh';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
