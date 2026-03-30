@@ -1,8 +1,11 @@
 # frontier-sentinel Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-29
+Auto-generated from all feature plans. Last updated: 2026-03-30
 
 ## Active Technologies
+
+- TypeScript 5.8.x in the dashboard and shared-types packages, with the existing React 19 / Vite 6 stack + React 19, Vite 6, Bun, `@frontier-sentinel/shared-types`, existing dashboard hooks, Testing Library, Vitest 3, Playwright (007-turret-filters)
+- No new storage; filtering is derived from the already loaded turret data and existing node / solar-system / type resolution surfaces (007-turret-filters)
 
 - TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright (006-hot-load-indexer-updates)
 - Existing PostgreSQL database for indexer-derived turret, event, and network-node state; existing dashboard fixture data for `/demo` (006-hot-load-indexer-updates)
@@ -34,11 +37,11 @@ TypeScript (Bun runtime), Rust (Edition 2021): Follow standard conventions
 
 ## Recent Changes
 
+- 007-turret-filters: Added TypeScript 5.8.x in the dashboard and shared-types packages, with the existing React 19 / Vite 6 stack + React 19, Vite 6, Bun, `@frontier-sentinel/shared-types`, existing dashboard hooks, Testing Library, Vitest 3, Playwright
+
 - 006-hot-load-indexer-updates: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
 
 - 005-eve-frontier-theme: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Tailwind CSS 4, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
-
-- 004-solar-system-assignment: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL schema + React 19, Vite 6, Tailwind CSS 4, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

@@ -13,6 +13,8 @@ const hooks = vi.hoisted(() => ({
   useTurretEvents: vi.fn(),
   useTurretSolarSystems: vi.fn(),
   useTurretIntelligence: vi.fn(),
+  useTurretFilters: vi.fn(),
+  useTurretTypeCatalog: vi.fn(),
   useDashboardRefresh: vi.fn(),
   useTypeInfo: vi.fn(),
 }));
@@ -43,6 +45,25 @@ vi.mock('./hooks/useTurretSolarSystems', () => ({
 
 vi.mock('./hooks/useTurretIntelligence', () => ({
   useTurretIntelligence: hooks.useTurretIntelligence,
+}));
+
+vi.mock('./hooks/useTurretFilters', () => ({
+  useTurretFilters: hooks.useTurretFilters,
+  readTurretStatus: (
+    turret: { status: string },
+    intelligenceByTurretId: Map<string, { statusOverride: 'ENGAGED' | null }>,
+  ) => {
+    const intelligence = intelligenceByTurretId.get((turret as { id?: string }).id ?? '');
+    if (intelligence?.statusOverride === 'ENGAGED') {
+      return 'engaged';
+    }
+
+    return turret.status === 'online' ? 'online' : 'offline';
+  },
+}));
+
+vi.mock('./hooks/useTurretTypeCatalog', () => ({
+  useTurretTypeCatalog: hooks.useTurretTypeCatalog,
 }));
 
 vi.mock('./hooks/useDashboardRefresh', () => ({
@@ -182,6 +203,49 @@ describe('App', () => {
       },
       loading: false,
       error: null,
+    });
+    hooks.useTurretTypeCatalog.mockReturnValue({
+      entries: [],
+      byTypeId: new Map(),
+    });
+    hooks.useTurretFilters.mockReturnValue({
+      state: {
+        searchText: '',
+        solarSystemQuery: '',
+        solarSystems: [],
+        selectedNetworkNodeId: null,
+        statuses: [],
+        classNames: [],
+      },
+      setSearchText: vi.fn(),
+      setSolarSystemQuery: vi.fn(),
+      addSolarSystem: vi.fn(),
+      removeSolarSystem: vi.fn(),
+      setSelectedNetworkNode: vi.fn(),
+      setStatus: vi.fn(),
+      setClassName: vi.fn(),
+      clearAll: vi.fn(),
+      filteredTurrets: [
+        {
+          id: TURRET_ADDRESS,
+          itemId: '1001',
+          name: 'Alpha Bastion',
+          status: 'online',
+          locationHash: 'J101',
+          isOnline: true,
+          typeId: 'turret.mk1',
+          energySourceId: NODE_ADDRESS,
+          aggressor: null,
+        },
+      ],
+      hasActiveFilters: false,
+      statusOptions: [
+        { value: 'online', label: 'ONLINE' },
+        { value: 'offline', label: 'OFFLINE' },
+        { value: 'engaged', label: 'ENGAGED' },
+      ],
+      classOptions: [{ value: 'Heavy Turret', label: 'HEAVY TURRET' }],
+      selectedNetworkNode: null,
     });
     hooks.useDashboardRefresh.mockReturnValue({
       refreshTick: 0,

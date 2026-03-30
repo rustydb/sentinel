@@ -24,6 +24,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 ### Changed
 
 - Refined project layout to support Bun monorepo and Docker-first infrastructure.
+- Reworked the dashboard shell into a single inline command row with branded search, drawer-driven network-node filtering, badge-driven advanced filters, and a separate expandable metrics blind beneath it.
 - Updated the dashboard to use the EVE Frontier copy/tick assets, responsive address rendering, and richer interactive polish across cards, buttons, and wallet controls.
 - Updated turret rendering to follow the real EVE ownership chain and world type-info APIs for names and icons.
 - Updated network-node presentation to use explicit `Network Node` terminology and mapped solar-system state instead of leaking `locationHash`.
@@ -51,3 +52,4 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Fixed turret solar-system display so cards and detail panes show friendly names instead of raw IDs or hashes.
 - Fixed dashboard shell surfaces that were still falling back to bright neutral panels after the theme overhaul.
 - Fixed the landing page logo treatment to use the transparent SVG mark so it blends with the canvas instead of showing a mismatched square background.
+- Fixed turret card status/class metadata rows so their labels and badges stay vertically aligned in narrower card layouts even when a badge wraps.

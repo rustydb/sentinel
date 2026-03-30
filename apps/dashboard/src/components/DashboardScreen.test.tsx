@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -30,7 +32,7 @@ describe('DashboardScreen', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders the authenticated shell with logo, smaller project name, and metrics', () => {
+  it('renders the authenticated shell with logo, search controls, and metrics', () => {
     render(
       <DashboardScreen
         turrets={[
@@ -79,8 +81,8 @@ describe('DashboardScreen', () => {
     );
 
     expect(screen.getByAltText(/frontier sentinel logo/i)).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /frontier sentinel/i })).toBeTruthy();
-    expect(screen.queryByText(/frontier security/i)).toBeNull();
+    expect(screen.getByRole('textbox', { name: /search turrets/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /advanced search options/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();
   });
@@ -451,5 +453,138 @@ describe('DashboardScreen', () => {
 
     expect(screen.getByRole('heading', { level: 2, name: /alpha bastion ii/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /dismiss turret detail/i })).toBeTruthy();
+  });
+
+  it('shows a friendly no-results message when filters remove every turret', () => {
+    render(
+      <DashboardScreen
+        turrets={[]}
+        totalTurrets={1}
+        loading={false}
+        error={null}
+        characterName="Captain Rusty"
+        walletAddress="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        onDisconnect={vi.fn()}
+        selectedTurret={null}
+        onSelectTurret={vi.fn()}
+        onCloseTurret={vi.fn()}
+        nodes={[]}
+        drawerLoading={false}
+        eventsState={{
+          events: [],
+          loading: false,
+          error: null,
+          page: 1,
+          nextPage: null,
+          next: vi.fn(),
+          reset: vi.fn(),
+        }}
+        solarSystemsByTurretId={new Map()}
+        turretIntelligenceByTurretId={new Map()}
+        stats={{
+          totalTurrets: 1,
+          engagedTurrets: 0,
+          onlineTurrets: 1,
+          offlineTurrets: 0,
+          aggressorsPast24Hours: 0,
+        }}
+        onAssignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onUnassignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onResetEvents={vi.fn()}
+        filters={{
+          searchText: 'alpha',
+          solarSystemQuery: '',
+          solarSystems: [],
+          selectedNetworkNodeId: null,
+          statuses: [],
+          classNames: [],
+        }}
+        hasActiveFilters
+        statusOptions={[]}
+        classOptions={[]}
+        onSearchTextChange={vi.fn()}
+        onSolarSystemQueryChange={vi.fn()}
+        onAddSolarSystem={vi.fn()}
+        onRemoveSolarSystem={vi.fn()}
+        onStatusChange={vi.fn()}
+        onClassNameChange={vi.fn()}
+        onSelectedNetworkNodeChange={vi.fn()}
+        onClearAllFilters={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/no turrets match the current criteria/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /clear all filters/i })).toBeTruthy();
+  });
+
+  it('keeps a hidden selected turret explicit when filters exclude it', () => {
+    const turret = {
+      id: '0x1111111111111111111111111111111111111111111111111111111111111111',
+      itemId: '42',
+      name: 'Alpha Bastion',
+      status: 'online' as const,
+      isOnline: true,
+      typeId: '92401',
+      energySourceId: 'orphaned',
+    };
+
+    render(
+      <DashboardScreen
+        turrets={[]}
+        totalTurrets={1}
+        loading={false}
+        error={null}
+        characterName="Captain Rusty"
+        walletAddress="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        onDisconnect={vi.fn()}
+        selectedTurret={turret}
+        onSelectTurret={vi.fn()}
+        onCloseTurret={vi.fn()}
+        nodes={[]}
+        drawerLoading={false}
+        eventsState={{
+          events: [],
+          loading: false,
+          error: null,
+          page: 1,
+          nextPage: null,
+          next: vi.fn(),
+          reset: vi.fn(),
+        }}
+        solarSystemsByTurretId={new Map()}
+        turretIntelligenceByTurretId={new Map()}
+        stats={{
+          totalTurrets: 1,
+          engagedTurrets: 0,
+          onlineTurrets: 1,
+          offlineTurrets: 0,
+          aggressorsPast24Hours: 0,
+        }}
+        onAssignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onUnassignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onResetEvents={vi.fn()}
+        filters={{
+          searchText: 'beta',
+          solarSystemQuery: '',
+          solarSystems: [],
+          selectedNetworkNodeId: null,
+          statuses: [],
+          classNames: [],
+        }}
+        hasActiveFilters
+        statusOptions={[]}
+        classOptions={[]}
+        onSearchTextChange={vi.fn()}
+        onSolarSystemQueryChange={vi.fn()}
+        onAddSolarSystem={vi.fn()}
+        onRemoveSolarSystem={vi.fn()}
+        onStatusChange={vi.fn()}
+        onClassNameChange={vi.fn()}
+        onSelectedNetworkNodeChange={vi.fn()}
+        onClearAllFilters={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/selected turret is hidden by the current filters/i)).toBeTruthy();
   });
 });

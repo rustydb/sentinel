@@ -8,16 +8,23 @@ import { startTransition, useEffect, useRef, useState } from 'react';
 import frontierSentinelLogo from '../../../../assets/logo.svg';
 import type { NetworkNodeView } from '../hooks/useNetworkNodes';
 import type { UseTurretEventsResult } from '../hooks/useTurretEvents';
+import type {
+  DisplayTurretStatus,
+  TurretFilterOption,
+  TurretFilterState,
+} from '../hooks/useTurretFilters';
 import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 import { MapEmbed } from './MapEmbed';
 import { NetworkNodeDrawer } from './NetworkNodeDrawer';
 import { ResponsiveAddress } from './ResponsiveAddress';
 import { StatisticsPanel } from './StatisticsPanel';
+import { TurretFilterBar } from './TurretFilterBar';
 import { TurretDetail } from './TurretDetail';
 import { TurretList } from './TurretCard';
 
 const ACTION_BUTTON_CLASS =
   'sentinel-action-button border border-sentinel-line px-3 py-2 uppercase';
+const HEADER_ACTION_BUTTON_CLASS = `${ACTION_BUTTON_CLASS} text-[10px] tracking-[0.22em]`;
 const DANGER_ACTION_BUTTON_CLASS =
   'sentinel-action-button sentinel-action-button--danger border-2 border-sentinel-danger px-3 py-2 uppercase text-sentinel-danger';
 
@@ -47,6 +54,24 @@ function EmptyState() {
   return (
     <div className="border-2 border-dashed border-sentinel-line bg-sentinel-shell/70 p-8 text-center uppercase">
       No turret assemblies detected in this frontier footprint.
+    </div>
+  );
+}
+
+function FilteredEmptyState({ onClearAll }: { onClearAll: () => void }) {
+  return (
+    <div className="border-2 border-dashed border-sentinel-line bg-sentinel-shell/70 p-8 text-center uppercase">
+      <p>No turrets match the current criteria.</p>
+      <p className="mt-2 text-sm text-sentinel-muted">Remove some filters for better results.</p>
+      <div className="mt-4 flex justify-center">
+        <button
+          type="button"
+          className="sentinel-action-button border border-sentinel-line px-3 py-2 uppercase"
+          onClick={onClearAll}
+        >
+          Clear all filters
+        </button>
+      </div>
     </div>
   );
 }
@@ -85,15 +110,15 @@ function WalletDropdown({
   }, [open]);
 
   return (
-    <div ref={menuRef} className="relative w-full max-w-md">
+    <div ref={menuRef} className="relative min-w-0 shrink-0">
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        className={`${ACTION_BUTTON_CLASS} flex w-full items-center justify-between gap-3`}
+        className={`${HEADER_ACTION_BUTTON_CLASS} flex min-w-[12rem] max-w-[16rem] items-center justify-between gap-3`}
         onClick={() => setOpen((current) => !current)}
       >
-        <span className="truncate normal-case">{characterName}</span>
+        <span className="truncate normal-case tracking-normal">{characterName}</span>
         <span aria-hidden="true" className="text-lg leading-none">
           {open ? '−' : '+'}
         </span>
@@ -127,6 +152,7 @@ function WalletDropdown({
 
 interface DashboardScreenProps {
   turrets: TurretData[];
+  totalTurrets?: number;
   loading: boolean;
   error: Error | null;
   characterName: string;
@@ -147,10 +173,24 @@ interface DashboardScreenProps {
   ) => Promise<void>;
   onUnassignSolarSystem: (nodeId: string) => Promise<void>;
   onResetEvents: () => void;
+  filters?: TurretFilterState;
+  hasActiveFilters?: boolean;
+  statusOptions?: TurretFilterOption[];
+  classOptions?: TurretFilterOption[];
+  selectedNetworkNode?: NetworkNodeView | null;
+  onSearchTextChange?: (value: string) => void;
+  onSolarSystemQueryChange?: (value: string) => void;
+  onAddSolarSystem?: (value: string) => void;
+  onRemoveSolarSystem?: (value: string) => void;
+  onStatusChange?: (value: DisplayTurretStatus | null) => void;
+  onClassNameChange?: (value: string | null) => void;
+  onSelectedNetworkNodeChange?: (nodeId: string | null) => void;
+  onClearAllFilters?: () => void;
 }
 
 export function DashboardScreen({
   turrets,
+  totalTurrets = turrets.length,
   loading,
   error,
   characterName,
@@ -168,7 +208,28 @@ export function DashboardScreen({
   onAssignSolarSystem,
   onUnassignSolarSystem,
   onResetEvents,
+  filters,
+  hasActiveFilters = false,
+  statusOptions = [],
+  classOptions = [],
+  selectedNetworkNode = null,
+  onSearchTextChange = () => undefined,
+  onSolarSystemQueryChange = () => undefined,
+  onAddSolarSystem = () => undefined,
+  onRemoveSolarSystem = () => undefined,
+  onStatusChange = () => undefined,
+  onClassNameChange = () => undefined,
+  onSelectedNetworkNodeChange = () => undefined,
+  onClearAllFilters = () => undefined,
 }: DashboardScreenProps) {
+  const filterState: TurretFilterState = filters ?? {
+    searchText: '',
+    solarSystemQuery: '',
+    solarSystems: [],
+    selectedNetworkNodeId: null,
+    statuses: [],
+    classNames: [],
+  };
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [metricsCollapsed, setMetricsCollapsed] = useState(() => {
     if (typeof window === 'undefined') {
@@ -259,7 +320,7 @@ export function DashboardScreen({
         behavior: 'smooth',
       });
     }
-  }, [detailPanelHeight, selectedTurret]);
+  }, [detailPanelHeight, selectedTurret, turrets]);
 
   return (
     <main
@@ -271,65 +332,74 @@ export function DashboardScreen({
           ref={headerRef}
           className="sticky top-4 z-30 border-2 border-sentinel-line bg-sentinel-shell/95 px-4 py-3 backdrop-blur-sm"
         >
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <img
-                  src={frontierSentinelLogo}
-                  alt="Frontier Sentinel logo"
-                  className="h-10 w-10 border border-sentinel-line bg-sentinel-panel object-cover object-center p-1"
-                />
-                <div className="min-w-0">
-                  <h1 className="text-lg uppercase text-sentinel-glow sm:text-xl">
-                    Frontier Sentinel
-                  </h1>
-                </div>
-              </div>
+          <div className="grid items-center gap-3 xl:grid-cols-[auto_minmax(0,1fr)_auto]">
+            <div className="flex shrink-0 items-center">
+              <img
+                src={frontierSentinelLogo}
+                alt="Frontier Sentinel logo"
+                className="h-10 w-10 border border-sentinel-line bg-sentinel-panel object-cover object-center p-1"
+              />
             </div>
-            <div className="flex w-full max-w-2xl flex-col items-stretch gap-2 text-sm uppercase lg:items-end">
-              <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                <WalletDropdown
-                  characterName={characterName}
-                  walletAddress={walletAddress}
-                  onDisconnect={onDisconnect}
-                />
-                <button
-                  type="button"
-                  className={`${ACTION_BUTTON_CLASS} w-full sm:w-auto`}
-                  onClick={() => setDrawerOpen(true)}
-                >
-                  Network Nodes
-                </button>
-                <button
-                  type="button"
-                  className={`${ACTION_BUTTON_CLASS} flex w-full items-center justify-between gap-2 sm:w-auto`}
-                  aria-expanded={!metricsCollapsed}
-                  aria-controls="dashboard-metrics-panel"
-                  aria-label={metricsCollapsed ? 'Expand metrics' : 'Collapse metrics'}
-                  onClick={() => setMetricsCollapsed((current) => !current)}
-                >
-                  <span className="tracking-[0.25em]">Metrics</span>
-                  <span aria-hidden="true" className="text-base leading-none">
-                    {metricsCollapsed ? '▾' : '▴'}
-                  </span>
-                </button>
-              </div>
+            <div className="min-w-0 xl:justify-self-stretch">
+              <TurretFilterBar
+                filters={filterState}
+                statusOptions={statusOptions}
+                classOptions={classOptions}
+                selectedNetworkNode={selectedNetworkNode}
+                hasActiveFilters={hasActiveFilters}
+                onSearchTextChange={onSearchTextChange}
+                onSolarSystemQueryChange={onSolarSystemQueryChange}
+                onAddSolarSystem={onAddSolarSystem}
+                onRemoveSolarSystem={onRemoveSolarSystem}
+                onStatusChange={onStatusChange}
+                onClassNameChange={onClassNameChange}
+                onClearSelectedNetworkNode={() => onSelectedNetworkNodeChange(null)}
+                onClearAll={onClearAllFilters}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-3 xl:flex-nowrap">
+              <button
+                type="button"
+                className={`${HEADER_ACTION_BUTTON_CLASS} shrink-0`}
+                onClick={() => setDrawerOpen(true)}
+              >
+                Network Nodes
+              </button>
+              <WalletDropdown
+                characterName={characterName}
+                walletAddress={walletAddress}
+                onDisconnect={onDisconnect}
+              />
+              <button
+                type="button"
+                className={`${HEADER_ACTION_BUTTON_CLASS} flex shrink-0 items-center justify-between gap-2`}
+                aria-expanded={!metricsCollapsed}
+                aria-controls="dashboard-metrics-panel"
+                aria-label={metricsCollapsed ? 'Expand metrics' : 'Collapse metrics'}
+                onClick={() => setMetricsCollapsed((current) => !current)}
+              >
+                <span>Metrics</span>
+                <span aria-hidden="true" className="text-base leading-none">
+                  {metricsCollapsed ? '▾' : '▴'}
+                </span>
+              </button>
             </div>
           </div>
-          <div className="mt-4">
-            {!metricsCollapsed ? (
-              <div className="mt-3" id="dashboard-metrics-panel">
-                <StatisticsPanel stats={stats} />
-              </div>
-            ) : null}
-          </div>
+          {!metricsCollapsed ? (
+            <div className="mt-4 border-t border-sentinel-line pt-4" id="dashboard-metrics-panel">
+              <StatisticsPanel stats={stats} />
+            </div>
+          ) : null}
         </header>
 
         <div className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
           <section className="space-y-6">
             {loading ? <LoadingSkeleton /> : null}
             {error ? <DashboardError error={error} /> : null}
-            {!loading && !error && turrets.length === 0 ? <EmptyState /> : null}
+            {!loading && !error && totalTurrets === 0 ? <EmptyState /> : null}
+            {!loading && !error && totalTurrets > 0 && turrets.length === 0 ? (
+              <FilteredEmptyState onClearAll={onClearAllFilters} />
+            ) : null}
             {!loading && !error && turrets.length > 0 ? (
               <TurretList
                 turrets={turrets}
@@ -343,6 +413,14 @@ export function DashboardScreen({
                   });
                 }}
               />
+            ) : null}
+            {!loading &&
+            !error &&
+            selectedTurret &&
+            !turrets.some((turret) => turret.id === selectedTurret.id) ? (
+              <div className="border border-sentinel-line bg-sentinel-panel-inset p-4 text-sm uppercase">
+                Selected turret is hidden by the current filters.
+              </div>
             ) : null}
           </section>
 
@@ -359,7 +437,9 @@ export function DashboardScreen({
         open={drawerOpen}
         nodes={nodes}
         loading={drawerLoading}
+        selectedNodeId={filterState.selectedNetworkNodeId}
         onClose={() => setDrawerOpen(false)}
+        onSelectNode={(nodeId) => onSelectedNetworkNodeChange(nodeId)}
         onAssign={onAssignSolarSystem}
         onUnassign={onUnassignSolarSystem}
       />

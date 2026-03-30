@@ -1,5 +1,7 @@
+// @vitest-environment jsdom
+
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NetworkNodeDrawer } from './NetworkNodeDrawer';
 
@@ -12,12 +14,18 @@ vi.mock('../hooks/useTypeInfo', () => ({
 }));
 
 describe('NetworkNodeDrawer', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
   it('renders an empty state when no nodes are available', () => {
     render(
       <NetworkNodeDrawer
         open
         nodes={[]}
+        selectedNodeId={null}
         onClose={vi.fn()}
+        onSelectNode={vi.fn()}
         onAssign={vi.fn().mockResolvedValue(undefined)}
         onUnassign={vi.fn().mockResolvedValue(undefined)}
       />,
@@ -27,9 +35,10 @@ describe('NetworkNodeDrawer', () => {
     expect(screen.getByText(/no current network nodes detected/i)).toBeTruthy();
   });
 
-  it('renders node cards and supports assignment flow', async () => {
+  it('renders node cards, toggles node filtering, and supports assignment flow', async () => {
     const onAssign = vi.fn().mockResolvedValue(undefined);
-    render(
+    const onSelectNode = vi.fn();
+    const { rerender } = render(
       <NetworkNodeDrawer
         open
         nodes={[
@@ -41,11 +50,49 @@ describe('NetworkNodeDrawer', () => {
             displayName: 'Node Prime',
           },
         ]}
+        selectedNodeId={null}
         onClose={vi.fn()}
+        onSelectNode={onSelectNode}
         onAssign={onAssign}
         onUnassign={vi.fn().mockResolvedValue(undefined)}
       />,
     );
+
+    const filterButton = screen.getAllByRole('button', { name: /filter by node/i })[0];
+
+    fireEvent.click(filterButton);
+    expect(onSelectNode).toHaveBeenCalledWith(
+      '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    );
+    expect(filterButton.getAttribute('aria-pressed')).toBe('false');
+
+    onSelectNode.mockClear();
+
+    rerender(
+      <NetworkNodeDrawer
+        open
+        nodes={[
+          {
+            nodeId: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+            solarSystemId: 0,
+            solarSystemName: null,
+            typeId: '92401',
+            displayName: 'Node Prime',
+          },
+        ]}
+        selectedNodeId="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        onClose={vi.fn()}
+        onSelectNode={onSelectNode}
+        onAssign={onAssign}
+        onUnassign={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    const activeFilterButton = screen.getAllByRole('button', { name: /filter by node/i })[0];
+    expect(activeFilterButton.getAttribute('aria-pressed')).toBe('true');
+
+    fireEvent.click(activeFilterButton);
+    expect(onSelectNode).toHaveBeenCalledWith(null);
 
     fireEvent.click(screen.getByRole('button', { name: /^assign$/i }));
     fireEvent.change(screen.getByPlaceholderText(/search by system name/i), {

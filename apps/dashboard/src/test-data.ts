@@ -355,3 +355,31 @@ export const sampleTurretStats: ShellStatisticsSnapshot = {
   offlineTurrets: 2,
   aggressorsPast24Hours: 7,
 };
+
+export const sampleTurretFilterFixtures = [
+  {
+    label: 'identity',
+    query: 'Alpha Bastion',
+    expectedTurretIds: [ALPHA_TURRET_ID],
+  },
+  {
+    label: 'solar-system',
+    query: 'O60-F49',
+    expectedTurretIds: [ALPHA_TURRET_ID],
+  },
+  {
+    label: 'known-network-node',
+    query: 'orphaned',
+    expectedTurretIds: [ORPHAN_TURRET_ID],
+  },
+  {
+    label: 'status',
+    query: 'engaged',
+    expectedTurretIds: [ALPHA_TURRET_ID, BETA_TURRET_ID],
+  },
+  {
+    label: 'class',
+    query: '92404',
+    expectedTurretIds: [ORPHAN_TURRET_ID, BETA_TURRET_ID, GAMMA_TURRET_ID],
+  },
+] as const;

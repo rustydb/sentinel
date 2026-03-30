@@ -3,16 +3,14 @@ import type { TurretData, TurretIntelligenceSummary } from '@frontier-sentinel/s
 import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 
 import { useTypeInfo } from '../hooks/useTypeInfo';
+import { readTurretStatus } from '../hooks/useTurretFilters';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 
-const statusTone: Record<TurretData['status'], string> = {
+const statusTone: Record<'online' | 'offline', string> = {
   online: 'bg-sentinel-positive/15 text-sentinel-positive',
-  anchored: 'bg-sentinel-paper text-sentinel-ink',
-  unanchored: 'bg-sentinel-shell text-sentinel-ink',
-  destroyed: 'bg-sentinel-ink text-sentinel-paper',
   offline: 'bg-sentinel-panel-inset text-sentinel-muted',
 };
-const THEMED_LOADING_LABEL = '<SYNCING>';
+const THEMED_LOADING_LABEL = 'LOADING ...';
 
 interface TurretCardProps {
   turret: TurretData;
@@ -35,11 +33,16 @@ export function TurretCard({
 }: TurretCardProps) {
   const orphaned = turret.energySourceId === 'orphaned';
   const addressValuedNode = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
-  const { typeInfo, isLoading } = useTypeInfo(turret.typeId);
+  const { typeInfo, isLoading, error } = useTypeInfo(turret.typeId);
   const customName = turret.name?.trim() ? turret.name.trim() : null;
   const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
-  const displayClass = typeName ?? (isLoading ? THEMED_LOADING_LABEL : 'Turret');
-  const displayStatus = intelligence?.statusOverride === 'ENGAGED' ? 'engaged' : turret.status;
+  const displayClass = error
+    ? 'ERROR!'
+    : (typeName ?? (isLoading ? THEMED_LOADING_LABEL : 'Turret'));
+  const displayStatus = readTurretStatus(
+    turret,
+    new Map(intelligence ? [[turret.id, intelligence]] : []),
+  );
   const hasTarget =
     typeof intelligence?.targetDisplayName === 'string' &&
     intelligence.targetDisplayName.trim() !== '' &&
@@ -105,31 +108,23 @@ export function TurretCard({
             )}
           </h3>
         </div>
-        <div className="col-start-1 col-span-2 row-start-2 mt-1 grid w-full grid-cols-2 gap-x-4 gap-y-2 self-start text-[10px] uppercase tracking-[0.2em]">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="pt-[1px] text-sentinel-muted leading-none">Status:</span>
-              <span
-                className={`border px-3 py-1 text-xs uppercase leading-none ${
-                  displayStatus === 'engaged'
-                    ? 'border-sentinel-engaged bg-sentinel-engaged/15 text-sentinel-engaged'
-                    : statusTone[turret.status]
-                }`}
-              >
-                {displayStatus}
-              </span>
-            </div>
-          </div>
-          <div className="min-w-0 justify-self-start">
-            <div className="flex items-center justify-start gap-2">
-              <span className="pt-[1px] text-sentinel-muted leading-none">Class:</span>
-              <span
-                className={`border px-3 py-1 text-xs uppercase leading-none ${'border-sentinel-line bg-sentinel-panel-inset text-sentinel-ink'}`}
-              >
-                {displayClass}
-              </span>
-            </div>
-          </div>
+        <div className="col-start-1 col-span-2 row-start-2 mt-1 grid w-full grid-cols-[max-content_minmax(0,1fr)_max-content_minmax(0,1fr)] items-center gap-x-2 gap-y-1 self-start text-[10px] uppercase tracking-[0.2em]">
+          <span className="self-center pt-[1px] text-sentinel-muted leading-none">Status:</span>
+          <span
+            className={`min-w-0 self-center border px-2.5 py-[0.3rem] text-xs uppercase leading-[1.05] ${
+              displayStatus === 'engaged'
+                ? 'border-sentinel-engaged bg-sentinel-engaged/15 text-sentinel-engaged'
+                : statusTone[displayStatus]
+            }`}
+          >
+            {displayStatus}
+          </span>
+          <span className="self-center pt-[1px] text-sentinel-muted leading-none">Class:</span>
+          <span
+            className={`min-w-0 self-center border px-2.5 py-[0.3rem] text-xs uppercase leading-[1.05] ${'border-sentinel-line bg-sentinel-panel-inset text-sentinel-ink'}`}
+          >
+            {displayClass}
+          </span>
         </div>
       </div>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-sentinel-line pt-4 text-sm uppercase">

@@ -318,6 +318,54 @@ describe('TurretCard', () => {
     );
   });
 
+  it('keeps the status and class row in stable columns when badges need multiple lines', () => {
+    hooks.useTypeInfo.mockReturnValue({
+      typeInfo: {
+        id: '92404',
+        name: 'Extremely Heavy Long-Range Turret',
+        iconUrl: 'https://assets.example.com/heavy-turret.png',
+      },
+      isLoading: false,
+    });
+
+    render(
+      <TurretCard
+        turret={{
+          id: TURRET_ADDRESS,
+          itemId: '43',
+          name: 'Nova Wall',
+          status: 'online',
+          locationHash: 'J102',
+          isOnline: true,
+          typeId: 'turret.mk2',
+          energySourceId: NODE_ADDRESS,
+          aggressor: 'Sleepers',
+        }}
+      />,
+    );
+
+    const statusBadge = screen.getByText('online');
+    const classBadge = screen.getByText('Extremely Heavy Long-Range Turret');
+    const badgeRow = statusBadge.parentElement;
+
+    expect(badgeRow?.className).toContain(
+      'grid-cols-[max-content_minmax(0,1fr)_max-content_minmax(0,1fr)]',
+    );
+    expect(badgeRow?.className).toContain('items-center');
+    expect(badgeRow?.className).toContain('gap-x-2');
+    expect(badgeRow?.className).toContain('gap-y-1');
+    expect(statusBadge.className).toContain('min-w-0');
+    expect(statusBadge.className).toContain('self-center');
+    expect(statusBadge.className).toContain('px-2.5');
+    expect(statusBadge.className).toContain('py-[0.3rem]');
+    expect(statusBadge.className).toContain('leading-[1.05]');
+    expect(classBadge.className).toContain('min-w-0');
+    expect(classBadge.className).toContain('self-center');
+    expect(classBadge.className).toContain('px-2.5');
+    expect(classBadge.className).toContain('py-[0.3rem]');
+    expect(classBadge.className).toContain('leading-[1.05]');
+  });
+
   it('lets the turret id address row grow to fill the card header width', () => {
     render(
       <TurretCard

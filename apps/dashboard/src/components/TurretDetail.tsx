@@ -6,6 +6,7 @@ import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
 import { ResponsiveAddress, isSuiAddress } from './ResponsiveAddress';
 import { SolarSystemAutocomplete } from './SolarSystemAutocomplete';
 import { useTypeInfo } from '../hooks/useTypeInfo';
+import { readTurretStatus } from '../hooks/useTurretFilters';
 
 type EventHook = ReturnType<typeof useTurretEvents>;
 const ACTION_BUTTON_CLASS =
@@ -14,7 +15,7 @@ const INLINE_ACTION_BUTTON_CLASS =
   'sentinel-action-button border border-sentinel-line px-2 py-1 text-xs uppercase';
 const INLINE_DANGER_ACTION_BUTTON_CLASS =
   'sentinel-action-button sentinel-action-button--danger border border-sentinel-danger px-2 py-1 text-xs uppercase text-sentinel-danger';
-const THEMED_LOADING_LABEL = '<SYNCING>';
+const THEMED_LOADING_LABEL = 'LOADING ...';
 const closeIconUrl =
   'https://raw.githubusercontent.com/evefrontier/dapps/refs/heads/main/packages/libs/ui-components/assets/close.svg';
 const copyIconUrl = new URL('../assets/copy.svg', import.meta.url).href;
@@ -217,7 +218,7 @@ export function TurretDetail({
   const [eventSortDirection, setEventSortDirection] = useState<SortDirection>('desc');
   const [eventTimeZone, setEventTimeZone] = useState<EventTimeZone>('local');
   const [copiedSolarSystem, setCopiedSolarSystem] = useState(false);
-  const { typeInfo, isLoading } = useTypeInfo(turret?.typeId);
+  const { typeInfo, isLoading, error } = useTypeInfo(turret?.typeId);
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null);
   const copyFeedbackTimerRef = useRef<number | null>(null);
 
@@ -242,8 +243,13 @@ export function TurretDetail({
   const detailTitle =
     typeof turret.name === 'string' && turret.name.trim()
       ? turret.name.trim()
-      : (typeName ?? (isLoading ? THEMED_LOADING_LABEL : 'Turret'));
-  const displayStatus = intelligence?.statusOverride === 'ENGAGED' ? 'ENGAGED' : turret.status;
+      : error
+        ? 'ERROR!'
+        : (typeName ?? (isLoading ? THEMED_LOADING_LABEL : 'Turret'));
+  const displayStatus = readTurretStatus(
+    turret,
+    new Map(intelligence ? [[turret.id, intelligence]] : []),
+  ).toUpperCase();
   const sortedEvents = [...eventsState.events].sort((left, right) =>
     compareEventRows(left, right, eventSortKey, eventSortDirection, eventTimeZone),
   );

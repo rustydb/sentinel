@@ -12,7 +12,9 @@ import {
   useTurretIntelligence,
 } from './hooks/useTurretIntelligence';
 import { type UseTurretEventsResult, useTurretEvents } from './hooks/useTurretEvents';
+import { useTurretFilters } from './hooks/useTurretFilters';
 import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
+import { useTurretTypeCatalog } from './hooks/useTurretTypeCatalog';
 import { useTurrets } from './hooks/useTurrets';
 
 const EVE_WALLET_DOWNLOAD_URL =
@@ -147,6 +149,18 @@ export default function App() {
     enabled: connected,
     refreshTick,
   });
+  const turretTypeCatalog = useTurretTypeCatalog({
+    typeIds: deferredTurrets.map((turret) => turret.typeId),
+    world: currentWorld,
+    enabled: connected,
+  });
+  const turretFilters = useTurretFilters({
+    turrets: deferredTurrets,
+    solarSystemsByTurretId: turretSolarSystems.byTurretId,
+    nodes: networkNodes.nodes,
+    turretIntelligenceByTurretId: turretIntelligence.byTurretId,
+    turretTypeCatalogByTypeId: turretTypeCatalog.byTypeId,
+  });
 
   const selectedTurret =
     selectedTurretId != null
@@ -203,7 +217,8 @@ export default function App() {
 
   return (
     <DashboardScreen
-      turrets={deferredTurrets}
+      turrets={turretFilters.filteredTurrets}
+      totalTurrets={deferredTurrets.length}
       loading={loading}
       error={error}
       characterName={characterName ?? 'Syncing character'}
@@ -223,6 +238,19 @@ export default function App() {
       onAssignSolarSystem={networkNodes.assignNode}
       onUnassignSolarSystem={networkNodes.unassignNode}
       onResetEvents={eventsState.reset}
+      filters={turretFilters.state}
+      hasActiveFilters={turretFilters.hasActiveFilters}
+      statusOptions={turretFilters.statusOptions}
+      classOptions={turretFilters.classOptions}
+      selectedNetworkNode={turretFilters.selectedNetworkNode}
+      onSearchTextChange={turretFilters.setSearchText}
+      onSolarSystemQueryChange={turretFilters.setSolarSystemQuery}
+      onAddSolarSystem={turretFilters.addSolarSystem}
+      onRemoveSolarSystem={turretFilters.removeSolarSystem}
+      onStatusChange={turretFilters.setStatus}
+      onClassNameChange={turretFilters.setClassName}
+      onSelectedNetworkNodeChange={turretFilters.setSelectedNetworkNode}
+      onClearAllFilters={turretFilters.clearAll}
     />
   );
 }

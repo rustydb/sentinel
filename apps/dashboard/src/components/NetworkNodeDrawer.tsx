@@ -9,7 +9,9 @@ interface NetworkNodeDrawerProps {
   open: boolean;
   nodes: NetworkNodeView[];
   loading?: boolean;
+  selectedNodeId?: string | null;
   onClose: () => void;
+  onSelectNode: (nodeId: string | null) => void;
   onAssign: (
     nodeId: string,
     assignment: { solarSystemId: number; solarSystemName: string | null },
@@ -21,7 +23,9 @@ export function NetworkNodeDrawer({
   open,
   nodes,
   loading = false,
+  selectedNodeId = null,
   onClose,
+  onSelectNode,
   onAssign,
   onUnassign,
 }: NetworkNodeDrawerProps) {
@@ -75,6 +79,8 @@ export function NetworkNodeDrawer({
                 <NetworkNodeCard
                   key={node.nodeId}
                   node={node}
+                  selected={selectedNodeId === node.nodeId}
+                  onSelect={() => onSelectNode(selectedNodeId === node.nodeId ? null : node.nodeId)}
                   onAssign={onAssign}
                   onUnassign={onUnassign}
                 />
