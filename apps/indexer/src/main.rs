@@ -2,15 +2,15 @@ use std::{collections::HashMap, env, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
+use reqwest::Client as HttpClient;
 use sentinel_indexer::handlers::retry_rpc;
 use sentinel_indexer::models::IncomingTurretEvent;
-use reqwest::Client as HttpClient;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde_json::{json, Value};
-use tokio::time::{interval, Duration};
-use tokio::net::TcpListener;
 use tokio::io::AsyncWriteExt;
+use tokio::net::TcpListener;
+use tokio::time::{interval, Duration};
 use tokio_postgres::{Client as PgClient, NoTls};
 
 const DEFAULT_POLL_INTERVAL_MS: u64 = 5_000;
@@ -596,7 +596,7 @@ async fn poll_until_caught_up(
 async fn start_health_check_server() {
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
-    
+
     let listener = match TcpListener::bind(&addr).await {
         Ok(l) => l,
         Err(e) => {
@@ -627,12 +627,17 @@ async fn main() -> Result<()> {
 
     println!(
         "indexer starting with poll interval {:?}, event page size {}, module {}, packages {}",
-        config.poll_interval, config.page_size, config.turret_event_module, config.turret_package_ids.len()
+        config.poll_interval,
+        config.page_size,
+        config.turret_event_module,
+        config.turret_package_ids.len()
     );
 
     if config.turret_package_ids.is_empty() {
         println!("EVE_PACKAGE_ID is not configured; indexer will stay idle until it is set");
-        loop { tokio::time::sleep(Duration::from_secs(3600)).await; }
+        loop {
+            tokio::time::sleep(Duration::from_secs(3600)).await;
+        }
     }
 
     let mut tasks = Vec::new();
@@ -645,13 +650,25 @@ async fn main() -> Result<()> {
         let config = config.clone();
 
         let task = tokio::spawn(async move {
-            let mut state = database.load_state(&pipeline_name).await.unwrap_or_default();
+            let mut state = database
+                .load_state(&pipeline_name)
+                .await
+                .unwrap_or_default();
             let mut ticker = interval(config.poll_interval);
 
             loop {
                 ticker.tick().await;
 
-                match poll_until_caught_up(&rpc, &database, &config, &mut state, &package_id, &pipeline_name).await {
+                match poll_until_caught_up(
+                    &rpc,
+                    &database,
+                    &config,
+                    &mut state,
+                    &package_id,
+                    &pipeline_name,
+                )
+                .await
+                {
                     Ok(summary) => {
                         if summary.indexed > 0 {
                             println!(
