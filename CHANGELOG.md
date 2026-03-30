@@ -43,6 +43,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 ### Fixed
 
 - Restored the Sentinel dashboard shell to the canonical SVG logo, loaded the intended Outfit and JetBrains Mono fonts, and replaced the remaining white copy controls with themed surfaces.
+- Removed stale `?demo=true` references in the dashboard workflow and wired `/demo` advanced filtering to the mocked status and class options.
 - Base task implementation formatting for automated spec-runners.
 - Fixed fatal dashboard render failures to fall back to a recoverable error screen instead of a white page.
 - Fixed dashboard white-screen crashes caused by over-broad wallet/provider usage.

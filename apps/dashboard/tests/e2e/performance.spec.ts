@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('wallet connect renders dashboard under three seconds', async ({ page }) => {
-  await page.goto('/?demo=true');
+  await page.goto('/demo');
 
   const startedAt = Date.now();
   await page.getByRole('button', { name: 'Connect EVE Vault' }).click();

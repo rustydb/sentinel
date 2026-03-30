@@ -43,7 +43,7 @@
 
 3. **Verify Health**
    Check that the API is running at `http://localhost:3001/api/health`.
-   Open `http://localhost:5173?demo=true` for a dependency-free UI smoke test, or `http://localhost:5173` for live wallet mode.
+   Open `http://localhost:5173/demo` for a dependency-free UI smoke test, or `http://localhost:5173` for live wallet mode.
 
 4. **Testing**
    Run the test suite across all workspaces:

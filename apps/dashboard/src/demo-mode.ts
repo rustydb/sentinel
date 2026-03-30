@@ -4,6 +4,7 @@ import type {
   TurretIntelligenceSummary,
 } from '@sentinel/shared-types';
 
+import type { TurretTypeCatalogEntry } from './hooks/useTurretTypeCatalog';
 import {
   sampleEvents,
   sampleNetworkNodes,
@@ -15,9 +16,7 @@ import {
 } from './test-data';
 import type { ResolvedTurretSolarSystem } from './hooks/useTurretSolarSystems';
 
-const search = new URLSearchParams(window.location.search);
-
-export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || search.get('demo') === 'true';
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 export const DEMO_WALLET_ADDRESS =
   '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd';
 export const DEMO_CHARACTER_NAME = 'The Slayer';
@@ -53,6 +52,34 @@ export const demoTurretIntelligenceByTurretId = new Map<string, TurretIntelligen
   sampleTurretIntelligence.map((entry) => [entry.turretId, entry]),
 );
 export const demoTurretStats: ShellStatisticsSnapshot = sampleTurretStats;
+export const demoTurretTypeCatalogByTypeId = new Map<string, TurretTypeCatalogEntry>([
+  [
+    '92401',
+    {
+      typeId: '92401',
+      typeInfo: {
+        id: '92401',
+        name: 'Heavy Turret',
+        iconUrl: null,
+      },
+      isLoading: false,
+      error: null,
+    },
+  ],
+  [
+    '92404',
+    {
+      typeId: '92404',
+      typeInfo: {
+        id: '92404',
+        name: 'Light Turret',
+        iconUrl: null,
+      },
+      isLoading: false,
+      error: null,
+    },
+  ],
+]);
 
 export function getDemoCandidateNodeIds(turrets: TurretData[]): string[] {
   return turrets

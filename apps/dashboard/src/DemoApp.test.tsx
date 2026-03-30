@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import DemoApp from './DemoApp';
@@ -36,5 +36,11 @@ describe('DemoApp', () => {
     expect(screen.getByAltText(/sentinel logo/i)).toBeTruthy();
     expect(screen.getByText(/metrics/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /^the slayer/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /advanced search options/i }));
+    expect(screen.getByRole('button', { name: /^online$/i, pressed: false })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^engaged$/i, pressed: false })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^heavy turret$/i, pressed: false })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^light turret$/i, pressed: false })).toBeTruthy();
   });
 });

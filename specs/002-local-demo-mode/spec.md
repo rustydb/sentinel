@@ -9,7 +9,7 @@
 
 ### User Story 1 - Activate Demo Context (Priority: P1)
 
-As a developer, I want to activate a demo mode via a specific route (`/demo`) or URL parameter so that the application loads mock data instead of requiring a real blockchain connection.
+As a developer, I want to activate a demo mode via the `/demo` route so that the application loads mock data instead of requiring a real blockchain connection.
 
 **Why this priority**: It is the core requirement to enable showing off the application without chain dependencies.
 
@@ -18,19 +18,19 @@ As a developer, I want to activate a demo mode via a specific route (`/demo`) or
 **Acceptance Scenarios**:
 
 1. **Given** I am running the app locally, **When** I navigate to `/demo`, **Then** the connect screen is bypassed and I see a dashboard with mock turrets.
-2. **Given** I navigate to the root route with a `?demo=true` query parameter, **When** the app loads, **Then** it operates fully using the mock data provider.
+2. **Given** I am in demo mode, **When** I refresh or revisit `/demo`, **Then** the mock dashboard still loads without requiring wallet authentication.
 3. **Given** I am in demo mode, **When** I interact with the UI (e.g. clicking a turret card), **Then** the detail drawer and event log display corresponding mock data.
 
 ### Edge Cases
 
 - What happens if a user navigates from a real-chain connection to `/demo`? (The app should disconnect the live wallet and switch to the mock provider).
-- What happens if the `demo=true` variable is appended to an invalid route? (The app should 404 naturally while remaining in demo mode).
+- What happens if a user appends a stale demo query parameter to an invalid route? (The app should 404 naturally while continuing to honor the pathname).
 
 ## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-001**: System MUST support activating demo mode via a `/demo` route or a URL query parameter (`?demo=true`).
+- **FR-001**: System MUST support activating demo mode via the `/demo` route.
 - **FR-002**: System MUST bypass the wallet connection flow and assume an authenticated state when demo mode is active.
 - **FR-003**: System MUST provide a mock data adapter that intercepts or replaces standard data-fetching hooks to return pre-configured mock data.
 - **FR-004**: System MUST supply a realistic set of mock turrets (including various statuses: online, anchored, offline, etc.) and associated mock events.

@@ -2,6 +2,7 @@ import type { TurretData } from '@sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
 import { DashboardScreen } from './components/DashboardScreen';
+import { useTurretFilters } from './hooks/useTurretFilters';
 import {
   DEMO_CHARACTER_NAME,
   DEMO_WALLET_ADDRESS,
@@ -10,6 +11,7 @@ import {
   demoNodeActions,
   demoTurretIntelligenceByTurretId,
   demoTurretStats,
+  demoTurretTypeCatalogByTypeId,
   demoSolarSystemsByTurretId,
   demoTurrets,
 } from './demo-mode';
@@ -25,6 +27,13 @@ function toggleSelectedTurret(
 export default function DemoApp() {
   const deferredTurrets = useDeferredValue(demoTurrets);
   const [selectedTurretId, setSelectedTurretId] = useState<string | null>(null);
+  const turretFilters = useTurretFilters({
+    turrets: deferredTurrets,
+    solarSystemsByTurretId: demoSolarSystemsByTurretId,
+    nodes: demoNetworkNodes,
+    turretIntelligenceByTurretId: demoTurretIntelligenceByTurretId,
+    turretTypeCatalogByTypeId: demoTurretTypeCatalogByTypeId,
+  });
   const selectedTurret =
     selectedTurretId != null
       ? (deferredTurrets.find((turret) => turret.id === selectedTurretId) ?? null)
@@ -44,7 +53,8 @@ export default function DemoApp() {
   return (
     <WorldProvider world="utopia">
       <DashboardScreen
-        turrets={deferredTurrets}
+        turrets={turretFilters.filteredTurrets}
+        totalTurrets={deferredTurrets.length}
         loading={false}
         error={null}
         characterName={DEMO_CHARACTER_NAME}
@@ -64,6 +74,19 @@ export default function DemoApp() {
         onAssignSolarSystem={demoNodeActions.assignNode}
         onUnassignSolarSystem={demoNodeActions.unassignNode}
         onResetEvents={demoEventsState.reset}
+        filters={turretFilters.state}
+        hasActiveFilters={turretFilters.hasActiveFilters}
+        statusOptions={turretFilters.statusOptions}
+        classOptions={turretFilters.classOptions}
+        selectedNetworkNode={turretFilters.selectedNetworkNode}
+        onSearchTextChange={turretFilters.setSearchText}
+        onSolarSystemQueryChange={turretFilters.setSolarSystemQuery}
+        onAddSolarSystem={turretFilters.addSolarSystem}
+        onRemoveSolarSystem={turretFilters.removeSolarSystem}
+        onStatusChange={turretFilters.setStatus}
+        onClassNameChange={turretFilters.setClassName}
+        onSelectedNetworkNodeChange={turretFilters.setSelectedNetworkNode}
+        onClearAllFilters={turretFilters.clearAll}
       />
     </WorldProvider>
   );

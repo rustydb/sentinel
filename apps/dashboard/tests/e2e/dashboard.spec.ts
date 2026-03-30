@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('wallet connect renders turret grid', async ({ page }) => {
-  await page.goto('/?demo=true');
+  await page.goto('/demo');
   await page.getByRole('button', { name: 'Connect EVE Vault' }).click();
 
   await expect(page.getByText('Command grid')).toBeVisible();
