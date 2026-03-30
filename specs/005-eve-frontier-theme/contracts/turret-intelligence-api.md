@@ -54,4 +54,4 @@ Returns intelligence summaries for the requested turrets.
 
 - Turret cards consume `targetDisplayName`, `statusOverride`, and `aggressorsPast24Hours`.
 - The statistics panel derives its grand total and engaged count from the same response set used for the cards.
-- The detail panel uses `latestPriorityEvent` as the default event-log selection anchor and enriches `targetTypeId` client-side through the existing type-info path.
+- The detail panel uses `latestPriorityEvent` as the default event-log selection anchor.

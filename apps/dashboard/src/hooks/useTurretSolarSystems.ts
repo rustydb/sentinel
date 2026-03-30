@@ -5,7 +5,7 @@ import {
   type TurretData,
   type TurretSolarSystemMapping,
 } from '@frontier-sentinel/shared-types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface ResolvedTurretSolarSystem {
   turretId: string;
@@ -20,6 +20,7 @@ interface UseTurretSolarSystemsOptions {
   apiBaseUrl?: string;
   world?: EveWorldName;
   enabled?: boolean;
+  refreshTick?: number;
 }
 
 interface TurretSolarSystemsResponse {
@@ -56,10 +57,13 @@ export function useTurretSolarSystems({
   apiBaseUrl = '',
   world = (import.meta.env.VITE_EVE_SERVER_NAME ?? 'utopia') as EveWorldName,
   enabled = true,
+  refreshTick = 0,
 }: UseTurretSolarSystemsOptions) {
   const [retainedMappings, setRetainedMappings] = useState<TurretSolarSystemMapping[]>([]);
   const [loading, setLoading] = useState(Boolean(enabled && turrets.length > 0));
   const [error, setError] = useState<Error | null>(null);
+  const hasLoadedOnceRef = useRef(false);
+  const queryKeyRef = useRef<string | null>(null);
 
   const turretIdsKey = turrets.map((turret) => turret.id).join(',');
   const relationsKey = turrets
@@ -73,11 +77,21 @@ export function useTurretSolarSystems({
     if (!enabled || turrets.length === 0) {
       setRetainedMappings([]);
       setLoading(false);
+      hasLoadedOnceRef.current = false;
+      queryKeyRef.current = null;
       return;
     }
 
+    const queryKey = `${enabled ? '1' : '0'}|${apiBaseUrl}|${turretIdsKey}|${relationsKey}`;
+    if (queryKeyRef.current !== queryKey) {
+      queryKeyRef.current = queryKey;
+      hasLoadedOnceRef.current = false;
+    }
+
     let cancelled = false;
-    setLoading(true);
+    if (!hasLoadedOnceRef.current) {
+      setLoading(true);
+    }
 
     const loadMappings = async (): Promise<void> => {
       try {
@@ -99,12 +113,16 @@ export function useTurretSolarSystems({
         const ids = turrets.map((turret) => turret.id).join(',');
         const response = await fetch(
           `${apiBaseUrl}/api/turret-solar-systems?ids=${encodeURIComponent(ids)}`,
+          {
+            cache: 'no-store',
+          },
         );
         const payload: unknown = await response.json();
 
         if (!cancelled) {
           setRetainedMappings(parseMappings(payload));
           setError(null);
+          hasLoadedOnceRef.current = true;
         }
       } catch (reason) {
         if (!cancelled) {
@@ -126,7 +144,7 @@ export function useTurretSolarSystems({
     return () => {
       cancelled = true;
     };
-  }, [apiBaseUrl, enabled, relationsKey, turretIdsKey]);
+  }, [apiBaseUrl, enabled, refreshTick, relationsKey, turretIdsKey]);
 
   const byTurretId = useMemo(() => {
     const currentByNodeId = new Map(nodeMappings.map((mapping) => [mapping.nodeId, mapping]));

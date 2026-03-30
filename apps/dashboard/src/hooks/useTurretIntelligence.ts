@@ -5,7 +5,7 @@ import type {
   TurretIntelligenceSummary,
 } from '@frontier-sentinel/shared-types';
 import { isTurretIntelligenceSummary } from '@frontier-sentinel/shared-types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const EMPTY_STATS: ShellStatisticsSnapshot = {
   totalTurrets: 0,
@@ -53,6 +53,7 @@ interface UseTurretIntelligenceOptions {
   turrets: TurretData[];
   apiBaseUrl?: string;
   enabled?: boolean;
+  refreshTick?: number;
 }
 
 export interface UseTurretIntelligenceResult {
@@ -67,10 +68,13 @@ export function useTurretIntelligence({
   turrets,
   apiBaseUrl = '',
   enabled = true,
+  refreshTick = 0,
 }: UseTurretIntelligenceOptions): UseTurretIntelligenceResult {
   const [summaries, setSummaries] = useState<TurretIntelligenceSummary[]>([]);
   const [loading, setLoading] = useState(Boolean(enabled && turrets.length > 0));
   const [error, setError] = useState<Error | null>(null);
+  const hasLoadedOnceRef = useRef(false);
+  const queryKeyRef = useRef<string | null>(null);
 
   const turretIdsKey = useMemo(() => turrets.map((turret) => turret.id).join(','), [turrets]);
 
@@ -79,16 +83,29 @@ export function useTurretIntelligence({
       setSummaries([]);
       setLoading(false);
       setError(null);
+      hasLoadedOnceRef.current = false;
+      queryKeyRef.current = null;
       return;
     }
 
+    const queryKey = `${enabled ? '1' : '0'}|${apiBaseUrl}|${turretIdsKey}|${turrets.length}`;
+    if (queryKeyRef.current !== queryKey) {
+      queryKeyRef.current = queryKey;
+      hasLoadedOnceRef.current = false;
+    }
+
     let cancelled = false;
-    setLoading(true);
+    if (!hasLoadedOnceRef.current) {
+      setLoading(true);
+    }
 
     const loadSummaries = async (): Promise<void> => {
       try {
         const response = await fetch(
           `${apiBaseUrl}/api/turret-intelligence?ids=${encodeURIComponent(turretIdsKey)}`,
+          {
+            cache: 'no-store',
+          },
         );
 
         if (!response.ok) {
@@ -99,6 +116,7 @@ export function useTurretIntelligence({
         if (!cancelled) {
           setSummaries(payload);
           setError(null);
+          hasLoadedOnceRef.current = true;
         }
       } catch (reason: unknown) {
         if (!cancelled) {
@@ -118,7 +136,7 @@ export function useTurretIntelligence({
     return () => {
       cancelled = true;
     };
-  }, [apiBaseUrl, enabled, turretIdsKey, turrets.length]);
+  }, [apiBaseUrl, enabled, refreshTick, turretIdsKey, turrets.length]);
 
   const byTurretId = useMemo(
     () => new Map(summaries.map((summary) => [summary.turretId, summary] as const)),

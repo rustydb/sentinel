@@ -24,12 +24,12 @@
     - Re-scan `useTurretEvents` client-side and derive intelligence in React: rejected because it mixes detail-view concerns into every card render and does not scale cleanly with more turrets.
     - Store a separate precomputed materialized table just for this feature: rejected because the existing indexer/event data plus API aggregation are enough for the current scope.
 
-## Decision 4: Keep target type icons client-side, but resolve character and tribe identity through API enrichment
+## Decision 4: Resolve character and tribe identity through API enrichment, but keep the detail panel focused on identity and threat state
 
-- **Decision**: Return target IDs plus resolved character/tribe names from the API summary, while continuing to use the existing `useTypeInfo` client pattern for icon/name enrichment from `type_id`.
-- **Rationale**: Character and tribe naming are operator-facing labels that should be normalized before reaching the UI, while type info already has a browser-side cache and icon rendering path in the dashboard. This split keeps the API focused on aggregation and identity joins without duplicating the existing type-info asset flow.
+- **Decision**: Return target IDs plus resolved character/tribe names from the API summary, and present only target identity, tribe, and aggressor state in the turret detail panel.
+- **Rationale**: Character and tribe naming are operator-facing labels that should be normalized before reaching the UI. The target-type surface is no longer part of the detail view, so the dashboard should avoid carrying type-icon rendering into that panel.
 - **Alternatives considered**:
-    - Resolve all target type info server-side as well: rejected because the dashboard already has working type-info caching and icon rendering, and duplicating that path would add complexity without much operator benefit.
+    - Keep target type icon rendering in the detail panel: rejected because that surface is now intentionally narrower and should emphasize identity and threat state instead of a broader enrichment grid.
     - Resolve character and tribe names entirely in the browser: rejected because those lookups belong closer to the event/indexer aggregation boundary and would create more distributed fetch logic across card/detail surfaces.
 
 ## Decision 5: Treat `ENGAGED` as a view-level override derived from the latest priority event, not a new persisted turret status

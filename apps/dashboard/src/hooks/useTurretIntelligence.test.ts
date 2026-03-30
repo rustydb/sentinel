@@ -67,6 +67,10 @@ describe('useTurretIntelligence', () => {
         '0x1111111111111111111111111111111111111111111111111111111111111111',
       )?.statusOverride,
     ).toBe('ENGAGED');
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.stringContaining('/api/turret-intelligence?ids='),
+      expect.objectContaining({ cache: 'no-store' }),
+    );
     expect(result.current.stats).toEqual({
       totalTurrets: 1,
       engagedTurrets: 1,

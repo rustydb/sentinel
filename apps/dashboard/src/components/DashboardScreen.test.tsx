@@ -355,4 +355,101 @@ describe('DashboardScreen', () => {
 
     expect(scrollByMock).toHaveBeenCalled();
   });
+
+  it('keeps the detail panel anchored when the selected turret snapshot refreshes with the same id', () => {
+    const initialTurret = {
+      id: '0x1111111111111111111111111111111111111111111111111111111111111111',
+      itemId: '42',
+      name: 'Alpha Bastion',
+      status: 'online' as const,
+      isOnline: true,
+      typeId: '92401',
+      energySourceId: 'orphaned',
+    };
+    const refreshedTurret = {
+      ...initialTurret,
+      name: 'Alpha Bastion II',
+      status: 'offline' as const,
+      isOnline: false,
+    };
+
+    const { rerender } = render(
+      <DashboardScreen
+        turrets={[initialTurret]}
+        loading={false}
+        error={null}
+        characterName="Captain Rusty"
+        walletAddress="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        onDisconnect={vi.fn()}
+        selectedTurret={initialTurret}
+        onSelectTurret={vi.fn()}
+        onCloseTurret={vi.fn()}
+        nodes={[]}
+        drawerLoading={false}
+        eventsState={{
+          events: [],
+          loading: false,
+          error: null,
+          page: 1,
+          nextPage: null,
+          next: vi.fn(),
+          reset: vi.fn(),
+        }}
+        solarSystemsByTurretId={new Map()}
+        turretIntelligenceByTurretId={new Map()}
+        stats={{
+          totalTurrets: 1,
+          engagedTurrets: 0,
+          onlineTurrets: 1,
+          offlineTurrets: 0,
+          aggressorsPast24Hours: 0,
+        }}
+        onAssignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onUnassignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onResetEvents={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('heading', { level: 2, name: /alpha bastion/i })).toBeTruthy();
+
+    rerender(
+      <DashboardScreen
+        turrets={[refreshedTurret]}
+        loading={false}
+        error={null}
+        characterName="Captain Rusty"
+        walletAddress="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        onDisconnect={vi.fn()}
+        selectedTurret={refreshedTurret}
+        onSelectTurret={vi.fn()}
+        onCloseTurret={vi.fn()}
+        nodes={[]}
+        drawerLoading={false}
+        eventsState={{
+          events: [],
+          loading: false,
+          error: null,
+          page: 1,
+          nextPage: null,
+          next: vi.fn(),
+          reset: vi.fn(),
+        }}
+        solarSystemsByTurretId={new Map()}
+        turretIntelligenceByTurretId={new Map()}
+        stats={{
+          totalTurrets: 1,
+          engagedTurrets: 0,
+          onlineTurrets: 1,
+          offlineTurrets: 0,
+          aggressorsPast24Hours: 0,
+        }}
+        onAssignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onUnassignSolarSystem={vi.fn().mockResolvedValue(undefined)}
+        onResetEvents={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('heading', { level: 2, name: /alpha bastion ii/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /dismiss turret detail/i })).toBeTruthy();
+  });
 });

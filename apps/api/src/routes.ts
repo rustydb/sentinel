@@ -36,6 +36,13 @@ function pageQueryValue(page: Request['query']['page']): string | undefined {
   return typeof page === 'string' ? page : undefined;
 }
 
+export function applyNoStoreHeaders(response: Response): Response {
+  response.set('Cache-Control', 'no-store');
+  response.set('Pragma', 'no-cache');
+  response.set('Expires', '0');
+  return response;
+}
+
 export function createApiHandlers(repositories: Repositories) {
   return {
     health(_request: Request, response: Response) {
@@ -47,7 +54,7 @@ export function createApiHandlers(repositories: Repositories) {
     },
 
     async listNetworkNodes(_request: Request, response: Response) {
-      response.json({ data: await repositories.networkNodes.all() });
+      applyNoStoreHeaders(response).json({ data: await repositories.networkNodes.all() });
     },
 
     async upsertNetworkNode(request: Request, response: Response) {
@@ -75,7 +82,7 @@ export function createApiHandlers(repositories: Repositories) {
     async listTurretSolarSystems(request: Request, response: Response) {
       const idsParam = typeof request.query.ids === 'string' ? request.query.ids : '';
       const turretIds = turretIdsQuerySchema.parse(idsParam);
-      response.json({
+      applyNoStoreHeaders(response).json({
         data: await repositories.turretSolarSystems.listByTurretIds(turretIds),
       });
     },
@@ -99,7 +106,7 @@ export function createApiHandlers(repositories: Repositories) {
         page,
         pageSize,
       );
-      response.json({
+      applyNoStoreHeaders(response).json({
         data: result.events,
         pagination: {
           page,
@@ -112,7 +119,7 @@ export function createApiHandlers(repositories: Repositories) {
     async listTurretIntelligence(request: Request, response: Response) {
       const idsParam = typeof request.query.ids === 'string' ? request.query.ids : '';
       const turretIds = turretIdsQuerySchema.parse(idsParam);
-      response.json({
+      applyNoStoreHeaders(response).json({
         data: await repositories.turretIntelligence.listByTurretIds(turretIds),
       });
     },

@@ -3,7 +3,7 @@ title: Frontier Sentinel - Design System
 version: 1.1.0
 status: draft
 created: 2026-03-26
-updated: 2026-03-29
+updated: 2026-03-30
 author: rustydb
 description: Branding, palette, typography, component guidance, and accessibility rules for Frontier Sentinel.
 ---
@@ -88,7 +88,8 @@ The shell should feel like ship telemetry, not a generic admin app.
 
 - Must show the Frontier Sentinel logo, telemetry subtitle, and a high-emphasis shell title
 - Must include the pilot statistics panel directly in the shell
-- Wallet controls and network-node drawer controls should live in the same visual family as the rest of the shell
+- Wallet controls, the metrics blind, and network-node drawer controls should live in the same visual family as the rest of the shell
+- The sticky toolbar should stay compact and structurally aligned rather than feeling like separate floating controls
 
 ### Turret Cards
 
@@ -109,9 +110,13 @@ The shell should feel like ship telemetry, not a generic admin app.
     - target name or `NPC`
     - aggressor state
     - tribe
-    - target type and icon
     - source event reference
 - Node assignment actions should remain compact and inline with the address row
+- Event log rows should act like blinds:
+    - row click opens a payload reveal rather than auto-opening on turret selection
+    - payloads should render as pretty-printed JSON with syntax highlighting
+    - selecting another row should smoothly close the previous payload reveal
+- Event timestamps may switch between local time and UTC, but whichever mode is active should stay clear in the header and consistent across the table
 
 ### Network Node Drawer
 
@@ -129,6 +134,7 @@ The shell should feel like ship telemetry, not a generic admin app.
     - aggressors in the past 24 hours
 - Values should be bold and scan-friendly
 - Labels should stay compact and monospace
+- The metrics panel may collapse into a blind from the sticky shell toolbar when space is tight
 
 ### Map Frame
 

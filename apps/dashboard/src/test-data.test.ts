@@ -92,7 +92,7 @@ describe('test-data', () => {
   it('covers recent-target intelligence scenarios for both player and NPC contacts', () => {
     expect(sampleTurretIntelligence).toHaveLength(4);
 
-    const captainRusty = sampleTurretIntelligence.find(
+    const theSlayer = sampleTurretIntelligence.find(
       (entry) => entry.latestPriorityEvent.txDigest === '0xbbb',
     );
     const orphanNpc = sampleTurretIntelligence.find(
@@ -105,8 +105,8 @@ describe('test-data', () => {
       (entry) => entry.latestPriorityEvent.txDigest === '0xfff',
     );
 
-    expect(captainRusty).toMatchObject({
-      targetDisplayName: 'Captain Rusty',
+    expect(theSlayer).toMatchObject({
+      targetDisplayName: 'The Slayer',
       isNpc: false,
       statusOverride: 'ENGAGED',
     });

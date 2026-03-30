@@ -13,6 +13,7 @@ const hooks = vi.hoisted(() => ({
   useTurretEvents: vi.fn(),
   useTurretSolarSystems: vi.fn(),
   useTurretIntelligence: vi.fn(),
+  useDashboardRefresh: vi.fn(),
   useTypeInfo: vi.fn(),
 }));
 
@@ -42,6 +43,10 @@ vi.mock('./hooks/useTurretSolarSystems', () => ({
 
 vi.mock('./hooks/useTurretIntelligence', () => ({
   useTurretIntelligence: hooks.useTurretIntelligence,
+}));
+
+vi.mock('./hooks/useDashboardRefresh', () => ({
+  useDashboardRefresh: hooks.useDashboardRefresh,
 }));
 
 vi.mock('./hooks/useTypeInfo', () => ({
@@ -178,6 +183,9 @@ describe('App', () => {
       loading: false,
       error: null,
     });
+    hooks.useDashboardRefresh.mockReturnValue({
+      refreshTick: 0,
+    });
   });
 
   afterEach(() => {
@@ -262,6 +270,63 @@ describe('App', () => {
     expect(card.getAttribute('aria-selected')).toBe('true');
     fireEvent.click(card);
     expect(card.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('passes the refresh tick into the live data hooks', () => {
+    hooks.useDashboardRefresh.mockReturnValue({
+      refreshTick: 7,
+    });
+
+    render(<App />);
+
+    expect(hooks.useTurrets).toHaveBeenCalledWith(
+      expect.objectContaining({ refreshTick: 7, enabled: true }),
+    );
+    expect(hooks.useNetworkNodes).toHaveBeenCalledWith(
+      expect.objectContaining({ refreshTick: 7, enabled: true }),
+    );
+    expect(hooks.useTurretEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ refreshTick: 7, enabled: true }),
+    );
+    expect(hooks.useTurretSolarSystems).toHaveBeenCalledWith(
+      expect.objectContaining({ refreshTick: 7, enabled: true }),
+    );
+    expect(hooks.useTurretIntelligence).toHaveBeenCalledWith(
+      expect.objectContaining({ refreshTick: 7, enabled: true }),
+    );
+  });
+
+  it('keeps the selected turret focused when refreshed turret data keeps the same id', () => {
+    const { rerender } = render(<App />);
+
+    fireEvent.click(screen.getByTestId(`turret-card-${TURRET_ADDRESS}`));
+    expect(screen.getByRole('button', { name: /dismiss turret detail/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: /alpha bastion/i })).toBeTruthy();
+
+    hooks.useTurrets.mockReturnValue({
+      turrets: [
+        {
+          id: TURRET_ADDRESS,
+          itemId: '1001',
+          name: 'Alpha Bastion II',
+          status: 'offline',
+          isOnline: false,
+          typeId: 'turret.mk1',
+          energySourceId: NODE_ADDRESS,
+          aggressor: null,
+          locationHash: 'J101',
+        },
+      ],
+      loading: false,
+      error: null,
+      characterName: CHARACTER_NAME,
+      characterAddress: '0xcharacter',
+    });
+
+    rerender(<App />);
+
+    expect(screen.getByRole('heading', { level: 2, name: /alpha bastion ii/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /dismiss turret detail/i })).toBeTruthy();
   });
 
   it('opens the network node drawer from the header', () => {

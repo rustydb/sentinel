@@ -73,8 +73,44 @@ describe('TurretCard', () => {
     expect(screen.getByText('offline')).toBeTruthy();
     expect(screen.getByText('Network Node')).toBeTruthy();
     expect(screen.getByText('Recent Target')).toBeTruthy();
+    expect(screen.getByText('Recent Target').parentElement?.className).toContain('normal-case');
     expect(screen.getByText('NPC')).toBeTruthy();
     expect(screen.getByText(/orphaned node assignment/i)).toBeTruthy();
+  });
+
+  it('renders None when no recent target contact exists', () => {
+    render(
+      <TurretCard
+        intelligence={{
+          turretId: '0x1111111111111111111111111111111111111111111111111111111111111111',
+          latestPriorityEvent: null,
+          targetItemId: null,
+          targetCharacterId: null,
+          targetDisplayName: null,
+          isNpc: null,
+          tribeId: null,
+          tribeName: null,
+          targetTypeId: null,
+          isAggressor: null,
+          behaviorChange: null,
+          statusOverride: null,
+          aggressorsPast24Hours: 0,
+        }}
+        turret={{
+          id: '0x1111111111111111111111111111111111111111111111111111111111111111',
+          itemId: '42',
+          name: 'Raven Gate',
+          status: 'offline',
+          locationHash: 'J101',
+          isOnline: false,
+          typeId: 'turret.mk1',
+          energySourceId: 'orphaned',
+          aggressor: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByText('None')).toBeTruthy();
   });
 
   it('shows the solar system field as unassigned when no mapping exists', () => {

@@ -60,9 +60,11 @@ function createProps() {
           txDigest: '0xpriority',
           eventSeq: 3,
           checkpointSequenceNumber: 10,
-          eventType: 'PriorityListUpdatedEvent',
+          eventType:
+            '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::turret::PriorityListUpdatedEvent',
           jsonData: {
             turret_id: TURRET_ADDRESS,
+            name: 'Alpha Bastion',
             priority_list: [],
           },
           timestamp: '2026-03-26T12:05:00.000Z',
@@ -71,9 +73,11 @@ function createProps() {
           txDigest: '0xabc',
           eventSeq: 1,
           checkpointSequenceNumber: 1,
-          eventType: 'TurretCreatedEvent',
+          eventType:
+            '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::turret::TurretCreatedEvent',
           jsonData: {
             turret_id: TURRET_ADDRESS,
+            name: 'Alpha Bastion',
             turret_key: { tenant: 'utopia', item_id: '42' },
             owner_cap_id: '0xowner-cap',
           },
@@ -121,14 +125,120 @@ describe('TurretDetail', () => {
   it('renders drawer details and events', () => {
     const props = createProps();
     render(<TurretDetail {...props} />);
+    const expectedDate = new Date('2026-03-26T12:05:00.000Z').toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    const expectedTime = new Date('2026-03-26T12:05:00.000Z').toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
 
     expect(screen.getByTestId('turret-detail')).toBeTruthy();
     expect(screen.getByText('Alpha Bastion')).toBeTruthy();
-    expect(screen.getByText('PriorityListUpdatedEvent')).toBeTruthy();
+    expect(screen.getByText('::turret::PriorityListUpdatedEvent')).toBeTruthy();
     expect(screen.getByText('O3H-1FN')).toBeTruthy();
     expect(screen.getByText('Captain Rusty')).toBeTruthy();
     expect(screen.getByText('Vherokior')).toBeTruthy();
+    expect(screen.queryByText('Target Type')).toBeNull();
+    expect(screen.getByText('Target').className).not.toContain('uppercase');
+    expect(screen.getByText('Captain Rusty').className).not.toContain('uppercase');
+    expect(screen.getByText('Tribe').className).not.toContain('uppercase');
+    expect(screen.getByText('Vherokior').className).not.toContain('uppercase');
     expect(screen.getByText('Yes')).toBeTruthy();
+    expect(screen.getByText('Date')).toBeTruthy();
+    expect(screen.getByText('Time')).toBeTruthy();
+    expect(screen.getByText('Event')).toBeTruthy();
+    expect(screen.getByRole('switch', { name: /event time zone/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /copy solar system/i })).toBeTruthy();
+    expect(screen.getAllByText(expectedDate).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(expectedTime).length).toBeGreaterThan(0);
+  });
+
+  it('renders None for target, aggressor, and tribe when no target contact exists', () => {
+    const props = createProps();
+    props.intelligence.targetDisplayName = null;
+    props.intelligence.isAggressor = null;
+    props.intelligence.tribeName = null;
+    props.intelligence.targetCharacterId = null;
+    render(<TurretDetail {...props} />);
+
+    expect(screen.getAllByText('None')).toHaveLength(2);
+    expect(screen.getByText('Aggressor').parentElement?.textContent).toContain('N/A');
+    expect(screen.getByText('Tribe').parentElement?.textContent).toContain('None');
+  });
+
+  it('expands event payload rows like a blind and keeps the JSON syntax-highlighted', () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    const priorityToggle = screen.getByRole('button', {
+      name: /toggle payload for ::turret::prioritylistupdatedevent/i,
+    });
+    const createdToggle = screen.getByRole('button', {
+      name: /toggle payload for ::turret::turretcreatedevent/i,
+    });
+
+    expect(priorityToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(createdToggle.getAttribute('aria-expanded')).toBe('false');
+
+    fireEvent.click(priorityToggle);
+
+    expect(priorityToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(createdToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.getByText('"priority_list"').className).toContain('text-sentinel-accent');
+
+    fireEvent.click(createdToggle);
+
+    expect(priorityToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(createdToggle.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('toggles event timestamps between local time and UTC', () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    const switchButton = screen.getByRole('switch', { name: /event time zone/i });
+    const timestamp = '2026-03-26T12:05:00.000Z';
+    const localDate = new Date(timestamp).toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    const localTime = new Date(timestamp).toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+    const utcDate = new Date(timestamp).toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    const utcTime = new Date(timestamp).toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'UTC',
+    });
+
+    expect(switchButton.getAttribute('aria-checked')).toBe('false');
+    expect(screen.getAllByText(localDate).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(localTime).length).toBeGreaterThan(0);
+
+    fireEvent.click(switchButton);
+
+    expect(
+      screen.getByRole('switch', { name: /event time zone/i }).getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(screen.getAllByText(utcDate).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(utcTime).length).toBeGreaterThan(0);
   });
 
   it('does not use the raw turret id as the large title when a custom name is missing', () => {
@@ -137,7 +247,7 @@ describe('TurretDetail', () => {
     render(<TurretDetail {...props} />);
 
     expect(screen.getByRole('heading', { name: 'Heavy Turret' })).toBeTruthy();
-    expect(screen.getByTitle(TURRET_ADDRESS)).toBeTruthy();
+    expect(screen.getAllByTitle(TURRET_ADDRESS)[0]).toBeTruthy();
   });
 
   it('allows solar-system reassignment from the detail panel', async () => {
@@ -165,8 +275,35 @@ describe('TurretDetail', () => {
     emitResizeForAll(120);
 
     await waitFor(() => {
-      expect(screen.getByTitle(TURRET_ADDRESS).textContent).toContain('...');
+      expect(screen.getAllByTitle(TURRET_ADDRESS)[0]?.textContent).toContain('...');
     });
+  });
+
+  it('shows a compact event summary for each event row', () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    expect(screen.getByText('::turret::PriorityListUpdatedEvent')).toBeTruthy();
+    expect(screen.getByText('::turret::TurretCreatedEvent')).toBeTruthy();
+  });
+
+  it('lets the event log sort by date and time', () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /date/i })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /time/i })[0]);
+
+    expect(screen.getAllByRole('button', { name: /date/i })[0]).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /time/i })[0]).toBeTruthy();
+  });
+
+  it('keeps event log rows compact and aligned', () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    const eventRows = screen.getAllByText('::turret::PriorityListUpdatedEvent');
+    expect(eventRows[0]?.className).toContain('text-xs');
   });
 
   it('copies the full turret address from the detail drawer', async () => {
@@ -177,6 +314,17 @@ describe('TurretDetail', () => {
 
     await waitFor(() => {
       expect(clipboardWriteText).toHaveBeenCalledWith(TURRET_ADDRESS);
+    });
+  });
+
+  it('copies the solar system label from the detail drawer', async () => {
+    const props = createProps();
+    render(<TurretDetail {...props} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /copy solar system/i }));
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith('O3H-1FN');
     });
   });
 

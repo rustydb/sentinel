@@ -1,11 +1,11 @@
 import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
 import type { TurretData } from '@frontier-sentinel/shared-types';
-import { useDeferredValue } from 'react';
-import { useState } from 'react';
+import { useDeferredValue, useEffect, useState } from 'react';
 
 import frontierSentinelLogo from '../../../assets/logo.svg';
 import { DashboardScreen } from './components/DashboardScreen';
+import { useDashboardRefresh } from './hooks/useDashboardRefresh';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
 import {
   type UseTurretIntelligenceResult,
@@ -95,14 +95,14 @@ function WalletConnect({ onConnect, canConnect }: { onConnect: () => void; canCo
 }
 
 function toggleSelectedTurret(
-  current: TurretData | null,
+  currentTurretId: string | null,
   nextTurret: TurretData,
-): TurretData | null {
-  return current?.id === nextTurret.id ? null : nextTurret;
+): string | null {
+  return currentTurretId === nextTurret.id ? null : nextTurret.id;
 }
 
 export default function App() {
-  const [selectedTurret, setSelectedTurret] = useState<TurretData | null>(null);
+  const [selectedTurretId, setSelectedTurretId] = useState<string | null>(null);
   const { currentAccount, handleConnect, handleDisconnect, hasEveVault, isConnected } =
     useConnection();
   const currentWallet = useCurrentWallet();
@@ -111,15 +111,18 @@ export default function App() {
   const connected = isConnected && usingSupportedWallet;
   const walletAddress = currentAccount?.address ?? 'Not connected';
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
+  const { refreshTick } = useDashboardRefresh({ enabled: connected });
 
   const { turrets, loading, error, characterName } = useTurrets({
     owner: connected ? currentAccount?.address : undefined,
     endpoint: graphQlEndpoint,
     enabled: connected,
+    refreshTick,
   });
   const eventsState: UseTurretEventsResult = useTurretEvents({
-    turretId: selectedTurret?.id,
+    turretId: selectedTurretId ?? undefined,
     enabled: connected,
+    refreshTick,
   });
   const deferredTurrets = useDeferredValue(turrets);
   const candidateNodeIds = deferredTurrets
@@ -129,18 +132,37 @@ export default function App() {
     enabled: connected,
     candidateNodeIds,
     graphQlEndpoint,
+    refreshTick,
   });
   const turretSolarSystems = useTurretSolarSystems({
     turrets: deferredTurrets,
     nodeMappings: networkNodes.mappings,
     apiBaseUrl: '',
     enabled: connected,
+    refreshTick,
   });
   const turretIntelligence: UseTurretIntelligenceResult = useTurretIntelligence({
     turrets: deferredTurrets,
     apiBaseUrl: '',
     enabled: connected,
+    refreshTick,
   });
+
+  const selectedTurret =
+    selectedTurretId != null
+      ? (deferredTurrets.find((turret) => turret.id === selectedTurretId) ?? null)
+      : null;
+
+  useEffect(() => {
+    if (selectedTurretId == null) {
+      return;
+    }
+
+    const selectedTurretExists = deferredTurrets.some((turret) => turret.id === selectedTurretId);
+    if (!selectedTurretExists) {
+      setSelectedTurretId(null);
+    }
+  }, [deferredTurrets, selectedTurretId]);
 
   if (!connected) {
     return (
@@ -188,8 +210,10 @@ export default function App() {
       walletAddress={walletAddress}
       onDisconnect={handleDisconnect}
       selectedTurret={selectedTurret}
-      onSelectTurret={(turret) => setSelectedTurret(toggleSelectedTurret(selectedTurret, turret))}
-      onCloseTurret={() => setSelectedTurret(null)}
+      onSelectTurret={(turret) =>
+        setSelectedTurretId(toggleSelectedTurret(selectedTurretId, turret))
+      }
+      onCloseTurret={() => setSelectedTurretId(null)}
       nodes={networkNodes.nodes}
       drawerLoading={networkNodes.loading}
       eventsState={eventsState}

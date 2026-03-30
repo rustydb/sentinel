@@ -154,7 +154,7 @@
 - [x] T044 [US5] Implement the client-side turret-intelligence data flow in `apps/dashboard/src/hooks/useTurretIntelligence.ts` and `apps/dashboard/src/App.tsx`
 - [x] T045 [US5] Add compact target-label, engaged-status, and 24-hour aggressor presentation to turret cards in `apps/dashboard/src/components/TurretCard.tsx`
 - [x] T046 [US5] Default the detail viewer to the latest priority event and render enriched target intelligence in `apps/dashboard/src/components/TurretDetail.tsx`
-- [x] T047 [US5] Resolve target type icon/name enrichment through the existing type-info path in `apps/dashboard/src/hooks/useTypeInfo.ts` and `apps/dashboard/src/components/TurretDetail.tsx`
+- [x] T047 [US5] Remove target type display from the turret detail panel in `apps/dashboard/src/components/TurretDetail.tsx`
 - [x] T048 [US5] Update demo threat scenarios and shell totals in `apps/dashboard/src/demo-mode.ts` and `apps/dashboard/src/test-data.ts`
 
 **Checkpoint**: All user stories should now be independently functional

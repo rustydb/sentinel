@@ -40,7 +40,11 @@ export function TurretCard({
   const typeName = typeInfo?.name?.trim() ? typeInfo.name.trim() : null;
   const displayClass = typeName ?? (isLoading ? THEMED_LOADING_LABEL : 'Turret');
   const displayStatus = intelligence?.statusOverride === 'ENGAGED' ? 'engaged' : turret.status;
-  const targetLabel = intelligence?.targetDisplayName ?? 'No Contact';
+  const hasTarget =
+    typeof intelligence?.targetDisplayName === 'string' &&
+    intelligence.targetDisplayName.trim() !== '' &&
+    intelligence.targetDisplayName !== 'No Contact';
+  const targetLabel = hasTarget ? intelligence.targetDisplayName : 'None';
   const aggressorsPast24Hours = intelligence?.aggressorsPast24Hours ?? 0;
 
   return (
@@ -148,7 +152,7 @@ export function TurretCard({
           <dt className="text-[11px] tracking-[0.16em] text-sentinel-muted">Solar System</dt>
           <dd>{solarSystem?.solarSystemName ?? 'Unassigned'}</dd>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 normal-case">
           <dt className="text-[11px] tracking-[0.16em] text-sentinel-muted">Recent Target</dt>
           <dd>{targetLabel}</dd>
         </div>

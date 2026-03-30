@@ -172,8 +172,8 @@ export const sampleEvents: TurretEvent[] = [
         {
           target_item_id: '700000001',
           priority_weight: '95',
-          character_id: 41001,
-          character_name: 'Captain Rusty',
+          character_id: '0x8f3a2c7d6e11b9a4d4f0c2a8d5b7e9f10a6c3d2b8f4e1a0c7d9b6e5f2a1c4d3e',
+          character_name: 'The Slayer',
           character_tribe: 128,
           tribe_name: 'Vherokior',
           type_id: '12001',
@@ -216,7 +216,7 @@ export const sampleEvents: TurretEvent[] = [
         {
           target_item_id: '700000031',
           priority_weight: '97',
-          character_id: 51234,
+          character_id: '0x2b7c9e1f4a6d8c0b3e5f7a9d1c4e6f8b0a2d4c6e8f1b3a5d7c9e0f2a4b6d8c1e',
           character_name: 'Commander Vale',
           character_tribe: 147,
           tribe_name: 'Sebiestor',
@@ -276,7 +276,7 @@ export const sampleTurretIntelligence: TurretIntelligenceSummary[] = [
     },
     targetItemId: '700000001',
     targetCharacterId: 41001,
-    targetDisplayName: 'Captain Rusty',
+    targetDisplayName: 'The Slayer',
     isNpc: false,
     tribeId: 128,
     tribeName: 'Vherokior',

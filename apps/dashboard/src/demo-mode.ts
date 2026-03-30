@@ -20,7 +20,7 @@ const search = new URLSearchParams(window.location.search);
 export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || search.get('demo') === 'true';
 export const DEMO_WALLET_ADDRESS =
   '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd';
-export const DEMO_CHARACTER_NAME = 'Captain Rusty';
+export const DEMO_CHARACTER_NAME = 'The Slayer';
 
 export const demoTurrets = sampleTurrets;
 export const demoNodeMappings = sampleNodes;

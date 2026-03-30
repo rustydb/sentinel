@@ -38,7 +38,7 @@ Validate the EVE Frontier theme overhaul, statistics panel, and recent target-in
 
 1. Open a turret detail panel.
 2. Verify the latest `PriorityListUpdatedEvent` is selected by default when available.
-3. Confirm the detail panel shows target identity, tribe name when available, target type information/icon when available, and aggressor state.
+3. Confirm the detail panel shows target identity, tribe name when available, and aggressor state.
 
 ### 5. Check live/demo parity
 

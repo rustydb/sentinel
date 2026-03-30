@@ -1,11 +1,12 @@
 import { GET_OBJECT_WITH_JSON, type NetworkNodeMapping } from '@frontier-sentinel/shared-types';
-import { startTransition, useEffect, useMemo, useState } from 'react';
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 
 interface UseNetworkNodesOptions {
   apiBaseUrl?: string;
   graphQlEndpoint?: string;
   candidateNodeIds?: string[];
   enabled?: boolean;
+  refreshTick?: number;
 }
 
 interface NetworkNodesResponse {
@@ -95,11 +96,14 @@ export function useNetworkNodes({
   graphQlEndpoint = '/graphql',
   candidateNodeIds = [],
   enabled = true,
+  refreshTick = 0,
 }: UseNetworkNodesOptions = {}) {
   const [mappings, setMappings] = useState<NetworkNodeMapping[]>([]);
   const [nodes, setNodes] = useState<NetworkNodeView[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<Error | null>(null);
+  const hasLoadedOnceRef = useRef(false);
+  const queryKeyRef = useRef<string | null>(null);
 
   const normalizedCandidateNodeIds = useMemo(
     () => [...new Set(candidateNodeIds.filter((nodeId) => isSuiAddress(nodeId)))],
@@ -111,12 +115,18 @@ export function useNetworkNodes({
       setNodes([]);
       setMappings([]);
       setLoading(false);
+      hasLoadedOnceRef.current = false;
+      queryKeyRef.current = null;
       return;
     }
 
-    setLoading(true);
+    if (!hasLoadedOnceRef.current) {
+      setLoading(true);
+    }
     try {
-      const response = await fetch(`${apiBaseUrl}/api/network-nodes`);
+      const response = await fetch(`${apiBaseUrl}/api/network-nodes`, {
+        cache: 'no-store',
+      });
       const payload: unknown = await response.json();
       const parsedMappings = parseNetworkNodesPayload(payload);
       const candidateIds = [
@@ -134,6 +144,7 @@ export function useNetworkNodes({
             const objectResponse = await fetch(graphQlEndpoint, {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
+              cache: 'no-store',
               body: JSON.stringify({
                 query: GET_OBJECT_WITH_JSON,
                 variables: { id: nodeId },
@@ -175,6 +186,7 @@ export function useNetworkNodes({
           }),
         );
         setError(null);
+        hasLoadedOnceRef.current = true;
       });
     } catch (reason) {
       setError(reason instanceof Error ? reason : new Error('Failed to fetch network nodes'));
@@ -188,11 +200,19 @@ export function useNetworkNodes({
       setNodes([]);
       setMappings([]);
       setLoading(false);
+      hasLoadedOnceRef.current = false;
+      queryKeyRef.current = null;
       return;
     }
 
+    const queryKey = `${enabled ? '1' : '0'}|${apiBaseUrl}|${graphQlEndpoint}|${normalizedCandidateNodeIds.join(',')}`;
+    if (queryKeyRef.current !== queryKey) {
+      queryKeyRef.current = queryKey;
+      hasLoadedOnceRef.current = false;
+    }
+
     void refresh();
-  }, [apiBaseUrl, enabled, graphQlEndpoint, normalizedCandidateNodeIds.join(',')]);
+  }, [apiBaseUrl, enabled, graphQlEndpoint, normalizedCandidateNodeIds.join(','), refreshTick]);
 
   async function assignNode(
     nodeId: string,

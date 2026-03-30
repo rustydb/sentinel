@@ -4,12 +4,13 @@ import {
   isTurretData,
   toTurretStatus,
 } from '@frontier-sentinel/shared-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseTurretsOptions {
   owner?: string;
   endpoint?: string;
   enabled?: boolean;
+  refreshTick?: number;
 }
 
 const DEFAULT_TURRET_PACKAGE_ID =
@@ -132,12 +133,19 @@ function parseCharacterName(characterJson: Record<string, unknown> | undefined):
   return typeof candidate === 'string' ? candidate.trim() : null;
 }
 
-export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: UseTurretsOptions) {
+export function useTurrets({
+  owner,
+  endpoint = '/graphql',
+  enabled = true,
+  refreshTick = 0,
+}: UseTurretsOptions) {
   const [turrets, setTurrets] = useState<TurretData[]>([]);
   const [loading, setLoading] = useState(Boolean(enabled && owner));
   const [error, setError] = useState<Error | null>(null);
   const [characterName, setCharacterName] = useState<string | null>(null);
   const [characterAddress, setCharacterAddress] = useState<string | null>(null);
+  const hasLoadedOnceRef = useRef(false);
+  const queryKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled || !owner) {
@@ -145,11 +153,21 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
       setLoading(false);
       setCharacterName(null);
       setCharacterAddress(null);
+      hasLoadedOnceRef.current = false;
+      queryKeyRef.current = null;
       return;
     }
 
+    const queryKey = `${enabled ? '1' : '0'}|${owner}|${endpoint}`;
+    if (queryKeyRef.current !== queryKey) {
+      queryKeyRef.current = queryKey;
+      hasLoadedOnceRef.current = false;
+    }
+
     let cancelled = false;
-    setLoading(true);
+    if (!hasLoadedOnceRef.current) {
+      setLoading(true);
+    }
     setError(null);
 
     const loadTurrets = async (): Promise<void> => {
@@ -165,6 +183,7 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
           const ownerCapsResponse = await fetch(endpoint, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
+            cache: 'no-store',
             body: JSON.stringify({
               query: GET_CHARACTER_AND_OWNED_OBJECTS,
               variables: { owner, characterPlayerProfileType, ownerCapType, after },
@@ -234,6 +253,7 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
           .filter((turret): turret is TurretData => turret !== null);
         if (!cancelled) {
           setTurrets(mapped);
+          hasLoadedOnceRef.current = true;
         }
       } catch (reason: unknown) {
         if (!cancelled) {
@@ -251,7 +271,7 @@ export function useTurrets({ owner, endpoint = '/graphql', enabled = true }: Use
     return () => {
       cancelled = true;
     };
-  }, [enabled, endpoint, owner]);
+  }, [enabled, endpoint, owner, refreshTick]);
 
   return { turrets, loading, error, characterName, characterAddress };
 }

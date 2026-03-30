@@ -4,6 +4,9 @@ Auto-generated from all feature plans. Last updated: 2026-03-29
 
 ## Active Technologies
 
+- TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright (006-hot-load-indexer-updates)
+- Existing PostgreSQL database for indexer-derived turret, event, and network-node state; existing dashboard fixture data for `/demo` (006-hot-load-indexer-updates)
+
 - TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Tailwind CSS 4, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright (005-eve-frontier-theme)
 - Existing PostgreSQL database for indexer and assignment data, existing repo assets including `./assets/logo.png`, and documented design tokens in `docs/DESIGN_SYSTEM.md` (005-eve-frontier-theme)
 
@@ -31,11 +34,11 @@ TypeScript (Bun runtime), Rust (Edition 2021): Follow standard conventions
 
 ## Recent Changes
 
+- 006-hot-load-indexer-updates: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
+
 - 005-eve-frontier-theme: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Tailwind CSS 4, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
 
 - 004-solar-system-assignment: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL schema + React 19, Vite 6, Tailwind CSS 4, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
-
-- 003-responsive-sui-addresses: Added TypeScript 5.8.x, React 19.1.x + React 19, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Tailwind CSS 4, Vite 6
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

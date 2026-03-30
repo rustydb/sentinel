@@ -65,12 +65,17 @@ describe('useNetworkNodes', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/network-nodes');
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      '/api/network-nodes',
+      expect.objectContaining({ cache: 'no-store' }),
+    );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       '/graphql',
       expect.objectContaining({
         method: 'POST',
+        cache: 'no-store',
       }),
     );
     expect(result.current.nodes).toEqual([

@@ -44,7 +44,6 @@ The detail panel defaults to the latest `PriorityListUpdatedEvent` and uses it t
 
 - target identity (character name or `NPC`)
 - tribe name when available
-- target type information and icon when available
 - aggressor state
 - the selected event as the source of truth for those fields
 

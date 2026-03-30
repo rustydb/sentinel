@@ -69,6 +69,11 @@ describe('useTurretSolarSystems', () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('/api/turret-solar-systems?ids='),
+      expect.objectContaining({ cache: 'no-store' }),
+    );
     expect(result.current.byTurretId.get('0xactive')).toEqual({
       turretId: '0xactive',
       solarSystemId: 30000004,

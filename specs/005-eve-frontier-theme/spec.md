@@ -84,7 +84,7 @@ An operator reviews turret cards and the turret detail panel and immediately und
 
 1. **Given** a turret has a recent `PriorityListUpdatedEvent`, **When** the operator views the turret card, **Then** the card shows the latest target's character name or `NPC` and updates the turret status to `ENGAGED` in red when the latest `behavior_change` is `STARTED_ATTACK`.
 2. **Given** a turret's most recent `PriorityListUpdatedEvent` has a `behavior_change` other than `STARTED_ATTACK`, **When** the operator views the turret card or detail panel, **Then** the turret status returns to its non-engaged state rather than remaining stuck in `ENGAGED`.
-3. **Given** the operator opens a turret detail panel, **When** the panel loads, **Then** it selects the latest `PriorityListUpdatedEvent` by default and uses that event to resolve the latest target's character name or `NPC`, tribe name when available, target type information and icon when available, and aggressor state.
+3. **Given** the operator opens a turret detail panel, **When** the panel loads, **Then** it selects the latest `PriorityListUpdatedEvent` by default and uses that event to resolve the latest target's character name or `NPC`, tribe name when available, and aggressor state.
 4. **Given** the latest target is an NPC with `character_id` equal to `0`, **When** the operator views the card or detail panel, **Then** the UI displays `NPC` instead of attempting a character-name lookup.
 5. **Given** recent event data is available for multiple turrets, **When** the operator views the statistics panel, **Then** the panel's aggressor total reflects the grand total of aggressors observed across turrets in the past 24 hours.
 6. **Given** demo mode is used to review this intelligence workflow, **When** the operator inspects cards and detail panels there, **Then** demo fixtures cover player targets, NPC targets, engaged turrets, restored statuses, and recent aggressor counts.
@@ -122,10 +122,10 @@ An operator reviews turret cards and the turret detail panel and immediately und
 - **FR-014**: The system MUST resolve each turret's latest meaningful target intelligence from that turret's latest `PriorityListUpdatedEvent`.
 - **FR-015**: The turret card MUST limit its added target-intelligence presentation to the latest target's character name or `NPC` plus the turret's status shift to `ENGAGED` when the latest `behavior_change` is `STARTED_ATTACK`.
 - **FR-016**: The turret detail panel MUST default its event viewer selection to the latest `PriorityListUpdatedEvent` when one exists.
-- **FR-017**: The turret detail panel MUST use the selected latest `PriorityListUpdatedEvent` to display the target's character name or `NPC`, tribe name when available, target type information and icon when available, and aggressor state.
+- **FR-017**: The turret detail panel MUST use the selected latest `PriorityListUpdatedEvent` to display the target's character name or `NPC`, tribe name when available, and aggressor state.
 - **FR-018**: The system MUST treat targets with `character_id` equal to `0` as NPCs and display `NPC` instead of attempting a character-name lookup.
 - **FR-019**: The system MUST resolve and display a real tribe name when a `tribe_id` is available for the latest target and the lookup succeeds.
-- **FR-020**: The system MUST resolve and display the target's type information, including iconography when available, using the target's `type_id`.
+- **FR-020**: The system MUST continue to preserve the target's type identifier in the intelligence payload for downstream consumers.
 - **FR-021**: When the latest `behavior_change` is `STARTED_ATTACK`, the turret's status MUST change from `ONLINE` to `ENGAGED` and use a red engaged-state treatment.
 - **FR-022**: When the latest `behavior_change` is anything other than `STARTED_ATTACK`, the turret's status MUST revert to its normal non-engaged state.
 - **FR-023**: The system MUST query the indexer database for each turret's aggressor activity in the past 24 hours and display that count on the turret card.
@@ -143,7 +143,7 @@ An operator reviews turret cards and the turret detail panel and immediately und
 - **Brand Asset**: The logo or related identity treatment that marks Frontier Sentinel as an EVE Frontier-facing product.
 - **Interactive State Style**: The visual treatment for hover, active, selected, warning, danger, and neutral states under the new palette.
 - **Pilot Statistics Panel**: A shell-level summary surface that communicates the operator’s current turret posture and recent hostile activity counts.
-- **Target Intelligence Snapshot**: The latest resolved target state for a turret, derived from its latest `PriorityListUpdatedEvent`, including character-or-NPC identity, optional tribe name, target type information, aggressor state, and resulting turret engagement state.
+- **Target Intelligence Snapshot**: The latest resolved target state for a turret, derived from its latest `PriorityListUpdatedEvent`, including character-or-NPC identity, optional tribe name, aggressor state, and resulting turret engagement state.
 
 ## Success Criteria _(mandatory)_
 
@@ -166,4 +166,4 @@ An operator reviews turret cards and the turret detail panel and immediately und
 - Demo mode continues to exist and should remain representative of the live product’s visual direction.
 - Demo mode remains part of the review and development workflow, so its mock data must evolve with the live dashboard contracts for turret intelligence and statistics.
 - The existing logo asset at `./assets/logo.svg` will be reused as the base brand asset, and favicon assets can be derived from it.
-- Character, tribe, and target type lookups are available from existing authoritative sources and can be joined onto the latest `PriorityListUpdatedEvent` without changing the event contract itself.
+- Character and tribe lookups are available from existing authoritative sources and can be joined onto the latest `PriorityListUpdatedEvent` without changing the event contract itself.

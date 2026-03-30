@@ -1,5 +1,5 @@
 import type { TurretData } from '@frontier-sentinel/shared-types';
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useEffect, useState } from 'react';
 
 import { DashboardScreen } from './components/DashboardScreen';
 import {
@@ -15,15 +15,30 @@ import {
 } from './demo-mode';
 
 function toggleSelectedTurret(
-  current: TurretData | null,
+  currentTurretId: string | null,
   nextTurret: TurretData,
-): TurretData | null {
-  return current?.id === nextTurret.id ? null : nextTurret;
+): string | null {
+  return currentTurretId === nextTurret.id ? null : nextTurret.id;
 }
 
 export default function DemoApp() {
   const deferredTurrets = useDeferredValue(demoTurrets);
-  const [selectedTurret, setSelectedTurret] = useState<TurretData | null>(null);
+  const [selectedTurretId, setSelectedTurretId] = useState<string | null>(null);
+  const selectedTurret =
+    selectedTurretId != null
+      ? (deferredTurrets.find((turret) => turret.id === selectedTurretId) ?? null)
+      : null;
+
+  useEffect(() => {
+    if (selectedTurretId == null) {
+      return;
+    }
+
+    const selectedTurretExists = deferredTurrets.some((turret) => turret.id === selectedTurretId);
+    if (!selectedTurretExists) {
+      setSelectedTurretId(null);
+    }
+  }, [deferredTurrets, selectedTurretId]);
 
   return (
     <DashboardScreen
@@ -34,8 +49,10 @@ export default function DemoApp() {
       walletAddress={DEMO_WALLET_ADDRESS}
       onDisconnect={() => undefined}
       selectedTurret={selectedTurret}
-      onSelectTurret={(turret) => setSelectedTurret(toggleSelectedTurret(selectedTurret, turret))}
-      onCloseTurret={() => setSelectedTurret(null)}
+      onSelectTurret={(turret) =>
+        setSelectedTurretId(toggleSelectedTurret(selectedTurretId, turret))
+      }
+      onCloseTurret={() => setSelectedTurretId(null)}
       nodes={demoNetworkNodes}
       drawerLoading={false}
       eventsState={demoEventsState}

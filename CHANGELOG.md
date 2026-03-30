@@ -19,6 +19,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - EVE Wallet-first dashboard connection flow and ADR coverage for wallet-selection behavior.
 - `004-solar-system-assignment`, including bundled solar-system catalogs, assignment UI, retained orphan mappings, and a network node side drawer.
 - `005-eve-frontier-theme`, including the branded shell overhaul, pilot statistics panel, turret-intelligence summaries, and demo/live parity updates.
+- `006-hot-load-indexer-updates`, including visibility-aware dashboard polling, no-store live reads, selection continuity by turret ID, and fresh API headers for indexer-backed data.
 
 ### Changed
 
@@ -34,12 +35,15 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Added a served `favicon.svg` so modern browsers can load the dashboard icon without relying on repo-relative asset paths.
 - Updated turret cards and detail panes to show recent target intelligence, `ENGAGED` status overrides, and 24-hour aggressor summaries.
 - Updated demo mode to mirror the live shell styling and threat-summary scenarios instead of acting as a stale side path.
+- Finalized the hot-load dashboard polish with expandable event-log payload blinds, local/UTC timestamp switching, and a more compact sticky toolbar.
 
 ### Fixed
 
 - Base task implementation formatting for automated spec-runners.
 - Fixed fatal dashboard render failures to fall back to a recoverable error screen instead of a white page.
 - Fixed dashboard white-screen crashes caused by over-broad wallet/provider usage.
+- Fixed turret card and detail target/tribe fields so they preserve natural casing instead of forcing all-caps styling.
+- Removed the turret detail panel's target type field and updated the supporting spec docs to match.
 - Fixed dashboard GraphQL and API proxying so the UI no longer depends on browser-side CORS workarounds.
 - Fixed `ef-map` embedding to use the supported iframe contract.
 - Fixed responsive Sui address behavior across resize, card, and detail surfaces.

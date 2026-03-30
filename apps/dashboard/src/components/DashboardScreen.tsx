@@ -93,7 +93,7 @@ function WalletDropdown({
         className={`${ACTION_BUTTON_CLASS} flex w-full items-center justify-between gap-3`}
         onClick={() => setOpen((current) => !current)}
       >
-        <span className="truncate">{characterName}</span>
+        <span className="truncate normal-case">{characterName}</span>
         <span aria-hidden="true" className="text-lg leading-none">
           {open ? '−' : '+'}
         </span>

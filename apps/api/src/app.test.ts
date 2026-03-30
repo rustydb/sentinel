@@ -10,9 +10,11 @@ import { createInMemoryRepositories } from './repositories';
 interface MockResponse<TBody = unknown> {
   statusCode: number;
   body: TBody | undefined;
+  headers: Record<string, string>;
   status: (code: number) => MockResponse<TBody>;
   json: (payload: TBody) => MockResponse<TBody>;
   send: (payload?: TBody) => MockResponse<TBody>;
+  set: (name: string, value: string) => MockResponse<TBody>;
 }
 
 function isTurretIntelligenceResponseBody(
@@ -30,6 +32,7 @@ function createMockResponse<TBody = unknown>(): MockResponse<TBody> {
   return {
     statusCode: 200,
     body: undefined,
+    headers: {},
     status(this: MockResponse<TBody>, code: number) {
       this.statusCode = code;
       return this;
@@ -40,6 +43,10 @@ function createMockResponse<TBody = unknown>(): MockResponse<TBody> {
     },
     send(this: MockResponse<TBody>, payload?: TBody) {
       this.body = payload;
+      return this;
+    },
+    set(this: MockResponse<TBody>, name: string, value: string) {
+      this.headers[name.toLowerCase()] = value;
       return this;
     },
   };
@@ -78,6 +85,9 @@ describe('API', () => {
         }
       ).data,
     ).toEqual([{ nodeId: 'node-7', solarSystemId: 31002477, solarSystemName: 'Jita' }]);
+    expect(listResponse.headers['cache-control']).toBe('no-store');
+    expect(listResponse.headers.pragma).toBe('no-cache');
+    expect(listResponse.headers.expires).toBe('0');
 
     const deleteResponse = createMockResponse();
     await handlers.deleteNetworkNode(
@@ -127,6 +137,7 @@ describe('API', () => {
         },
       ],
     );
+    expect(listResponse.headers['cache-control']).toBe('no-store');
   });
 
   it('returns paginated turret events', async () => {
@@ -156,6 +167,7 @@ describe('API', () => {
     expect(
       (response.body as { pagination: { nextPage: number | null } }).pagination.nextPage,
     ).toBeNull();
+    expect(response.headers['cache-control']).toBe('no-store');
   });
 
   it('returns turret intelligence summaries including engaged status and aggressor counts', async () => {
@@ -218,6 +230,7 @@ describe('API', () => {
 
     const summaries: TurretIntelligenceSummary[] = body.data;
     expect(summaries).toHaveLength(1);
+    expect(response.headers['cache-control']).toBe('no-store');
     const summary: TurretIntelligenceSummary | undefined = summaries[0];
     if (!summary) {
       throw new Error('Expected a turret intelligence summary');
