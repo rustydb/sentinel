@@ -431,6 +431,21 @@ export function DashboardScreen({
             />
           </div>
         </div>
+        <footer className="mt-8 border-t border-sentinel-line pt-6 text-xs font-mono text-sentinel-muted uppercase">
+          <p>
+            Sentinel is in prerelease, and to report all issues to{' '}
+            <a
+              href="https://github.com/rustydb/sentinel/issues"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sentinel-glow underline"
+            >
+              GitHub
+            </a>
+            . EVE Frontier is a registered trademark of CCP hf. All rights reserved in all
+            jurisdictions. Sentinel is not affiliated with CCP.
+          </p>
+        </footer>
       </div>
 
       <NetworkNodeDrawer
