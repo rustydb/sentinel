@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const DEFAULT_CONNECTION = 'postgres://sentinel:sentinel@localhost:5432/frontier_sentinel';
+const DEFAULT_CONNECTION = 'postgres://sentinel:sentinel@localhost:5432/sentinel';
 
 export const NETWORK_NODE_MAPPINGS_TABLE = `
   CREATE TABLE IF NOT EXISTS network_node_mappings (

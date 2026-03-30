@@ -2,10 +2,10 @@ import type {
   ShellStatisticsSnapshot,
   TurretData,
   TurretIntelligenceSummary,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import { startTransition, useEffect, useRef, useState } from 'react';
 
-import frontierSentinelLogo from '../../../../assets/logo.svg';
+import sentinelLogo from '../../../../assets/logo.svg';
 import type { NetworkNodeView } from '../hooks/useNetworkNodes';
 import type { UseTurretEventsResult } from '../hooks/useTurretEvents';
 import type {
@@ -53,7 +53,7 @@ function LoadingSkeleton() {
 function EmptyState() {
   return (
     <div className="border-2 border-dashed border-sentinel-line bg-sentinel-shell/70 p-8 text-center uppercase">
-      No turret assemblies detected in this frontier footprint.
+      No turret assemblies detected in this operational footprint.
     </div>
   );
 }
@@ -335,8 +335,8 @@ export function DashboardScreen({
           <div className="grid items-center gap-3 xl:grid-cols-[auto_minmax(0,1fr)_auto]">
             <div className="flex shrink-0 items-center">
               <img
-                src={frontierSentinelLogo}
-                alt="Frontier Sentinel logo"
+                src={sentinelLogo}
+                alt="Sentinel logo"
                 className="h-10 w-10 border border-sentinel-line bg-sentinel-panel object-cover object-center p-1"
               />
             </div>

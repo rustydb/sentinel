@@ -1,5 +1,5 @@
 {
-  "name": "@frontier-sentinel/dashboard",
+  "name": "@sentinel/dashboard",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@evefrontier/dapp-kit": "^0.1.0",
-    "@frontier-sentinel/shared-types": "workspace:*",
+    "@sentinel/shared-types": "workspace:*",
     "@mysten/dapp-kit-react": "^1.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

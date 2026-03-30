@@ -5,7 +5,7 @@
 
 ## Summary
 
-Add a visibility-aware refresh layer to Frontier Sentinel so turret assemblies, network-node assignments, derived solar-system mappings, shell metrics, and event-driven turret context hot-load from the existing dashboard/API stack without a manual page refresh. Keep the live shell authoritative, preserve the operator's selected turret by ID across refreshes, and leave demo mode fixture-driven rather than turning it into a live polling surface.
+Add a visibility-aware refresh layer to Sentinel so turret assemblies, network-node assignments, derived solar-system mappings, shell metrics, and event-driven turret context hot-load from the existing dashboard/API stack without a manual page refresh. Keep the live shell authoritative, preserve the operator's selected turret by ID across refreshes, and leave demo mode fixture-driven rather than turning it into a live polling surface.
 
 ## Technical Context
 

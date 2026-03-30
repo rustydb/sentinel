@@ -9,7 +9,7 @@
 
 ### User Story 1 - Keep Dashboard Data Current (Priority: P1)
 
-An operator keeps Frontier Sentinel open while turret assemblies and network node relationships change, and the dashboard updates itself so the visible turret cards, metrics, and node drawer reflect the latest known state without a manual refresh.
+An operator keeps Sentinel open while turret assemblies and network node relationships change, and the dashboard updates itself so the visible turret cards, metrics, and node drawer reflect the latest known state without a manual refresh.
 
 **Why this priority**: Fresh operational data is the core value of the dashboard. If the visible state falls behind, every other workflow becomes less trustworthy.
 

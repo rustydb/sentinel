@@ -1,6 +1,6 @@
 # Tasks: EVE Frontier Theme Overhaul
 
-**Input**: Design documents from `/specs/005-eve-frontier-theme/`
+**Input**: Design documents from `/specs/005-eve-sentinel-theme/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
 **Tests**: Tests are included because the project constitution and plan call for focused component, API, and browser coverage before feature implementation is considered complete.
@@ -43,7 +43,7 @@
 
 ## Phase 3: User Story 1 - Establish EVE Frontier Visual Identity (Priority: P1) 🎯 MVP
 
-**Goal**: Make Frontier Sentinel immediately read as an EVE Frontier product through the shell branding, logo treatment, and primary surface styling.
+**Goal**: Make Sentinel immediately read as an EVE Frontier product through the shell branding, logo treatment, and primary surface styling.
 
 **Independent Test**: Load the live shell and confirm the header, unconnected wallet view, and primary surfaces present the new logo treatment and cohesive EVE Frontier visual identity without changing core workflows.
 
@@ -167,7 +167,7 @@
 
 - [x] T049 [P] Update the documented design decisions in `docs/DESIGN_SYSTEM.md`
 - [x] T050 [P] Update user-facing and workflow documentation in `CHANGELOG.md`, `AGENTS.md`, and `docs/EVE_FRONTIER.md`
-- [x] T051 Run the review flow from `specs/005-eve-frontier-theme/quickstart.md` and the validation commands for `apps/dashboard/src`, `apps/api/src`, and `packages/shared-types/src`
+- [x] T051 Run the review flow from `specs/005-eve-sentinel-theme/quickstart.md` and the validation commands for `apps/dashboard/src`, `apps/api/src`, and `packages/shared-types/src`
 
 ---
 

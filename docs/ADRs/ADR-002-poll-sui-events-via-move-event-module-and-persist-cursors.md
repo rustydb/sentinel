@@ -5,7 +5,7 @@
 
 ## Context
 
-Frontier Sentinel's indexer started as a placeholder loop that emitted one mock event and kept its progress only in memory.
+Sentinel's indexer started as a placeholder loop that emitted one mock event and kept its progress only in memory.
 
 That was enough to bootstrap the service shell, but it was not enough to satisfy the actual ingestion requirements:
 
@@ -16,7 +16,7 @@ That was enough to bootstrap the service shell, but it was not enough to satisfy
 
 ## Decision
 
-Frontier Sentinel will poll Sui events with a `MoveEventModule` filter and persist its RPC cursor in PostgreSQL.
+Sentinel will poll Sui events with a `MoveEventModule` filter and persist its RPC cursor in PostgreSQL.
 
 Specifically:
 

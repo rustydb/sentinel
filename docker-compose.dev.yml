@@ -1,10 +1,10 @@
-name: frontier-sentinel-dev
+name: sentinel-dev
 
 services:
   postgres:
     image: docker.io/library/postgres:16-alpine
     environment:
-      POSTGRES_DB: frontier_sentinel
+      POSTGRES_DB: sentinel
       POSTGRES_USER: sentinel
       POSTGRES_PASSWORD: sentinel
     ports:
@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sentinel -d frontier_sentinel"]
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinel"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -23,10 +23,10 @@ services:
     command:
       - sh
       - -c
-      - bun install && bun run --filter @frontier-sentinel/api dev
+      - bun install && bun run --filter @sentinel/api dev
     environment:
       PORT: 3001
-      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
       CHOKIDAR_USEPOLLING: "true"
     depends_on:
       postgres:
@@ -65,7 +65,7 @@ services:
       - --manifest-path
       - apps/indexer/Cargo.toml
     environment:
-      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
       SUI_RPC_URL: https://fullnode.testnet.sui.io
       SUI_TURRET_PACKAGE_ID: ${SUI_TURRET_PACKAGE_ID:-0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75}
       SUI_TURRET_EVENT_MODULE: ${SUI_TURRET_EVENT_MODULE:-turret}

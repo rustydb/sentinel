@@ -3,7 +3,7 @@ import type {
   TurretEvent,
   TurretIntelligenceSummary,
   TurretSolarSystemMapping,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 
 export interface SolarSystemAssignmentInput {
   solarSystemId: number;

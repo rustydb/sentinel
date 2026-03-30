@@ -1,7 +1,7 @@
 import {
   isTurretIntelligenceSummary,
   type TurretIntelligenceSummary,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import { describe, expect, it } from 'vitest';
 
 import { createApiHandlers } from './routes';

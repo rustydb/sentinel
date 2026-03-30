@@ -1,16 +1,16 @@
 ---
-title: Frontier Sentinel - Design System
+title: Sentinel - Design System
 version: 1.1.0
 status: draft
 created: 2026-03-26
 updated: 2026-03-30
 author: rustydb
-description: Branding, palette, typography, component guidance, and accessibility rules for Frontier Sentinel.
+description: Branding, palette, typography, component guidance, and accessibility rules for Sentinel.
 ---
 
-# Frontier Sentinel Design System
+# Sentinel Design System
 
-Frontier Sentinel keeps the repo's brutalist structure, but the visual mood now needs to feel closer to EVE Frontier itself:
+Sentinel keeps the repo's brutalist structure, but the visual mood now needs to feel closer to EVE Frontier itself:
 
 - stark
 - ominous
@@ -27,21 +27,21 @@ The shell should feel like ship telemetry, not a generic admin app.
 
 ## Color Palette
 
-| Token                          | Hex       | Usage                                                                |
-| ------------------------------ | --------- | -------------------------------------------------------------------- |
-| `--color-sentinel-canvas`      | `#090b0d` | Global page background                                               |
-| `--color-sentinel-shell`       | `#111418` | Header shell, drawers, large chrome surfaces                         |
-| `--color-sentinel-paper`       | `#171b20` | Primary cards and detail panels                                      |
-| `--color-sentinel-panel`       | `#1b2026` | Nested framed sections such as stats and dropdown bodies             |
-| `--color-sentinel-panel-inset` | `#12161b` | Inset cells, target intel boxes, retained notices, map frame backing |
-| `--color-sentinel-ink`         | `#ede0c8` | Primary text color and high-emphasis framing                         |
-| `--color-sentinel-line`        | `#332f29` | Softer structural borders and dividers                               |
-| `--color-sentinel-muted`       | `#8b8172` | Labels, helper text, lower-emphasis copy                             |
-| `--color-sentinel-glow`        | `#ffe7bf` | High-emphasis shell title treatment                                  |
-| `--color-sentinel-accent`      | `#ff6a21` | Primary active state and shell signal color                          |
-| `--color-sentinel-engaged`     | `#d44337` | `ENGAGED` turret state                                               |
-| `--color-sentinel-positive`    | `#52d39b` | Healthy and online emphasis                                          |
-| `--color-sentinel-danger`      | `#cf4740` | Destructive actions, error framing, danger text                      |
+| Token                 | Hex       | Usage                                                                |
+| --------------------- | --------- | -------------------------------------------------------------------- |
+| `--color-canvas`      | `#090b0d` | Global page background                                               |
+| `--color-shell`       | `#111418` | Header shell, drawers, large chrome surfaces                         |
+| `--color-paper`       | `#171b20` | Primary cards and detail panels                                      |
+| `--color-panel`       | `#1b2026` | Nested framed sections such as stats and dropdown bodies             |
+| `--color-panel-inset` | `#12161b` | Inset cells, target intel boxes, retained notices, map frame backing |
+| `--color-ink`         | `#ede0c8` | Primary text color and high-emphasis framing                         |
+| `--color-line`        | `#332f29` | Softer structural borders and dividers                               |
+| `--color-muted`       | `#8b8172` | Labels, helper text, lower-emphasis copy                             |
+| `--color-glow`        | `#ffe7bf` | High-emphasis shell title treatment                                  |
+| `--color-accent`      | `#ff6a21` | Primary active state and shell signal color                          |
+| `--color-engaged`     | `#d44337` | `ENGAGED` turret state                                               |
+| `--color-positive`    | `#52d39b` | Healthy and online emphasis                                          |
+| `--color-danger`      | `#cf4740` | Destructive actions, error framing, danger text                      |
 
 ### Palette Rules
 
@@ -86,7 +86,7 @@ The shell should feel like ship telemetry, not a generic admin app.
 
 ### Dashboard Shell
 
-- Must show the Frontier Sentinel logo, telemetry subtitle, and a high-emphasis shell title
+- Must show the Sentinel logo, telemetry subtitle, and a high-emphasis shell title
 - Must include the pilot statistics panel directly in the shell
 - Wallet controls, the metrics blind, and network-node drawer controls should live in the same visual family as the rest of the shell
 - The sticky toolbar should stay compact and structurally aligned rather than feeling like separate floating controls
@@ -139,7 +139,7 @@ The shell should feel like ship telemetry, not a generic admin app.
 ### Map Frame
 
 - The `ef-map` embed can keep its own internal rendering
-- Frontier Sentinel is responsible for the frame, title, and surrounding shell treatment
+- Sentinel is responsible for the frame, title, and surrounding shell treatment
 - Focus changes should feel smooth; the map container should not visually reload on every selection
 
 ## Loading, Empty, and Error States

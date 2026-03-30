@@ -1,18 +1,18 @@
 ---
-title: Frontier Sentinel - Project Constitution
+title: Sentinel - Project Constitution
 version: 1.0.0
 status: active
 created: 2026-03-26
 updated: 2026-03-26
 author: rustydb
-description: Absolute source of truth for all development, architectural decisions, and project conventions within frontier-sentinel.
+description: Absolute source of truth for all development, architectural decisions, and project conventions within sentinel.
 ---
 
-This document serves as the absolute source of truth for all development, architectural decisions, and project conventions within the `frontier-sentinel` repository. It synthesizes overarching project goals with specific technical guardrails to ensure longevity, security, and maintainability.
+This document serves as the absolute source of truth for all development, architectural decisions, and project conventions within the `sentinel` repository. It synthesizes overarching project goals with specific technical guardrails to ensure longevity, security, and maintainability.
 
 ## 1. Product Vision & Mission
 
-**Frontier Sentinel** is a monitor for EVE Frontier in-game assets that are publically available on the Sui block-chain. We want to provide users with visibility and awareness around their in-game structures, aiming to provide them with a single dashboard and notifications.
+**Sentinel** is a monitor for EVE Frontier in-game assets that are publically available on the Sui block-chain. We want to provide users with visibility and awareness around their in-game structures, aiming to provide them with a single dashboard and notifications.
 
 ---
 

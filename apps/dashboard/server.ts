@@ -123,4 +123,4 @@ Bun.serve({
   },
 });
 
-console.log(`frontier-sentinel-dashboard serving on ${port}`);
+console.log(`sentinel-dashboard serving on ${port}`);

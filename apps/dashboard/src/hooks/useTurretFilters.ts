@@ -1,4 +1,4 @@
-import type { TurretData, TurretIntelligenceSummary } from '@frontier-sentinel/shared-types';
+import type { TurretData, TurretIntelligenceSummary } from '@sentinel/shared-types';
 import { useMemo, useState } from 'react';
 
 import type { NetworkNodeView } from './useNetworkNodes';

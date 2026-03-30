@@ -5,7 +5,7 @@
 
 ## Context
 
-Frontier Sentinel's dashboard originally used the broader `@evefrontier/dapp-kit` provider stack and allowed fallback to any detected Sui-compatible wallet when the EVE Wallet extension was not present.
+Sentinel's dashboard originally used the broader `@evefrontier/dapp-kit` provider stack and allowed fallback to any detected Sui-compatible wallet when the EVE Wallet extension was not present.
 
 That caused two practical problems:
 
@@ -16,7 +16,7 @@ During implementation we also found that the top-level `EveFrontierProvider` mou
 
 ## Decision
 
-Frontier Sentinel will require EVE Wallet for dashboard connection.
+Sentinel will require EVE Wallet for dashboard connection.
 
 Specifically:
 

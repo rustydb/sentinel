@@ -14,7 +14,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@frontier-sentinel/shared-types": ["packages/shared-types/src/index.ts"]
+      "@sentinel/shared-types": ["packages/shared-types/src/index.ts"]
     }
   }
 }

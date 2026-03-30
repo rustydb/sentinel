@@ -8,7 +8,7 @@ Verify that all user-visible Sui addresses in the dashboard remain responsive to
 
 - Bun installed
 - Workspace dependencies installed with `bun install`
-- Dev dashboard available via `bun run --filter @frontier-sentinel/dashboard dev` or `podman compose -f docker-compose.dev.yml up`
+- Dev dashboard available via `bun run --filter @sentinel/dashboard dev` or `podman compose -f docker-compose.dev.yml up`
 
 ## Verification Steps
 
@@ -24,11 +24,11 @@ Run the dashboard lint and unit tests:
 
 ```bash
 bun lint
-bun run --filter @frontier-sentinel/dashboard test
+bun run --filter @sentinel/dashboard test
 ```
 
 Run browser coverage if address resize behavior is captured in E2E tests:
 
 ```bash
-bun run --filter @frontier-sentinel/dashboard test:e2e
+bun run --filter @sentinel/dashboard test:e2e
 ```

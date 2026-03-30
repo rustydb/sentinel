@@ -2,7 +2,7 @@ import {
   searchSolarSystems,
   type EveWorldName,
   type SolarSystemSearchResult,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import { useDeferredValue, useMemo } from 'react';
 
 import { useCurrentWorld } from '../worldContext';

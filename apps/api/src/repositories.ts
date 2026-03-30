@@ -3,7 +3,7 @@ import type {
   TurretEvent,
   TurretIntelligenceSummary,
   TurretSolarSystemMapping,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import type { Pool } from 'pg';
 
 import type {

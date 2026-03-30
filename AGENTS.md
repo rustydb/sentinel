@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository builds **Frontier Sentinel**, an EVE Frontier dashboard for viewing turret assemblies, their event history, and related operator metadata.
+This repository builds **Sentinel**, an EVE Frontier dashboard for viewing turret assemblies, their event history, and related operator metadata.
 
 Agents working in this repo should preserve the current product direction:
 

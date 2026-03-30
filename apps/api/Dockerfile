@@ -7,7 +7,7 @@ RUN     bun install
 
 FROM    deps AS build
 COPY    . .
-RUN     bun run --filter @frontier-sentinel/api test
+RUN     bun run --filter @sentinel/api test
 
 FROM    docker.io/oven/bun:1.3.11 AS runner
 WORKDIR /app

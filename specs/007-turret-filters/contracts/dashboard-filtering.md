@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the operator-facing filtering behavior for the turret list in Frontier Sentinel.
+Define the operator-facing filtering behavior for the turret list in Sentinel.
 
 ## Inputs
 

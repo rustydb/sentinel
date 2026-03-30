@@ -43,7 +43,7 @@ An operator applies more than one filter at a time to reduce the turret list to 
 
 ### User Story 3 - Preserve Honest State Labels While Filtering (Priority: P3)
 
-An operator filters the turret list using states that are meaningful in Frontier Sentinel, including explicit unassigned or orphaned conditions where applicable, and the dashboard keeps those states legible rather than hiding them behind empty or misleading labels.
+An operator filters the turret list using states that are meaningful in Sentinel, including explicit unassigned or orphaned conditions where applicable, and the dashboard keeps those states legible rather than hiding them behind empty or misleading labels.
 
 **Why this priority**: Filters are only useful if the states they target are clear and trustworthy, especially when the operator is looking for edge cases like orphaned turrets or unassigned systems.
 
@@ -74,7 +74,7 @@ An operator filters the turret list using states that are meaningful in Frontier
 - **FR-004**: The solar-system filter MUST match turrets by their displayed solar-system assignment, including an explicit unassigned state when no assignment exists.
 - **FR-005**: The identifier filter MUST match the turret's full identifier or turret name and show only the matching turret or turrets.
 - **FR-006**: The known-network-node filter MUST allow operators to narrow the list to turrets associated with a selected known node, including an explicit orphaned state when no node exists.
-- **FR-007**: The status filter MUST reflect the turret statuses currently shown in Frontier Sentinel, including any displayed presentation states.
+- **FR-007**: The status filter MUST reflect the turret statuses currently shown in Sentinel, including any displayed presentation states.
 - **FR-008**: The class filter MUST reflect the turret classes currently available in the dashboard data and MUST not invent a class that is not present or resolvable; if a class value is temporarily unavailable, the system MUST show a loading state and then an explicit error state if the class still cannot be resolved after 10 seconds.
 - **FR-009**: The system MUST update the visible turret list immediately when a filter value changes.
 - **FR-010**: The system MUST provide a clear way to remove an individual filter without resetting the remaining active filters.
@@ -93,7 +93,7 @@ An operator filters the turret list using states that are meaningful in Frontier
 - **Turret**: The dashboard object being filtered, identified by `turret.id` and described by status, class, solar-system assignment, and network-node assignment.
 - **Solar System Filter Value**: A selectable solar-system state used to narrow the turret list by the turret's displayed solar system or by an explicit unassigned condition.
 - **Network Node Filter Value**: A selectable known-node state used to narrow the turret list by the turret's assigned node or by an explicit orphaned condition.
-- **Status Filter Value**: A selectable operational state shown in Frontier Sentinel for the turret.
+- **Status Filter Value**: A selectable operational state shown in Sentinel for the turret.
 - **Class Filter Value**: A selectable turret class used to distinguish turret types in the list, with explicit loading and error states if the class metadata is not immediately available.
 
 ## Success Criteria _(mandatory)_

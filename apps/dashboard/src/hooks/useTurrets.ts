@@ -4,7 +4,7 @@ import {
   type TurretData,
   isTurretData,
   toTurretStatus,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
 import { resolveTurretPackageId } from '../world';

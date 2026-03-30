@@ -1,9 +1,9 @@
 services:
   postgres:
     image: docker.io/library/postgres:16-alpine
-    container_name: frontier-sentinel-postgres
+    container_name: sentinel-postgres
     environment:
-      POSTGRES_DB: frontier_sentinel
+      POSTGRES_DB: sentinel
       POSTGRES_USER: sentinel
       POSTGRES_PASSWORD: sentinel
     ports:
@@ -11,19 +11,19 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sentinel -d frontier_sentinel"]
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinel"]
       interval: 5s
       timeout: 5s
       retries: 20
 
   api:
-    image: localhost/frontier-sentinel_api:latest
+    image: localhost/frontier_api:latest
     build:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
       PORT: 3001
-      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,7 +31,7 @@ services:
       - "3001:3001"
 
   dashboard:
-    image: localhost/frontier-sentinel_dashboard:latest
+    image: localhost/frontier_dashboard:latest
     build:
       context: .
       dockerfile: apps/dashboard/Dockerfile
@@ -45,12 +45,12 @@ services:
       - "5173:5173"
 
   indexer:
-    image: localhost/frontier-sentinel_indexer:latest
+    image: localhost/frontier_indexer:latest
     build:
       context: .
       dockerfile: apps/indexer/Dockerfile
     environment:
-      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/frontier_sentinel
+      DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
       SUI_RPC_URL: https://fullnode.testnet.sui.io
       SUI_TURRET_PACKAGE_ID: ${SUI_TURRET_PACKAGE_ID:-0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75}
       SUI_TURRET_EVENT_MODULE: ${SUI_TURRET_EVENT_MODULE:-turret}

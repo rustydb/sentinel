@@ -1,4 +1,4 @@
-import type { TurretData, TurretIntelligenceSummary } from '@frontier-sentinel/shared-types';
+import type { TurretData, TurretIntelligenceSummary } from '@sentinel/shared-types';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { useTurretEvents } from '../hooks/useTurretEvents';
@@ -400,10 +400,10 @@ export function TurretDetail({
                 {currentSolarSystem?.solarSystemName ? (
                   <button
                     type="button"
-                    className={`flex size-7 shrink-0 items-center justify-center border-2 border-sentinel-ink transition-all duration-200 ease-out ${
+                    className={`flex size-7 shrink-0 items-center justify-center border-2 border-sentinel-ink bg-sentinel-panel-inset text-sentinel-ink transition-all duration-200 ease-out ${
                       copiedSolarSystem
                         ? 'bg-sentinel-ink text-sentinel-paper shadow-[2px_2px_0_0_#ff5f1f]'
-                        : 'bg-white text-sentinel-ink'
+                        : 'hover:bg-sentinel-accent hover:text-sentinel-paper'
                     }`}
                     aria-label="Copy solar system"
                     onClick={() => {

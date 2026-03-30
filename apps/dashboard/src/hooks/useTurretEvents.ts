@@ -1,4 +1,4 @@
-import type { TurretEvent } from '@frontier-sentinel/shared-types';
+import type { TurretEvent } from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
 interface UseTurretEventsOptions {

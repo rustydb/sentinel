@@ -1,4 +1,4 @@
-import { GET_OBJECT_WITH_JSON, type NetworkNodeMapping } from '@frontier-sentinel/shared-types';
+import { GET_OBJECT_WITH_JSON, type NetworkNodeMapping } from '@sentinel/shared-types';
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 
 interface UseNetworkNodesOptions {

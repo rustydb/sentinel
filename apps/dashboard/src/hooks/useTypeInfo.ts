@@ -1,4 +1,4 @@
-import type { EveWorldName } from '@frontier-sentinel/shared-types';
+import type { EveWorldName } from '@sentinel/shared-types';
 import { useEffect, useState } from 'react';
 
 import { buildWorldApiPath } from '../world';

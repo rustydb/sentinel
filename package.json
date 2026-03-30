@@ -1,5 +1,5 @@
 {
-  "name": "frontier-sentinel",
+  "name": "sentinel",
   "private": true,
   "packageManager": "bun@1.2.11",
   "workspaces": [
@@ -7,15 +7,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter @frontier-sentinel/dashboard dev & bun run --filter @frontier-sentinel/api dev",
+    "dev": "bun run --filter @sentinel/dashboard dev & bun run --filter @sentinel/api dev",
     "build": "bun run --filter '*' build",
     "lint": "bunx eslint .",
     "format": "bunx prettier --check .",
     "test": "bun run test:shared && bun run test:api && bun run test:dashboard && cargo test --manifest-path apps/indexer/Cargo.toml",
-    "test:shared": "bun run --filter @frontier-sentinel/shared-types test",
-    "test:api": "bun run --filter @frontier-sentinel/api test",
-    "test:dashboard": "bun run --filter @frontier-sentinel/dashboard test",
-    "test:e2e": "bun run --filter @frontier-sentinel/dashboard test:e2e",
+    "test:shared": "bun run --filter @sentinel/shared-types test",
+    "test:api": "bun run --filter @sentinel/api test",
+    "test:dashboard": "bun run --filter @sentinel/dashboard test",
+    "test:e2e": "bun run --filter @sentinel/dashboard test:e2e",
     "prepare": "husky install"
   },
   "devDependencies": {

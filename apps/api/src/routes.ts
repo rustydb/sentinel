@@ -48,7 +48,7 @@ export function createApiHandlers(repositories: Repositories) {
     health(_request: Request, response: Response) {
       response.json({
         status: 'ok',
-        service: 'frontier-sentinel-api',
+        service: 'sentinel-api',
         timestamp: new Date().toISOString(),
       });
     },

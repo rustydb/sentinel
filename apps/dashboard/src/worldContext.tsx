@@ -1,4 +1,4 @@
-import type { EveWorldName } from '@frontier-sentinel/shared-types';
+import type { EveWorldName } from '@sentinel/shared-types';
 import { createContext, useContext, type ReactNode } from 'react';
 
 const WorldContext = createContext<EveWorldName>('utopia');

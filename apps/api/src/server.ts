@@ -9,7 +9,7 @@ async function main(): Promise<void> {
   const port = Number(process.env.PORT ?? '3001');
 
   app.listen(port, () => {
-    console.log(`frontier-sentinel-api listening on ${port}`);
+    console.log(`sentinel-api listening on ${port}`);
   });
 }
 

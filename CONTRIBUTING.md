@@ -1,6 +1,6 @@
-# Contributing to Frontier Sentinel
+# Contributing to Sentinel
 
-First off, thank you for considering contributing to Frontier Sentinel!
+First off, thank you for considering contributing to Sentinel!
 This document outlines the absolutely critical rules and expectations for contributing to this project.
 
 By participating, you agree to abide by our specific aesthetic, technical, and security constraints.
@@ -46,4 +46,4 @@ We govern all commit history strictly:
 - **camelCase**: Variables, utility functions, filenames for logic (`codeGenerator.ts`).
 - **kebab-case**: General organizational directories.
 
-Thank you for building a robust and resilient Frontier Sentinel!
+Thank you for building a robust and resilient Sentinel!

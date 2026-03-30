@@ -1,6 +1,6 @@
 # Feature Specification: EVE Frontier Theme Overhaul
 
-**Feature Branch**: `005-eve-frontier-theme`  
+**Feature Branch**: `005-eve-sentinel-theme`  
 **Created**: 2026-03-29  
 **Status**: Implemented  
 **Input**: User description: "Add logo and overhaul the themeing to match EVE Frontier stark and ominious space pallete."
@@ -9,7 +9,7 @@
 
 ### User Story 1 - Establish EVE Frontier Visual Identity (Priority: P1)
 
-An operator opens Frontier Sentinel and immediately recognizes it as an EVE Frontier interface through the logo, color palette, and overall visual tone rather than a generic dashboard.
+An operator opens Sentinel and immediately recognizes it as an EVE Frontier interface through the logo, color palette, and overall visual tone rather than a generic dashboard.
 
 **Why this priority**: The product currently works, but it does not yet communicate the intended world identity strongly enough. The logo and visual direction are the highest-leverage changes for product perception.
 
@@ -17,7 +17,7 @@ An operator opens Frontier Sentinel and immediately recognizes it as an EVE Fron
 
 **Acceptance Scenarios**:
 
-1. **Given** an operator opens the dashboard, **When** the page loads, **Then** the interface displays a Frontier Sentinel logo treatment that feels native to the product and aligned with EVE Frontier.
+1. **Given** an operator opens the dashboard, **When** the page loads, **Then** the interface displays a Sentinel logo treatment that feels native to the product and aligned with EVE Frontier.
 2. **Given** the operator scans the page, **When** they compare the header, cards, drawers, and map container, **Then** the palette reads as one cohesive stark and ominous space-facing system rather than mixed neutral surfaces.
 3. **Given** the operator uses the dashboard across the main shell, **When** they move between connected and unconnected states, **Then** the updated identity remains consistent across both views.
 
@@ -106,7 +106,7 @@ An operator reviews turret cards and the turret detail panel and immediately und
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST introduce a Frontier Sentinel logo treatment that is visible in the dashboard shell.
+- **FR-001**: The system MUST introduce a Sentinel logo treatment that is visible in the dashboard shell.
 - **FR-002**: The system MUST apply a cohesive EVE Frontier-inspired theme across the dashboard shell, cards, drawers, detail panels, and primary supporting surfaces.
 - **FR-003**: The updated theme MUST emphasize a stark and ominous space-facing palette rather than the current lighter neutral presentation.
 - **FR-004**: The system MUST preserve clear visual distinction for status, warning, danger, selected, and neutral states under the new theme.
@@ -140,7 +140,7 @@ An operator reviews turret cards and the turret detail panel and immediately und
 ### Key Entities _(include if feature involves data)_
 
 - **Theme Surface**: A branded dashboard surface such as the shell, card, drawer, detail panel, or map frame that must express the updated visual identity consistently.
-- **Brand Asset**: The logo or related identity treatment that marks Frontier Sentinel as an EVE Frontier-facing product.
+- **Brand Asset**: The logo or related identity treatment that marks Sentinel as an EVE Frontier-facing product.
 - **Interactive State Style**: The visual treatment for hover, active, selected, warning, danger, and neutral states under the new palette.
 - **Pilot Statistics Panel**: A shell-level summary surface that communicates the operator’s current turret posture and recent hostile activity counts.
 - **Target Intelligence Snapshot**: The latest resolved target state for a turret, derived from its latest `PriorityListUpdatedEvent`, including character-or-NPC identity, optional tribe name, aggressor state, and resulting turret engagement state.

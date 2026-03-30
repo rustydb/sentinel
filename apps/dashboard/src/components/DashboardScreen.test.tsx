@@ -80,7 +80,7 @@ describe('DashboardScreen', () => {
       />,
     );
 
-    expect(screen.getByAltText(/frontier sentinel logo/i)).toBeTruthy();
+    expect(screen.getByAltText(/sentinel logo/i)).toBeTruthy();
     expect(screen.getByRole('textbox', { name: /search turrets/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /advanced search options/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();

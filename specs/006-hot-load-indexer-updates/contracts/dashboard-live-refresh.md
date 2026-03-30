@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define how Frontier Sentinel keeps turret assemblies, network nodes, solar-system mappings, event context, and metrics fresh while the live dashboard remains open.
+Define how Sentinel keeps turret assemblies, network nodes, solar-system mappings, event context, and metrics fresh while the live dashboard remains open.
 
 ## Live Data Sources
 

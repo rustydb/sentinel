@@ -1,11 +1,11 @@
 # Implementation Plan: EVE Frontier Theme Overhaul
 
-**Branch**: `005-eve-frontier-theme` | **Date**: 2026-03-29 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/005-eve-frontier-theme/spec.md`
+**Branch**: `005-eve-sentinel-theme` | **Date**: 2026-03-29 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/005-eve-sentinel-theme/spec.md`
 
 ## Summary
 
-Overhaul Frontier Sentinel into a darker EVE Frontier-aligned shell by reusing the existing logo asset, introducing a documented theme token system, adding a shell-level statistics panel, and enriching turret cards/detail with latest target intelligence derived from turret events and indexer-backed aggressor counts. Keep demo and live routes visually aligned and treat demo fixtures as a first-class deliverable for review.
+Overhaul Sentinel into a darker EVE Frontier-aligned shell by reusing the existing logo asset, introducing a documented theme token system, adding a shell-level statistics panel, and enriching turret cards/detail with latest target intelligence derived from turret events and indexer-backed aggressor counts. Keep demo and live routes visually aligned and treat demo fixtures as a first-class deliverable for review.
 
 ## Technical Context
 
@@ -33,7 +33,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ### Documentation (this feature)
 
 ```text
-specs/005-eve-frontier-theme/
+specs/005-eve-sentinel-theme/
 ├── plan.md
 ├── research.md
 ├── data-model.md

@@ -10,7 +10,7 @@ Add operator-facing turret filtering in the dashboard so users can narrow the li
 ## Technical Context
 
 **Language/Version**: TypeScript 5.8.x in the dashboard and shared-types packages, with the existing React 19 / Vite 6 stack  
-**Primary Dependencies**: React 19, Vite 6, Bun, `@frontier-sentinel/shared-types`, existing dashboard hooks, Testing Library, Vitest 3, Playwright  
+**Primary Dependencies**: React 19, Vite 6, Bun, `@sentinel/shared-types`, existing dashboard hooks, Testing Library, Vitest 3, Playwright  
 **Storage**: No new storage; filtering is derived from the already loaded turret data and existing node / solar-system / type resolution surfaces  
 **Testing**: Vitest for filter logic and component behavior, Testing Library for interaction coverage, existing Playwright coverage for end-to-end operator flows  
 **Target Platform**: Desktop browser dashboard  

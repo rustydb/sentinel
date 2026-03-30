@@ -3,8 +3,8 @@ import type {
   TurretData,
   TurretIntelligenceResponse,
   TurretIntelligenceSummary,
-} from '@frontier-sentinel/shared-types';
-import { isTurretIntelligenceSummary } from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
+import { isTurretIntelligenceSummary } from '@sentinel/shared-types';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const EMPTY_STATS: ShellStatisticsSnapshot = {

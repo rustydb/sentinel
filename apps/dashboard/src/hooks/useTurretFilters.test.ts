@@ -3,7 +3,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import type { TurretIntelligenceSummary } from '@frontier-sentinel/shared-types';
+import type { TurretIntelligenceSummary } from '@sentinel/shared-types';
 
 import type { NetworkNodeView } from './useNetworkNodes';
 import type { ResolvedTurretSolarSystem } from './useTurretSolarSystems';

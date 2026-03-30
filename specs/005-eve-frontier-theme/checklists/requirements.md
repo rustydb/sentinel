@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-03-29  
-**Feature**: [spec.md](/home/rusty/gitstuffs/rusty/frontier-sentinel/specs/005-eve-frontier-theme/spec.md)
+**Feature**: [spec.md](/home/rusty/gitstuffs/rusty/sentinel/specs/005-eve-sentinel-theme/spec.md)
 
 ## Content Quality
 

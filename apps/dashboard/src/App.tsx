@@ -1,9 +1,9 @@
 import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
-import type { EveWorldName, TurretData } from '@frontier-sentinel/shared-types';
+import type { EveWorldName, TurretData } from '@sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
-import frontierSentinelLogo from '../../../assets/logo.png';
+import sentinelLogo from '../../../assets/logo.png';
 import { DashboardScreen } from './components/DashboardScreen';
 import { useDashboardRefresh } from './hooks/useDashboardRefresh';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
@@ -41,13 +41,11 @@ function WalletConnect({ onConnect, canConnect }: { onConnect: () => void; canCo
     <section className="mx-auto flex min-h-[78vh] max-w-5xl flex-col items-center justify-center px-6 py-10 text-center">
       <div className="w-full max-w-3xl">
         <img
-          src={frontierSentinelLogo}
-          alt="Frontier Sentinel mark"
+          src={sentinelLogo}
+          alt="Sentinel logo"
           className="mx-auto h-auto w-full max-w-[21rem] object-contain drop-shadow-[0_0_24px_rgba(255,106,33,0.18)] sm:max-w-[24rem]"
         />
-        <h1 className="mt-6 text-4xl uppercase text-sentinel-glow sm:text-[3.35rem]">
-          Frontier Sentinel
-        </h1>
+        <h1 className="mt-6 text-4xl uppercase text-sentinel-glow sm:text-[3.35rem]">Sentinel</h1>
         <p className="mt-3 text-[0.7rem] uppercase tracking-[0.55em] text-sentinel-muted">
           EVE Frontier Defense Telemetry
         </p>
@@ -206,7 +204,7 @@ export default function App() {
         ) : null}
         {isConnected && !usingSupportedWallet ? (
           <div className="mx-auto mt-4 flex max-w-2xl flex-col gap-3 border border-sentinel-danger bg-sentinel-shell p-4 text-sm uppercase text-sentinel-danger">
-            <p>Connected wallet is not supported. Frontier Sentinel requires EVE Wallet.</p>
+            <p>Connected wallet is not supported. Sentinel requires EVE Wallet.</p>
             <button
               type="button"
               className={`w-fit ${DANGER_ACTION_BUTTON_CLASS}`}

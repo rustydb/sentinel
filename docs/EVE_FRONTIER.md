@@ -1,11 +1,11 @@
 ---
-title: Frontier Sentinel - EVE Frontier
+title: Sentinel - EVE Frontier
 version: 1.1.0
 status: draft
 created: 2026-03-27
 updated: 2026-03-29
 author: rustydb
-description: Descriptions of the EVE Frontier game relevant for Frontier Sentinel
+description: Descriptions of the EVE Frontier game relevant for Sentinel
 ---
 
 ## APIs
@@ -26,7 +26,7 @@ Solar systems should be treated as a friendly-name and numeric-ID pair:
 - `name` is what operators search for and what the dashboard displays
 - `id` is what `ef-map` needs for dynamic highlight and focus messaging
 
-For Frontier Sentinel, solar-system data is bundled locally and refreshed with `scripts/update-solar-systems.ts` rather than fetched on every search interaction.
+For Sentinel, solar-system data is bundled locally and refreshed with `scripts/update-solar-systems.ts` rather than fetched on every search interaction.
 
 ## Game items (types)
 
@@ -59,7 +59,7 @@ The information contained in this file is for quick reference, but the upstream 
 
 ### Location presentation
 
-When Frontier Sentinel presents a turret location:
+When Sentinel presents a turret location:
 
 1. use the network-node solar-system assignment if the current node is assigned
 2. if the turret is orphaned, fall back to the retained last-known solar-system mapping when available
@@ -212,7 +212,7 @@ The return value from `get_target_priority_list`. Each entry maps a target to it
 
 ### Priority Intelligence Presentation
 
-Frontier Sentinel uses the most recent `PriorityListUpdatedEvent` as the current threat summary for a turret.
+Sentinel uses the most recent `PriorityListUpdatedEvent` as the current threat summary for a turret.
 
 - `target_item_id` identifies the latest in-proximity target item
 - `character_id === 0` means the target is an NPC and should display as `NPC`
@@ -230,7 +230,7 @@ Frontier Sentinel uses the most recent `PriorityListUpdatedEvent` as the current
 
 ### Recent Aggressor Counts
 
-Frontier Sentinel also derives a recent threat count from indexed events:
+Sentinel also derives a recent threat count from indexed events:
 
 - per turret: number of aggressor sightings in the past 24 hours
 - shell total: sum of those turret-level counts across the current operator view

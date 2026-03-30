@@ -7,7 +7,7 @@ Define the shell-level UI expectations for the EVE Frontier theme overhaul, incl
 ## Branding
 
 - The dashboard shell uses the existing `./assets/logo.svg` as its canonical logo source.
-- The header presents a Frontier Sentinel logo treatment in both live and demo routes.
+- The header presents a Sentinel logo treatment in both live and demo routes.
 - The unconnected wallet view, connected shell, and fatal fallback surface share the same theme language.
 
 ## Theme Documentation

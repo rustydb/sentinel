@@ -1,4 +1,4 @@
-import type { EveWorldName, SolarSystemSearchResult } from '@frontier-sentinel/shared-types';
+import type { EveWorldName, SolarSystemSearchResult } from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
 import { useSolarSystemCatalog } from '../hooks/useSolarSystemCatalog';

@@ -1,6 +1,6 @@
 use chrono::{NaiveDateTime, Utc};
-use frontier_sentinel_indexer::handlers::{InMemoryStore, TurretEventHandler};
-use frontier_sentinel_indexer::models::IncomingTurretEvent;
+use sentinel_indexer::handlers::{InMemoryStore, TurretEventHandler};
+use sentinel_indexer::models::IncomingTurretEvent;
 
 #[test]
 fn inserts_event_into_store() {

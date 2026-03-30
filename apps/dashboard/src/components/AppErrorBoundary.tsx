@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import frontierSentinelLogo from '../../../../assets/logo.svg';
+import sentinelLogo from '../../../../assets/logo.svg';
 
 const ACTION_BUTTON_CLASS =
   'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
@@ -27,7 +27,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('frontier-sentinel fatal render error', error, errorInfo);
+    console.error('sentinel fatal render error', error, errorInfo);
   }
 
   private readonly handleReload = () => {
@@ -44,8 +44,8 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
         <section className="mx-auto flex max-w-3xl flex-col gap-5 border-4 border-sentinel-danger bg-sentinel-shell p-8 shadow-[12px_12px_0_0_#06080b]">
           <div className="flex items-start gap-4">
             <img
-              src={frontierSentinelLogo}
-              alt="Frontier Sentinel logo"
+              src={sentinelLogo}
+              alt="Sentinel logo"
               className="h-16 w-16 border-2 border-sentinel-ink bg-sentinel-panel object-cover object-center p-1"
             />
             <div>
@@ -53,7 +53,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
                 Telemetry fault
               </p>
               <h1 className="mt-3 text-4xl uppercase leading-none text-sentinel-danger">
-                Frontier Sentinel encountered a fatal error
+                Sentinel encountered a fatal error
               </h1>
             </div>
           </div>

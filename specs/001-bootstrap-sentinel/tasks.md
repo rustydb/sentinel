@@ -1,6 +1,6 @@
 # Tasks: Bootstrap Sentinel
 
-**Input**: Design documents from `/specs/001-bootstrap-sentinel/`
+**Input**: Design documents from `/specs/001-bootstrap/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
 > Gate tasks were treated as approved by the explicit `/speckit-implement` request for this turn after their corresponding tests were authored.
@@ -12,10 +12,10 @@
 - [x] T001 Initialize Bun monorepo and workspace root configuration in package.json
 - [x] T002 [P] Configure global ESLint, Prettier, Husky, and commitlint to enforce Conventional Commits
 - [x] T002b [P] Configure root and workspace `tsconfig.json` files for strict ES2022 targeting
-- [x] T003 Initialize `@frontier-sentinel/shared-types` package structure
-- [x] T004 Initialize `@frontier-sentinel/api` Express project structure
-- [x] T005 Initialize `@frontier-sentinel/dashboard` React+Vite project structure
-- [x] T006 Initialize `@frontier-sentinel/indexer` Rust project structure
+- [x] T003 Initialize `@sentinel/shared-types` package structure
+- [x] T004 Initialize `@sentinel/api` Express project structure
+- [x] T005 Initialize `@sentinel/dashboard` React+Vite project structure
+- [x] T006 Initialize `@sentinel/indexer` Rust project structure
 - [x] T008 [P] Configure Tailwind CSS 4 `@theme` in apps/dashboard/src/index.css
 - [x] T009 [P] Create base Dockerfiles for apps/api, apps/dashboard, and apps/indexer
 - [x] T009b [P] Setup Playwright framework for End-to-End browser UI testing in apps/dashboard/tests/e2e/

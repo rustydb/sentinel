@@ -33,8 +33,7 @@ describe('DemoApp', () => {
   it('renders the branded dashboard shell and pilot statistics in demo mode', () => {
     render(<DemoApp />);
 
-    expect(screen.getByAltText(/frontier sentinel logo/i)).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /frontier sentinel/i })).toBeTruthy();
+    expect(screen.getByAltText(/sentinel logo/i)).toBeTruthy();
     expect(screen.getByText(/metrics/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /^the slayer/i })).toBeTruthy();
   });

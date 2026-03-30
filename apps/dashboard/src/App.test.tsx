@@ -296,8 +296,8 @@ describe('App', () => {
 
     render(<App />);
 
-    expect(screen.getByAltText(/frontier sentinel mark/i)).toBeTruthy();
-    expect(screen.getByRole('heading', { name: /frontier sentinel/i })).toBeTruthy();
+    expect(screen.getByAltText(/sentinel logo/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /sentinel/i })).toBeTruthy();
     expect(screen.getByText(/eve frontier defense telemetry/i)).toBeTruthy();
     expect(screen.getByText(/security clearance terminal/i)).toBeTruthy();
     expect(screen.getByText(/no active security clearance\./i)).toBeTruthy();

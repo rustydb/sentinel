@@ -2,8 +2,8 @@ use std::{collections::HashMap, env};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
-use frontier_sentinel_indexer::handlers::retry_rpc;
-use frontier_sentinel_indexer::models::IncomingTurretEvent;
+use sentinel_indexer::handlers::retry_rpc;
+use sentinel_indexer::models::IncomingTurretEvent;
 use reqwest::Client as HttpClient;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;

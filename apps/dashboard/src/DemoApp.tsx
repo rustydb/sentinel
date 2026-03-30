@@ -1,4 +1,4 @@
-import type { TurretData } from '@frontier-sentinel/shared-types';
+import type { TurretData } from '@sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
 import { DashboardScreen } from './components/DashboardScreen';

@@ -1,11 +1,11 @@
 # Implementation Plan: Bootstrap Sentinel
 
-**Branch**: `001-bootstrap-sentinel` | **Date**: 2026-03-26 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-bootstrap-sentinel/spec.md`
+**Branch**: `001-bootstrap` | **Date**: 2026-03-26 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/001-bootstrap/spec.md`
 
 ## Summary
 
-Bootstrap the entire Frontier Sentinel monorepo from scratch, encompassing a React 19 + Tailwind CSS 4 frontend, an Express API backend, a Rust-based Sui event indexer, and a Move smart contract package. Connects to the EVE Vault wallet for on-chain interaction.
+Bootstrap the entire Sentinel monorepo from scratch, encompassing a React 19 + Tailwind CSS 4 frontend, an Express API backend, a Rust-based Sui event indexer, and a Move smart contract package. Connects to the EVE Vault wallet for on-chain interaction.
 
 ## Technical Context
 
@@ -33,7 +33,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ### Documentation (this feature)
 
 ```text
-specs/001-bootstrap-sentinel/
+specs/001-bootstrap/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output
 ├── data-model.md        # Phase 1 output

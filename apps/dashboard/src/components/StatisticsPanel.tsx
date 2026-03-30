@@ -1,4 +1,4 @@
-import type { ShellStatisticsSnapshot } from '@frontier-sentinel/shared-types';
+import type { ShellStatisticsSnapshot } from '@sentinel/shared-types';
 
 interface StatisticsPanelProps {
   stats: ShellStatisticsSnapshot;

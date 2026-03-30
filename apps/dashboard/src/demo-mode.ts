@@ -2,7 +2,7 @@ import type {
   ShellStatisticsSnapshot,
   TurretData,
   TurretIntelligenceSummary,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 
 import {
   sampleEvents,

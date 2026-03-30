@@ -1,4 +1,4 @@
-import type { EveWorldName } from '@frontier-sentinel/shared-types';
+import type { EveWorldName } from '@sentinel/shared-types';
 import { useEffect, useMemo, useState } from 'react';
 
 import { fetchTypeInfo, type TypeInfo } from './useTypeInfo';

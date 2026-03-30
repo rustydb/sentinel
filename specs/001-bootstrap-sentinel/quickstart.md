@@ -25,8 +25,8 @@
     In separate terminals start the dashboard and API:
 
     ```bash
-    bun run --filter @frontier-sentinel/dashboard dev
-    bun run --filter @frontier-sentinel/api dev
+    bun run --filter @sentinel/dashboard dev
+    bun run --filter @sentinel/api dev
     ```
 
     Start the indexer when you need event ingestion:

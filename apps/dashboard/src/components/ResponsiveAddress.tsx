@@ -235,10 +235,10 @@ export function ResponsiveAddress({
             ref={controlRef}
             type="button"
             className={joinClasses(
-              'flex size-7 items-center justify-center border-2 border-sentinel-ink transition-all duration-200 ease-out',
+              'flex size-7 items-center justify-center border-2 border-sentinel-ink bg-sentinel-panel-inset text-sentinel-ink transition-all duration-200 ease-out',
               copied
                 ? 'bg-sentinel-ink text-sentinel-paper shadow-[2px_2px_0_0_#ff5f1f]'
-                : 'bg-white text-sentinel-ink',
+                : 'hover:bg-sentinel-accent hover:text-sentinel-paper',
             )}
             aria-label={`Copy ${copyLabel}`}
             onClick={(event: MouseEvent<HTMLButtonElement>) => {

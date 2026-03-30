@@ -4,7 +4,7 @@ import {
   type NetworkNodeMapping,
   type TurretData,
   type TurretSolarSystemMapping,
-} from '@frontier-sentinel/shared-types';
+} from '@sentinel/shared-types';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface ResolvedTurretSolarSystem {
