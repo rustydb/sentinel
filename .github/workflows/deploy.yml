@@ -1,0 +1,85 @@
+name: Deploy to Cloud Run
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  REGION: ${{ secrets.GCP_REGION }}
+  REPO: sentinel-repo
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for Workload Identity Federation
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Docker Auth
+        run: |-
+          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build Images
+        run: |
+          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest -f apps/api/Dockerfile .
+          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest -f apps/dashboard/Dockerfile .
+          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest -f apps/indexer/Dockerfile .
+
+      - name: Push Images
+        run: |
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest
+
+      - name: Deploy API
+        run: |
+          gcloud run deploy api \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT }} \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --allow-unauthenticated \
+            --port 3001
+
+      - name: Deploy Indexer
+        run: |
+          gcloud run deploy indexer \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT }} \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --no-cpu-throttling \
+            --min-instances 1 \
+            --allow-unauthenticated \
+            --port 8080
+
+      - name: Deploy Dashboard
+        run: |
+          API_URL=$(gcloud run services describe api --region ${{ secrets.GCP_REGION }} --format="value(status.url)")
+          echo "API deployed at $API_URL"
+          
+          gcloud run deploy dashboard \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest \
+            --region ${{ secrets.GCP_REGION }} \
+            --project ${{ secrets.GCP_PROJECT }} \
+            --set-env-vars API_PROXY_URL=$API_URL,GRAPHQL_PROXY_URL=https://graphql.testnet.sui.io \
+            --allow-unauthenticated \
+            --port 5173

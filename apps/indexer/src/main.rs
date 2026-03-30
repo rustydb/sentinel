@@ -9,6 +9,8 @@ use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::time::{interval, Duration};
+use tokio::net::TcpListener;
+use tokio::io::AsyncWriteExt;
 use tokio_postgres::{Client as PgClient, NoTls};
 
 const INDEXER_PIPELINE: &str = "turret_events";
@@ -596,8 +598,34 @@ async fn poll_until_caught_up(
     Ok(summary)
 }
 
+async fn start_health_check_server() {
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let addr = format!("0.0.0.0:{}", port);
+    
+    let listener = match TcpListener::bind(&addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("failed to bind health check port: {}", e);
+            return;
+        }
+    };
+
+    println!("health check server listening on {}", addr);
+
+    loop {
+        if let Ok((mut stream, _)) = listener.accept().await {
+            tokio::spawn(async move {
+                let response = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK";
+                let _ = stream.write_all(response.as_bytes()).await;
+            });
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    tokio::spawn(start_health_check_server());
+
     let config = IndexerConfig::from_env()?;
     let database = Database::connect(&config.database_url).await?;
     let rpc = SuiRpcClient::new(config.sui_rpc_url.clone());
