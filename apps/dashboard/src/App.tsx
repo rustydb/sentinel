@@ -16,7 +16,7 @@ import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
 import { useTurrets } from './hooks/useTurrets';
 
 const EVE_WALLET_DOWNLOAD_URL =
-  'https://github.com/evefrontier/evevault/releases/download/v0.0.6/eve-vault-chrome.zip';
+  'https://github.com/evefrontier/evevault/releases/latest/download/eve-vault-chrome.zip';
 const ACTION_BUTTON_CLASS =
   'sentinel-action-button border-2 border-sentinel-ink px-3 py-2 uppercase';
 const PRIMARY_ACTION_BUTTON_CLASS =
