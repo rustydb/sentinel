@@ -6,24 +6,36 @@
 
 <p align="center"><strong>Defensive telemetry for EVE Frontier turret operators.</strong></p>
 
+## Table of Contents
+
+- [What It Covers](#what-it-covers)
+- [Tech Stack](#tech-stack)
+- [Repository Layout](#repository-layout)
+- [EVE Hackathon Notes](#eve-hackathon-notes)
+- [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Preferred Local Workflow](#preferred-local-workflow)
+    - [Production-Style Stack](#production-style-stack)
+    - [Host-Native Workflow](#host-native-workflow)
+- [Validation](#validation)
+- [Documentation](#documentation)
+- [License](#license)
+
 ---
 
-Sentinel is an EVE Frontier dashboard for tracking turret assemblies, their indexed event history, network-node assignments, and related operator metadata. The project combines a React dashboard, a Bun/Express support API, and a Rust indexer that follows turret activity on Sui.
+Sentinel is an EVE Frontier dashboard for live monitoring of a user's turret assemblies; their interactions, and current status.
+
+The project combines a React dashboard, a Bun/Express support API, and a Rust indexer that follows turret activity on Sui blockchain.
 
 The product direction is intentional:
 
-- brutalist but polished UI
-- honest, explicit state handling
-- EVE Frontier language over generic admin-app wording
-- fluid interactions that still feel sharp and tactical
-
 ## What It Covers
 
-- turret assembly discovery from Sui-owned objects
-- event history and threat intelligence from indexed turret events
-- network-node assignment and retained solar-system mapping workflows
-- live operator view plus a fixture-backed `/demo` route for review and development
-- world-aware behavior for current development on `Utopia` with `Stillness` as the production target
+- Displaying Turret Smart Assembly objects owned by the logged in wallet
+- Event history and threat intelligence from indexed on-chain turret events
+- Solar-system mapping for working around the location obfuscation in EVE, players can assign solar-systems to their network nodes
+- Galaxy plotting by network-node; assign solar systems to network-nodes to map turrets
+- Live operator view
 
 ## Tech Stack
 
@@ -53,6 +65,21 @@ The product direction is intentional:
 |-- docker-compose.dev.yml
 `-- docker-compose.yml
 ```
+
+## EVE Hackathon Notes
+
+The 2026 EVE Hackathon was ongoing during Cycle 5 of EVE Frontier, and at this time there were
+momumental changes made to the game. Some of these changes, such as certain on-chain events, were
+not fully functional yet for the hackathon.
+
+To work around missing on-chain events, this application created a "demo-mode" that populates the dashboard with static mocks.
+
+Demo mode will be removed from the application after the on-chain events become available, it will
+not be maintained long-term.
+
+> NOTE: The data in demo mode is entirely static, it makes no attempt to simulate live data.
+
+Access demo-mode by the `/demo` sub-path (e.g. `http://localhost:5173/demo`).
 
 ## Getting Started
 
@@ -85,10 +112,11 @@ Use the live dashboard when you want the real wallet-connected flow. Use `/demo`
 
 Notes:
 
-- use `Podman`, not Docker, for documented workflows in this repository
-- the dev stack defaults to the current `Utopia` world assumptions
-- the demo route stays fixture-backed on purpose; it does not pretend to be live telemetry
-- some older repo quickstarts still mention `5174`, but the checked-in dashboard runtime is currently configured for `5173`
+> This project was built and tested using `podman` and `podman compose`. Use `docker` at your own discretion.
+>
+> - The dev stack defaults to the current `Utopia` world assumptions
+> - the demo route stays fixture-backed on purpose; it does not pretend to be live telemetry
+> - some older repo quickstarts still mention `5174`, but the checked-in dashboard runtime is currently configured for `5173`
 
 ### Production-Style Stack
 
