@@ -20,11 +20,12 @@ Sentinel will poll Sui events with a `MoveEventModule` filter and persist its RP
 
 Specifically:
 
-- The indexer queries `suix_queryEvents` against `SUI_TURRET_PACKAGE_ID::turret`.
+- The indexer parses `EVE_PACKAGE_ID` as a comma-separated list of addresses.
+- The indexer queries `suix_queryEvents` against `EVE_PACKAGE_ID::turret`. It spawns a concurrent `tokio` polling loop for each configured package ID.
 - Supported turret events are filtered explicitly by event name after fetch.
-- The indexer persists its last processed RPC cursor in the `indexer_cursors` table.
+- The indexer persists its last processed RPC cursor in the `indexer_cursors` table, using a dynamic `pipeline_name` (e.g. `turret_events_{ID}`) to avoid collisions.
 - The indexer looks up each matching transaction's checkpoint through `sui_getTransactionBlock` so `turret_events.checkpoint_sequence_number` remains populated.
-- If `SUI_TURRET_PACKAGE_ID` is not configured, the service stays alive and idle instead of crashing.
+- If `EVE_PACKAGE_ID` is not configured or empty, the service stays alive and idle instead of crashing.
 
 ## Consequences
 
@@ -48,6 +49,5 @@ Specifically:
     - `Utopia` (current sandbox default): `0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75`
     - `Stillness` (planned later switch): `0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c`
 - Runtime configuration:
-    - `SUI_TURRET_PACKAGE_ID`
-    - `SUI_TURRET_EVENT_MODULE` (defaults to `turret`)
+    - `EVE_PACKAGE_ID`
     - `SUI_RPC_URL`

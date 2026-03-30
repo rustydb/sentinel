@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env};
+use std::{collections::HashMap, env, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
@@ -13,7 +13,6 @@ use tokio::net::TcpListener;
 use tokio::io::AsyncWriteExt;
 use tokio_postgres::{Client as PgClient, NoTls};
 
-const INDEXER_PIPELINE: &str = "turret_events";
 const DEFAULT_POLL_INTERVAL_MS: u64 = 5_000;
 const DEFAULT_PAGE_SIZE: u64 = 50;
 const DEFAULT_MAX_PAGES_PER_POLL: usize = 10;
@@ -28,7 +27,7 @@ const SUPPORTED_TURRET_EVENTS: [&str; 3] = [
 struct IndexerConfig {
     database_url: String,
     sui_rpc_url: String,
-    turret_package_id: Option<String>,
+    turret_package_ids: Vec<String>,
     turret_event_module: String,
     poll_interval: Duration,
     page_size: u64,
@@ -40,18 +39,19 @@ impl IndexerConfig {
         let database_url = env::var("DATABASE_URL").context("DATABASE_URL is required")?;
         let sui_rpc_url = env::var("SUI_RPC_URL")
             .unwrap_or_else(|_| "https://fullnode.testnet.sui.io:443".to_string());
-        let turret_package_id = env::var("SUI_TURRET_PACKAGE_ID")
-            .ok()
-            .map(|value| value.trim().to_string())
-            .filter(|value| !value.is_empty())
-            .map(normalize_object_id);
-        let turret_event_module = env::var("SUI_TURRET_EVENT_MODULE")
-            .unwrap_or_else(|_| DEFAULT_EVENT_MODULE.to_string());
+        let turret_package_ids = env::var("EVE_PACKAGE_ID")
+            .unwrap_or_default()
+            .split(',')
+            .map(|id| id.trim().to_string())
+            .filter(|id| !id.is_empty())
+            .map(normalize_object_id)
+            .collect();
+        let turret_event_module = DEFAULT_EVENT_MODULE.to_string();
 
         Ok(Self {
             database_url,
             sui_rpc_url,
-            turret_package_id,
+            turret_package_ids,
             turret_event_module,
             poll_interval: Duration::from_millis(parse_positive_u64(
                 "INDEXER_POLL_INTERVAL_MS",
@@ -513,16 +513,9 @@ async fn process_page(
     database: &Database,
     config: &IndexerConfig,
     state: &CursorState,
+    package_id: &str,
+    pipeline_name: &str,
 ) -> Result<PageOutcome> {
-    let Some(package_id) = config.turret_package_id.as_deref() else {
-        return Ok(PageOutcome {
-            fetched: 0,
-            indexed: 0,
-            has_next_page: false,
-            next_state: state.clone(),
-        });
-    };
-
     let page = rpc
         .query_events(
             package_id,
@@ -561,7 +554,7 @@ async fn process_page(
     }
 
     let next_state = merge_state(state, next_cursor, max_checkpoint);
-    database.save_state(INDEXER_PIPELINE, &next_state).await?;
+    database.save_state(pipeline_name, &next_state).await?;
 
     Ok(PageOutcome {
         fetched: page.data.len(),
@@ -576,6 +569,8 @@ async fn poll_until_caught_up(
     database: &Database,
     config: &IndexerConfig,
     state: &mut CursorState,
+    package_id: &str,
+    pipeline_name: &str,
 ) -> Result<PollSummary> {
     let mut summary = PollSummary {
         fetched: 0,
@@ -584,7 +579,7 @@ async fn poll_until_caught_up(
     };
 
     for _ in 0..config.max_pages_per_poll {
-        let outcome = process_page(rpc, database, config, state).await?;
+        let outcome = process_page(rpc, database, config, state, package_id, pipeline_name).await?;
         *state = outcome.next_state;
         summary.fetched += outcome.fetched;
         summary.indexed += outcome.indexed;
@@ -627,41 +622,69 @@ async fn main() -> Result<()> {
     tokio::spawn(start_health_check_server());
 
     let config = IndexerConfig::from_env()?;
-    let database = Database::connect(&config.database_url).await?;
+    let database = Arc::new(Database::connect(&config.database_url).await?);
     let rpc = SuiRpcClient::new(config.sui_rpc_url.clone());
-    let mut state = database.load_state(INDEXER_PIPELINE).await?;
-    let mut ticker = interval(config.poll_interval);
 
     println!(
-        "indexer starting with poll interval {:?}, event page size {}, module {}",
-        config.poll_interval, config.page_size, config.turret_event_module
+        "indexer starting with poll interval {:?}, event page size {}, module {}, packages {}",
+        config.poll_interval, config.page_size, config.turret_event_module, config.turret_package_ids.len()
     );
 
-    if config.turret_package_id.is_none() {
-        println!("SUI_TURRET_PACKAGE_ID is not configured; indexer will stay idle until it is set");
+    if config.turret_package_ids.is_empty() {
+        println!("EVE_PACKAGE_ID is not configured; indexer will stay idle until it is set");
+        loop { tokio::time::sleep(Duration::from_secs(3600)).await; }
     }
 
-    loop {
-        ticker.tick().await;
+    let mut tasks = Vec::new();
 
-        let summary = poll_until_caught_up(&rpc, &database, &config, &mut state).await?;
-        if summary.indexed > 0 {
-            println!(
-                "indexed {} turret event(s) across {} page(s); last checkpoint {}",
-                summary.indexed, summary.pages, state.last_checkpoint_sequence_number
-            );
-        } else if summary.fetched > 0 {
-            println!(
-                "fetched {} event(s) with no supported turret matches across {} page(s); last checkpoint {}",
-                summary.fetched, summary.pages, state.last_checkpoint_sequence_number
-            );
-        } else {
-            println!(
-                "no new events; last checkpoint {}",
-                state.last_checkpoint_sequence_number
-            );
-        }
+    for package_id in &config.turret_package_ids {
+        let package_id = package_id.clone();
+        let pipeline_name = format!("turret_events_{}", package_id);
+        let database = Arc::clone(&database);
+        let rpc = rpc.clone();
+        let config = config.clone();
+
+        let task = tokio::spawn(async move {
+            let mut state = database.load_state(&pipeline_name).await.unwrap_or_default();
+            let mut ticker = interval(config.poll_interval);
+
+            loop {
+                ticker.tick().await;
+
+                match poll_until_caught_up(&rpc, &database, &config, &mut state, &package_id, &pipeline_name).await {
+                    Ok(summary) => {
+                        if summary.indexed > 0 {
+                            println!(
+                                "[{}] indexed {} turret event(s) across {} page(s); last checkpoint {}",
+                                package_id, summary.indexed, summary.pages, state.last_checkpoint_sequence_number
+                            );
+                        } else if summary.fetched > 0 {
+                            println!(
+                                "[{}] fetched {} event(s) with no supported matches across {} page(s); last checkpoint {}",
+                                package_id, summary.fetched, summary.pages, state.last_checkpoint_sequence_number
+                            );
+                        } else {
+                            println!(
+                                "[{}] no new events; last checkpoint {}",
+                                package_id, state.last_checkpoint_sequence_number
+                            );
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("[{}] polling failed: {}", package_id, err);
+                    }
+                }
+            }
+        });
+
+        tasks.push(task);
     }
+
+    for task in tasks {
+        let _ = task.await;
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]

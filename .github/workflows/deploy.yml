@@ -9,6 +9,8 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   REGION: ${{ secrets.GCP_REGION }}
   REPO: sentinel-repo
+  EVE_PACKAGE_ID_STILLNESS: '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
+  EVE_PACKAGE_ID_UTOPIA: '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75'
 
 jobs:
   deploy:
@@ -65,7 +67,7 @@ jobs:
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
-            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db,SUI_RPC_URL=https://fullnode.testnet.sui.io,EVE_PACKAGE_ID=${{ env.EVE_PACKAGE_ID_STILLNESS}},${{ env.EVE_PACKAGE_ID_UTOPIA }} \
             --no-cpu-throttling \
             --min-instances 1 \
             --allow-unauthenticated \
@@ -75,7 +77,7 @@ jobs:
         run: |
           API_URL=$(gcloud run services describe api --region ${{ secrets.GCP_REGION }} --format="value(status.url)")
           echo "API deployed at $API_URL"
-          
+
           gcloud run deploy dashboard \
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest \
             --region ${{ secrets.GCP_REGION }} \
