@@ -19,6 +19,7 @@
 - [ ] **Index world updates** Add new package IDs for Utopia and Stillness updates
     - [ ] **Indexer** Needs to listen to additional package IDs
     - [ ] **API/Dashboard** Needs to query different pacakge IDs for new, different events
+    - [ ] **Index `ExtensionRevokedEvent`s** available from the new package ID
 
 ## CI/CD & Infrastructure
 
