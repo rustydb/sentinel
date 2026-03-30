@@ -16,6 +16,9 @@
 - [ ] **Discord notifcations** Add the ability to watch turrets and have their
       updates posted to Discord. Updates should be posted based on severity, and in
       summary. Allows configuration for anti-spam.
+- [ ] **Index world updates** Add new package IDs for Utopia and Stillness updates
+    - [ ] **Indexer** Needs to listen to additional package IDs
+    - [ ] **API/Dashboard** Needs to query different pacakge IDs for new, different events
 
 ## CI/CD & Infrastructure
 
