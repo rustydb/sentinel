@@ -11,6 +11,7 @@ env:
   REPO: sentinel-repo
   EVE_PACKAGE_ID_STILLNESS: '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
   EVE_PACKAGE_ID_UTOPIA: '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75'
+  SUI_NETWORK: testnet
 
 jobs:
   deploy:
@@ -56,18 +57,19 @@ jobs:
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
-            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --set-env-vars DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
             --allow-unauthenticated \
             --port 3001
 
       - name: Deploy Indexer
         run: |
+          EVE_PACKAGE_ID="${{ env.EVE_PACKAGE_ID_STILLNESS }},${{ env.EVE_PACKAGE_ID_UTOPIA }}"
           gcloud run deploy indexer \
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
-            --set-env-vars DATABASE_URL=postgres://sentinel:sentinel@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db,SUI_RPC_URL=https://fullnode.testnet.sui.io,EVE_PACKAGE_ID=${{ env.EVE_PACKAGE_ID_STILLNESS}},${{ env.EVE_PACKAGE_ID_UTOPIA }} \
+            --set-env-vars=^__^DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID} \
             --no-cpu-throttling \
             --min-instances 1 \
             --allow-unauthenticated \
@@ -82,6 +84,6 @@ jobs:
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
-            --set-env-vars API_PROXY_URL=$API_URL,GRAPHQL_PROXY_URL=https://graphql.testnet.sui.io \
+            --set-env-vars API_PROXY_URL=$API_URL,GRAPHQL_PROXY_URL=https://graphql.${{ env.SUI_NETWORK }}.sui.io \
             --allow-unauthenticated \
             --port 5173
