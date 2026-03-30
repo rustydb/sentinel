@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-responsive-sui-addresses`  
 **Created**: 2026-03-28  
-**Status**: Draft  
+**Status**: Implemented  
 **Input**: User description: "All Sui addresses should be responsive to their container size per ./docs/DESIGN_SYSTEM.md#SuiAddresses"
 
 ## User Scenarios & Testing _(mandatory)_

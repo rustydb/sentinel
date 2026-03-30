@@ -2,7 +2,7 @@
 
 **Feature Branch**: `005-eve-frontier-theme`  
 **Created**: 2026-03-29  
-**Status**: Draft  
+**Status**: Implemented  
 **Input**: User description: "Add logo and overhaul the themeing to match EVE Frontier stark and ominious space pallete."
 
 ## User Scenarios & Testing _(mandatory)_

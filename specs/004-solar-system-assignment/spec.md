@@ -2,7 +2,7 @@
 
 **Feature Branch**: `004-solar-system-assignment`  
 **Created**: 2026-03-28  
-**Status**: Draft  
+**Status**: Implemented  
 **Input**: User description: "Solar system autocomplete search and assignment for network nodes and orphaned turrets. Turrets associated with a solar system will display the solar system's friendly name on the turret card and in the detail pane. Selecting the turret card will focus the ef-map on that turrets solar system using the solar system ID. Deselecting the turret card will remove focus from the map. An orphaned turret does not have a network node. Additionally we want a way for users to view their network nodes in a list, using cards similar to the turret cards (a graphic resolved from typeInfo, an abbreviated Sui address, and an assign/unassign button). The list of network nodes should be a drawer that comes from the side."
 
 ## User Scenarios & Testing _(mandatory)_
