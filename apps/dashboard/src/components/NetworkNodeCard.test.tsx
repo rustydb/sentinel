@@ -53,4 +53,25 @@ describe('NetworkNodeCard', () => {
       );
     });
   });
+
+  it('falls back to the node id when the name is generic', () => {
+    render(
+      <NetworkNodeCard
+        node={{
+          nodeId: '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+          solarSystemId: 0,
+          solarSystemName: null,
+          typeId: '92401',
+          displayName: 'Network Node',
+        }}
+        onAssign={vi.fn().mockResolvedValue(undefined)}
+        onUnassign={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    expect(
+      screen.getByTitle('0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'),
+    ).toBeTruthy();
+    expect(screen.queryByText(/^network node$/i)).toBeNull();
+  });
 });

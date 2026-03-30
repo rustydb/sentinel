@@ -1,10 +1,16 @@
-import type { TurretData } from '@frontier-sentinel/shared-types';
+import type {
+  ShellStatisticsSnapshot,
+  TurretData,
+  TurretIntelligenceSummary,
+} from '@frontier-sentinel/shared-types';
 
 import {
   sampleEvents,
   sampleNetworkNodes,
   sampleNodes,
   sampleResolvedTurretSolarSystems,
+  sampleTurretIntelligence,
+  sampleTurretStats,
   sampleTurrets,
 } from './test-data';
 import type { ResolvedTurretSolarSystem } from './hooks/useTurretSolarSystems';
@@ -43,6 +49,10 @@ export const demoSolarSystemsByTurretId = new Map<string, ResolvedTurretSolarSys
     },
   ]),
 );
+export const demoTurretIntelligenceByTurretId = new Map<string, TurretIntelligenceSummary>(
+  sampleTurretIntelligence.map((entry) => [entry.turretId, entry]),
+);
+export const demoTurretStats: ShellStatisticsSnapshot = sampleTurretStats;
 
 export function getDemoCandidateNodeIds(turrets: TurretData[]): string[] {
   return turrets

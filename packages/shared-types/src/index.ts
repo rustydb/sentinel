@@ -175,3 +175,4 @@ export function toTurretStatus(input: string): TurretStatus {
 }
 
 export * from './solarSystems';
+export * from './turretIntelligence';

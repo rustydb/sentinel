@@ -3,7 +3,7 @@ title: Frontier Sentinel - EVE Frontier
 version: 1.1.0
 status: draft
 created: 2026-03-27
-updated: 2026-03-28
+updated: 2026-03-29
 author: rustydb
 description: Descriptions of the EVE Frontier game relevant for Frontier Sentinel
 ---
@@ -209,3 +209,28 @@ The return value from `get_target_priority_list`. Each entry maps a target to it
 | `PriorityListUpdatedEvent` | `turret_id`, `priority_list`                                                          | The targeting priority list changes.      |
 | `ExtensionAuthorizedEvent` | `assembly_id`, `assembly_key`, `extension_type`, `previous_extension`, `owner_cap_id` | An extension is authorized (or replaced). |
 | `ExtensionRevokedEvent `   | `assembly_id`, `assembly_key`, `revoked_extension`, `owner_cap_id`                    | An extension is revoked.                  |
+
+### Priority Intelligence Presentation
+
+Frontier Sentinel uses the most recent `PriorityListUpdatedEvent` as the current threat summary for a turret.
+
+- `target_item_id` identifies the latest in-proximity target item
+- `character_id === 0` means the target is an NPC and should display as `NPC`
+- otherwise the dashboard should display the resolved character name
+- when `character_tribe` is available, resolve and display the tribe name alongside the target intelligence
+- `type_id` should resolve through the world type API so the dashboard can show the target name and icon
+- `is_aggressor` should be surfaced plainly in the detail view
+
+### ENGAGED UI Override
+
+`ENGAGED` is a dashboard presentation status, not a new persisted world status.
+
+- if the latest target candidate reports `behavior_change === STARTED_ATTACK`, the turret should display as `ENGAGED`
+- once the latest behavior change is anything else, the UI should fall back to the real turret assembly status
+
+### Recent Aggressor Counts
+
+Frontier Sentinel also derives a recent threat count from indexed events:
+
+- per turret: number of aggressor sightings in the past 24 hours
+- shell total: sum of those turret-level counts across the current operator view

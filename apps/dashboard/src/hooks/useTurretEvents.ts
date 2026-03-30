@@ -7,6 +7,16 @@ interface UseTurretEventsOptions {
   enabled?: boolean;
 }
 
+export interface UseTurretEventsResult {
+  events: TurretEvent[];
+  loading: boolean;
+  error: Error | null;
+  page: number;
+  nextPage: number | null;
+  next: () => void;
+  reset: () => void;
+}
+
 interface TurretEventsResponse {
   data?: TurretEvent[];
   pagination?: {
@@ -54,7 +64,7 @@ export function useTurretEvents({
   apiBaseUrl = '',
   turretId,
   enabled = true,
-}: UseTurretEventsOptions) {
+}: UseTurretEventsOptions): UseTurretEventsResult {
   const [events, setEvents] = useState<TurretEvent[]>([]);
   const [loading, setLoading] = useState(Boolean(enabled && turretId));
   const [error, setError] = useState<Error | null>(null);

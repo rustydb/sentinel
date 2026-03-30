@@ -1,3 +1,11 @@
+# App
+apps/dashboard/.vite/
+apps/dashboard/test-results/
+apps/api/.turbo/
+**/.playwright/
+**/*.tsbuildinfo
+
+# Node
 node_modules/
 .bun/
 dist/
@@ -5,21 +13,27 @@ build/
 coverage/
 playwright-report/
 test-results/
+
+# Rust
+**/.cargo/
 target/
 debug/
 release/
+
+# Generic
 *.log
 *.tmp
+
+# OS
 *.swp
 .env
 .env.*
 .DS_Store
 Thumbs.db
+
+# IDE
 .vscode/
 .idea/
-apps/dashboard/.vite/
-apps/dashboard/.playwright/
-apps/dashboard/test-results/
-apps/api/.turbo/
-apps/indexer/.cargo/
-**/*.tsbuildinfo
+
+# Agents
+.codex

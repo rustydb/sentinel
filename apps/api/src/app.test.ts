@@ -1,21 +1,44 @@
+import {
+  isTurretIntelligenceSummary,
+  type TurretIntelligenceSummary,
+} from '@frontier-sentinel/shared-types';
 import { describe, expect, it } from 'vitest';
 
 import { createApiHandlers } from './routes';
 import { createInMemoryRepositories } from './repositories';
 
-function createMockResponse() {
+interface MockResponse<TBody = unknown> {
+  statusCode: number;
+  body: TBody | undefined;
+  status: (code: number) => MockResponse<TBody>;
+  json: (payload: TBody) => MockResponse<TBody>;
+  send: (payload?: TBody) => MockResponse<TBody>;
+}
+
+function isTurretIntelligenceResponseBody(
+  value: unknown,
+): value is { data: TurretIntelligenceSummary[] } {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const maybeData = (value as { data?: unknown }).data;
+  return Array.isArray(maybeData) && maybeData.every(isTurretIntelligenceSummary);
+}
+
+function createMockResponse<TBody = unknown>(): MockResponse<TBody> {
   return {
     statusCode: 200,
-    body: undefined as unknown,
-    status(code: number) {
+    body: undefined,
+    status(this: MockResponse<TBody>, code: number) {
       this.statusCode = code;
       return this;
     },
-    json(payload: unknown) {
+    json(this: MockResponse<TBody>, payload: TBody) {
       this.body = payload;
       return this;
     },
-    send(payload?: unknown) {
+    send(this: MockResponse<TBody>, payload?: TBody) {
       this.body = payload;
       return this;
     },
@@ -133,6 +156,93 @@ describe('API', () => {
     expect(
       (response.body as { pagination: { nextPage: number | null } }).pagination.nextPage,
     ).toBeNull();
+  });
+
+  it('returns turret intelligence summaries including engaged status and aggressor counts', async () => {
+    const turretId = '0xturret';
+    const handlers = createApiHandlers(
+      createInMemoryRepositories({
+        events: [
+          {
+            txDigest: '0xengaged',
+            eventSeq: 2,
+            checkpointSequenceNumber: 9,
+            eventType: 'PriorityListUpdatedEvent',
+            jsonData: {
+              turret_id: turretId,
+              priority_list: [
+                {
+                  target_item_id: '7001',
+                  character_id: 4123,
+                  character_name: 'Captain Rusty',
+                  character_tribe: 128,
+                  type_id: '92404',
+                  is_aggressor: true,
+                  behavior_change: 'STARTED_ATTACK',
+                },
+              ],
+            },
+            timestamp: new Date().toISOString(),
+          },
+          {
+            txDigest: '0xolder',
+            eventSeq: 1,
+            checkpointSequenceNumber: 8,
+            eventType: 'PriorityListUpdatedEvent',
+            jsonData: {
+              turret_id: turretId,
+              priority_list: [
+                {
+                  target_item_id: '7002',
+                  character_id: 0,
+                  type_id: '92401',
+                  is_aggressor: true,
+                  behavior_change: 'ENTERED',
+                },
+              ],
+            },
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      }),
+    );
+    const response = createMockResponse();
+
+    await handlers.listTurretIntelligence({ query: { ids: turretId } } as never, response as never);
+
+    expect(response.statusCode).toBe(200);
+    const body = response.body;
+    if (!isTurretIntelligenceResponseBody(body)) {
+      throw new Error('Expected turret intelligence response body');
+    }
+
+    const summaries: TurretIntelligenceSummary[] = body.data;
+    expect(summaries).toHaveLength(1);
+    const summary: TurretIntelligenceSummary | undefined = summaries[0];
+    if (!summary) {
+      throw new Error('Expected a turret intelligence summary');
+    }
+
+    expect(summary).toMatchObject({
+      turretId,
+      latestPriorityEvent: {
+        txDigest: '0xengaged',
+        eventSeq: 2,
+        checkpointSequenceNumber: 9,
+      },
+      targetItemId: '7001',
+      targetCharacterId: 4123,
+      targetDisplayName: 'Captain Rusty',
+      isNpc: false,
+      tribeId: 128,
+      tribeName: 'Vherokior',
+      targetTypeId: '92404',
+      isAggressor: true,
+      behaviorChange: 'STARTED_ATTACK',
+      statusOverride: 'ENGAGED',
+      aggressorsPast24Hours: 2,
+    });
+    expect(summary.latestPriorityEvent.timestamp).toEqual(expect.any(String));
   });
 
   it('keeps p95 response time under 200ms for health requests', () => {

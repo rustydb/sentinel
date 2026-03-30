@@ -34,8 +34,39 @@ function createProps() {
       solarSystemName: 'O3H-1FN',
       resolutionSource: 'node' as const,
     },
+    intelligence: {
+      turretId: TURRET_ADDRESS,
+      latestPriorityEvent: {
+        txDigest: '0xpriority',
+        eventSeq: 3,
+        checkpointSequenceNumber: 10,
+        timestamp: '2026-03-26T12:05:00.000Z',
+      },
+      targetItemId: '7001',
+      targetCharacterId: 41001,
+      targetDisplayName: 'Captain Rusty',
+      isNpc: false,
+      tribeId: 128,
+      tribeName: 'Vherokior',
+      targetTypeId: '92404',
+      isAggressor: true,
+      behaviorChange: 'STARTED_ATTACK' as const,
+      statusOverride: 'ENGAGED' as const,
+      aggressorsPast24Hours: 3,
+    },
     eventsState: {
       events: [
+        {
+          txDigest: '0xpriority',
+          eventSeq: 3,
+          checkpointSequenceNumber: 10,
+          eventType: 'PriorityListUpdatedEvent',
+          jsonData: {
+            turret_id: TURRET_ADDRESS,
+            priority_list: [],
+          },
+          timestamp: '2026-03-26T12:05:00.000Z',
+        },
         {
           txDigest: '0xabc',
           eventSeq: 1,
@@ -93,8 +124,11 @@ describe('TurretDetail', () => {
 
     expect(screen.getByTestId('turret-detail')).toBeTruthy();
     expect(screen.getByText('Alpha Bastion')).toBeTruthy();
-    expect(screen.getByText('TurretCreatedEvent')).toBeTruthy();
+    expect(screen.getByText('PriorityListUpdatedEvent')).toBeTruthy();
     expect(screen.getByText('O3H-1FN')).toBeTruthy();
+    expect(screen.getByText('Captain Rusty')).toBeTruthy();
+    expect(screen.getByText('Vherokior')).toBeTruthy();
+    expect(screen.getByText('Yes')).toBeTruthy();
   });
 
   it('does not use the raw turret id as the large title when a custom name is missing', () => {
@@ -102,7 +136,7 @@ describe('TurretDetail', () => {
     props.turret.name = '';
     render(<TurretDetail {...props} />);
 
-    expect(screen.getByText('Heavy Turret')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Heavy Turret' })).toBeTruthy();
     expect(screen.getByTitle(TURRET_ADDRESS)).toBeTruthy();
   });
 

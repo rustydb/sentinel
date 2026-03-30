@@ -1,0 +1,21 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent background; the page canvas should show through -->
+  <path
+    d="M 80 16 L 176 16 L 240 80 V 176 L 176 240 H 80 L 16 176 V 80 Z"
+    fill="#1b2026"
+    stroke="#332f29"
+    stroke-width="8"
+  />
+  <path
+    d="M 64 64 L 192 64 L 216 88 V 168 L 192 192 H 64 L 40 168 V 88 Z"
+    fill="#111418"
+    stroke="#090b0d"
+    stroke-width="4"
+  />
+  <path d="M 128 96 L 156 112 V 144 L 128 160 L 100 144 V 112 Z" fill="#ff6a21" />
+  <rect x="120" y="44" width="16" height="16" fill="#ff6a21" />
+  <rect x="120" y="196" width="16" height="16" fill="#ff6a21" />
+  <rect x="196" y="120" width="16" height="16" fill="#ff6a21" />
+  <rect x="44" y="120" width="16" height="16" fill="#ff6a21" />
+  <path d="M 64 64 L 96 96 M 192 64 L 160 96 M 192 192 L 160 160 M 64 192 L 96 160" stroke="#332f29" stroke-width="2" />
+</svg>

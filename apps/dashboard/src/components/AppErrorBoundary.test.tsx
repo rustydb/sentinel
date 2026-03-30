@@ -23,6 +23,7 @@ describe('AppErrorBoundary', () => {
       </AppErrorBoundary>,
     );
 
+    expect(screen.getByAltText(/frontier sentinel logo/i)).toBeTruthy();
     expect(screen.getByText(/frontier sentinel encountered a fatal error/i)).toBeTruthy();
     expect(screen.getByText(/boom/i)).toBeTruthy();
     expect(consoleErrorSpy).toHaveBeenCalled();

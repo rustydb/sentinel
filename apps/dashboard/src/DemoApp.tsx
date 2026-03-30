@@ -8,6 +8,8 @@ import {
   demoEventsState,
   demoNetworkNodes,
   demoNodeActions,
+  demoTurretIntelligenceByTurretId,
+  demoTurretStats,
   demoSolarSystemsByTurretId,
   demoTurrets,
 } from './demo-mode';
@@ -38,6 +40,8 @@ export default function DemoApp() {
       drawerLoading={false}
       eventsState={demoEventsState}
       solarSystemsByTurretId={demoSolarSystemsByTurretId}
+      turretIntelligenceByTurretId={demoTurretIntelligenceByTurretId}
+      stats={demoTurretStats}
       onAssignSolarSystem={demoNodeActions.assignNode}
       onUnassignSolarSystem={demoNodeActions.unassignNode}
       onResetEvents={demoEventsState.reset}

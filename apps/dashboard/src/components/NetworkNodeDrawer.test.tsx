@@ -23,6 +23,7 @@ describe('NetworkNodeDrawer', () => {
       />,
     );
 
+    expect(screen.getByRole('complementary').className).toContain('bg-sentinel-shell');
     expect(screen.getByText(/no current network nodes detected/i)).toBeTruthy();
   });
 

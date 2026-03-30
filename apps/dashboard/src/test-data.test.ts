@@ -6,6 +6,8 @@ import {
   sampleResolvedTurretSolarSystems,
   sampleNodes,
   sampleRetainedTurretSolarSystems,
+  sampleTurretIntelligence,
+  sampleTurretStats,
   sampleTurrets,
 } from './test-data';
 
@@ -47,27 +49,34 @@ describe('test-data', () => {
   });
 
   it('keeps active node-backed solar-system fixtures aligned for demo map focus', () => {
-    const alphaBastion = sampleTurrets.find((turret) => turret.name === 'Alpha Bastion');
-    expect(alphaBastion).toBeTruthy();
-    expect(alphaBastion?.energySourceId).not.toBe('orphaned');
+    const activeTurrets = sampleTurrets.filter((turret) => turret.energySourceId !== 'orphaned');
+    expect(activeTurrets).toHaveLength(3);
 
-    const mappedNode = sampleNodes.find((node) => node.nodeId === alphaBastion?.energySourceId);
-    expect(mappedNode).toMatchObject({
-      solarSystemId: 30000004,
-      solarSystemName: 'O3H-1FN',
-    });
+    expect(
+      activeTurrets.every((turret) =>
+        sampleNodes.some((node) => node.nodeId === turret.energySourceId),
+      ),
+    ).toBe(true);
 
-    const resolvedSolarSystem = sampleResolvedTurretSolarSystems.find(
-      (entry) => entry.turretId === alphaBastion?.id,
+    expect(
+      sampleResolvedTurretSolarSystems.filter((entry) => entry.resolutionSource === 'node'),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          solarSystemId: 30000016,
+          solarSystemName: 'O60-F49',
+        }),
+        expect.objectContaining({
+          solarSystemId: 30000042,
+          solarSystemName: 'EQ5-N6N',
+        }),
+      ]),
     );
-    expect(resolvedSolarSystem).toMatchObject({
-      solarSystemId: 30000004,
-      solarSystemName: 'O3H-1FN',
-      resolutionSource: 'node',
-    });
   });
 
   it('keeps demo network-node cards aligned with node mappings', () => {
+    expect(sampleNetworkNodes).toHaveLength(2);
+    expect(sampleNetworkNodes.every((node) => node.displayName === 'Network Node')).toBe(true);
     expect(
       sampleNetworkNodes.every((node) =>
         sampleNodes.some(
@@ -78,5 +87,53 @@ describe('test-data', () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it('covers recent-target intelligence scenarios for both player and NPC contacts', () => {
+    expect(sampleTurretIntelligence).toHaveLength(4);
+
+    const captainRusty = sampleTurretIntelligence.find(
+      (entry) => entry.latestPriorityEvent.txDigest === '0xbbb',
+    );
+    const orphanNpc = sampleTurretIntelligence.find(
+      (entry) => entry.latestPriorityEvent.txDigest === '0xddd',
+    );
+    const commanderVale = sampleTurretIntelligence.find(
+      (entry) => entry.latestPriorityEvent.txDigest === '0xeee',
+    );
+    const gammaNpc = sampleTurretIntelligence.find(
+      (entry) => entry.latestPriorityEvent.txDigest === '0xfff',
+    );
+
+    expect(captainRusty).toMatchObject({
+      targetDisplayName: 'Captain Rusty',
+      isNpc: false,
+      statusOverride: 'ENGAGED',
+    });
+    expect(orphanNpc).toMatchObject({
+      targetDisplayName: 'NPC',
+      isNpc: true,
+      statusOverride: null,
+    });
+    expect(commanderVale).toMatchObject({
+      targetDisplayName: 'Commander Vale',
+      isNpc: false,
+      statusOverride: 'ENGAGED',
+    });
+    expect(gammaNpc).toMatchObject({
+      targetDisplayName: 'NPC',
+      isNpc: true,
+      statusOverride: null,
+    });
+  });
+
+  it('keeps demo statistics aligned with the current threat summary fixtures', () => {
+    expect(sampleTurretStats).toEqual({
+      totalTurrets: 4,
+      engagedTurrets: 2,
+      onlineTurrets: 2,
+      offlineTurrets: 2,
+      aggressorsPast24Hours: 7,
+    });
   });
 });

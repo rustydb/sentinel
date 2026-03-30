@@ -12,6 +12,7 @@ const hooks = vi.hoisted(() => ({
   useNetworkNodes: vi.fn(),
   useTurretEvents: vi.fn(),
   useTurretSolarSystems: vi.fn(),
+  useTurretIntelligence: vi.fn(),
   useTypeInfo: vi.fn(),
 }));
 
@@ -37,6 +38,10 @@ vi.mock('./hooks/useTurretEvents', () => ({
 
 vi.mock('./hooks/useTurretSolarSystems', () => ({
   useTurretSolarSystems: hooks.useTurretSolarSystems,
+}));
+
+vi.mock('./hooks/useTurretIntelligence', () => ({
+  useTurretIntelligence: hooks.useTurretIntelligence,
 }));
 
 vi.mock('./hooks/useTypeInfo', () => ({
@@ -144,6 +149,35 @@ describe('App', () => {
       },
       isLoading: false,
     });
+    hooks.useTurretIntelligence.mockReturnValue({
+      summaries: [
+        {
+          turretId: TURRET_ADDRESS,
+          latestPriorityEvent: null,
+          targetItemId: null,
+          targetCharacterId: null,
+          targetDisplayName: null,
+          isNpc: false,
+          tribeId: null,
+          tribeName: null,
+          targetTypeId: null,
+          isAggressor: null,
+          behaviorChange: null,
+          statusOverride: null,
+          aggressorsPast24Hours: 0,
+        },
+      ],
+      byTurretId: new Map(),
+      stats: {
+        totalTurrets: 1,
+        engagedTurrets: 0,
+        onlineTurrets: 1,
+        offlineTurrets: 0,
+        aggressorsPast24Hours: 0,
+      },
+      loading: false,
+      error: null,
+    });
   });
 
   afterEach(() => {
@@ -155,6 +189,34 @@ describe('App', () => {
     render(<App />);
 
     expect(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') })).toBeTruthy();
+  });
+
+  it('renders the updated disconnected landing page clearance terminal', () => {
+    const connectMock = vi.fn();
+
+    hooks.useConnection.mockReturnValue({
+      currentAccount: null,
+      handleConnect: connectMock,
+      handleDisconnect: vi.fn(),
+      hasEveVault: true,
+      isConnected: false,
+    });
+    hooks.useCurrentWallet.mockReturnValue({ name: undefined });
+
+    render(<App />);
+
+    expect(screen.getByAltText(/frontier sentinel mark/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /frontier sentinel/i })).toBeTruthy();
+    expect(screen.getByText(/eve frontier defense telemetry/i)).toBeTruthy();
+    expect(screen.getByText(/security clearance terminal/i)).toBeTruthy();
+    expect(screen.getByText(/no active security clearance\./i)).toBeTruthy();
+    expect(screen.getByText(/access denied\./i)).toBeTruthy();
+
+    const connectButton = screen.getByRole('button', { name: /connect eve vault/i });
+    expect(connectButton).toBeTruthy();
+
+    fireEvent.click(connectButton);
+    expect(connectMock).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the wallet address responsive inside the wallet dropdown', async () => {
@@ -208,12 +270,19 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /network nodes/i }));
 
     expect(screen.getByRole('heading', { name: /network nodes/i })).toBeTruthy();
-    expect(screen.getByText('Node Prime')).toBeTruthy();
+    expect(screen.getByText(/node prime/i)).toBeTruthy();
   });
 
   it('renders the resolved solar-system friendly name on turret cards', () => {
     render(<App />);
 
     expect(screen.getByText('O3H-1FN')).toBeTruthy();
+  });
+
+  it('renders the pilot statistics panel in the shell', () => {
+    render(<App />);
+
+    expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();
+    expect(screen.getByText('Total Turrets')).toBeTruthy();
   });
 });

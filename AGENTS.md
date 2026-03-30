@@ -73,13 +73,14 @@ cargo test --manifest-path apps/indexer/Cargo.toml
 
 ## UI Rules
 
-Follow [docs/DESIGN_SYSTEM.md](/home/rusty/gitstuffs/rusty/frontier-sentinel/docs/DESIGN_SYSTEM.md).
+Follow [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md).
 
 Important established conventions:
 
 - Use `Outfit` for display text and `JetBrains Mono` for body/system text.
 - Keep borders sharp, shadows hard, and labels uppercase.
 - Avoid gradients and rounded-corner modern SaaS styling.
+- Reuse `./assets/mark.svg` for shell branding and favicon wiring.
 - Interactions should feel tactile:
     - hover should react
     - active should visibly respond
@@ -102,7 +103,7 @@ Turret cards intentionally do **not** show inline copy buttons for addresses.
 
 ## EVE Frontier Domain Rules
 
-Follow [docs/EVE_FRONTIER.md](/home/rusty/gitstuffs/rusty/frontier-sentinel/docs/EVE_FRONTIER.md).
+Follow [docs/EVE_FRONTIER.md](./docs/EVE_FRONTIER.md).
 
 Current world/API assumptions:
 
@@ -117,6 +118,13 @@ Turret naming precedence:
 2. type name from the world `/v2/types/{typeId}` API
 
 If a custom name exists, show the type name nearby with lower emphasis.
+
+Threat-intelligence rules:
+
+- the latest `PriorityListUpdatedEvent` is the current threat summary for a turret
+- `character_id === 0` means `NPC`
+- `behavior_change === STARTED_ATTACK` should present the turret as `ENGAGED`
+- 24-hour aggressor counts are indexer-derived summaries, not raw turret fields
 
 ## Network Nodes and Solar Systems
 
@@ -165,6 +173,7 @@ Keep it aligned with:
 - current network-node assumptions
 - current UI expectations
 - current solar-system assignment and retained-mapping assumptions
+- current threat-summary and shell-statistics expectations
 
 Do not leave stale fake relationships in demo mode just to make the screen look busy.
 

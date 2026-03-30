@@ -32,6 +32,9 @@ describe('MapEmbed', () => {
   it('loads all assigned systems into the embed when no turret is focused', () => {
     render(<MapEmbed focusedSystemId={null} highlightedSystemIds={[30000004, 30000005]} />);
 
+    expect(screen.getByText(/universe map/i).closest('section')?.className).toContain(
+      'bg-sentinel-shell',
+    );
     expect(screen.getByTitle(/eve frontier universe map/i).getAttribute('src')).toContain(
       'systems=30000004%2C30000005',
     );

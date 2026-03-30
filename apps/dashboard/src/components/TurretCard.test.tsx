@@ -36,6 +36,21 @@ describe('TurretCard', () => {
   it('renders turret state and orphaned indicator', () => {
     render(
       <TurretCard
+        intelligence={{
+          turretId: '0x1111111111111111111111111111111111111111111111111111111111111111',
+          latestPriorityEvent: null,
+          targetItemId: null,
+          targetCharacterId: null,
+          targetDisplayName: 'NPC',
+          isNpc: true,
+          tribeId: null,
+          tribeName: null,
+          targetTypeId: null,
+          isAggressor: null,
+          behaviorChange: null,
+          statusOverride: null,
+          aggressorsPast24Hours: 0,
+        }}
         turret={{
           id: '0x1111111111111111111111111111111111111111111111111111111111111111',
           itemId: '42',
@@ -50,12 +65,15 @@ describe('TurretCard', () => {
       />,
     );
 
-    expect(screen.getByText('Raven Gate')).toBeTruthy();
+    expect(screen.getByText('RAVEN GATE')).toBeTruthy();
+    expect(screen.getByText('Class:')).toBeTruthy();
     expect(screen.getAllByText('Heavy Turret').length).toBeGreaterThan(0);
     expect(screen.getByAltText(/heavy turret icon/i)).toBeTruthy();
     expect(screen.getByText('Status:')).toBeTruthy();
     expect(screen.getByText('offline')).toBeTruthy();
     expect(screen.getByText('Network Node')).toBeTruthy();
+    expect(screen.getByText('Recent Target')).toBeTruthy();
+    expect(screen.getByText('NPC')).toBeTruthy();
     expect(screen.getByText(/orphaned node assignment/i)).toBeTruthy();
   });
 
@@ -83,6 +101,21 @@ describe('TurretCard', () => {
   it('renders the resolved solar-system friendly name when available', () => {
     render(
       <TurretCard
+        intelligence={{
+          turretId: TURRET_ADDRESS,
+          latestPriorityEvent: null,
+          targetItemId: null,
+          targetCharacterId: null,
+          targetDisplayName: 'Captain Rusty',
+          isNpc: false,
+          tribeId: null,
+          tribeName: null,
+          targetTypeId: null,
+          isAggressor: true,
+          behaviorChange: 'STARTED_ATTACK',
+          statusOverride: 'ENGAGED',
+          aggressorsPast24Hours: 3,
+        }}
         turret={{
           id: TURRET_ADDRESS,
           itemId: '43',
@@ -104,6 +137,39 @@ describe('TurretCard', () => {
     );
 
     expect(screen.getByText('O3H-1FN')).toBeTruthy();
+    expect(screen.getByText('NOVA WALL')).toBeTruthy();
+    expect(screen.getByText('Class:')).toBeTruthy();
+    expect(screen.getByText('Heavy Turret')).toBeTruthy();
+    expect(screen.getByText('engaged')).toBeTruthy();
+    expect(screen.getByText('Aggressors 24H')).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
+  });
+
+  it('falls back to the turret id in the title when there is no custom name', async () => {
+    render(
+      <TurretCard
+        turret={{
+          id: TURRET_ADDRESS,
+          itemId: '43',
+          name: null,
+          status: 'online',
+          locationHash: 'J102',
+          isOnline: true,
+          typeId: 'turret.mk2',
+          energySourceId: NODE_ADDRESS,
+          aggressor: 'Sleepers',
+        }}
+      />,
+    );
+
+    emitResizeForAll(220);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading').textContent).not.toBe(TURRET_ADDRESS);
+      expect(screen.getByRole('heading').textContent).toContain('...');
+    });
+    expect(screen.getByText('Class:')).toBeTruthy();
+    expect(screen.getByText('Heavy Turret')).toBeTruthy();
   });
 
   it('uses a centered cover fit for the turret icon image', () => {
@@ -211,7 +277,7 @@ describe('TurretCard', () => {
       />,
     );
 
-    expect(screen.getByRole('heading', { name: 'Heavy Turret' }).className).not.toContain(
+    expect(screen.getByRole('heading', { name: 'HEAVY TURRET' }).className).not.toContain(
       'truncate',
     );
   });

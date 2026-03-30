@@ -1,6 +1,7 @@
 import type {
   NetworkNodeMapping,
   TurretEvent,
+  TurretIntelligenceSummary,
   TurretSolarSystemMapping,
 } from '@frontier-sentinel/shared-types';
 
@@ -37,8 +38,13 @@ export interface TurretEventRepository {
   }>;
 }
 
+export interface TurretIntelligenceRepository {
+  listByTurretIds(turretIds: string[]): Promise<TurretIntelligenceSummary[]>;
+}
+
 export interface Repositories {
   networkNodes: NetworkNodeRepository;
   turretSolarSystems: TurretSolarSystemRepository;
   turretEvents: TurretEventRepository;
+  turretIntelligence: TurretIntelligenceRepository;
 }

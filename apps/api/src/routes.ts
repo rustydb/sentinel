@@ -108,6 +108,14 @@ export function createApiHandlers(repositories: Repositories) {
         },
       });
     },
+
+    async listTurretIntelligence(request: Request, response: Response) {
+      const idsParam = typeof request.query.ids === 'string' ? request.query.ids : '';
+      const turretIds = turretIdsQuerySchema.parse(idsParam);
+      response.json({
+        data: await repositories.turretIntelligence.listByTurretIds(turretIds),
+      });
+    },
   };
 }
 
@@ -135,6 +143,10 @@ export function registerRoutes(app: Express, repositories: Repositories): void {
 
   app.get('/api/events/:turretId', async (request: Request, response: Response) => {
     await handlers.listTurretEvents(request, response);
+  });
+
+  app.get('/api/turret-intelligence', async (request: Request, response: Response) => {
+    await handlers.listTurretIntelligence(request, response);
   });
 
   app.get('/api/turret-solar-systems', async (request: Request, response: Response) => {
