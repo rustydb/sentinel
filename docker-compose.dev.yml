@@ -51,7 +51,7 @@ services:
     depends_on:
       - api
     ports:
-      - "5174:5173"
+      - "5173:5173"
     volumes:
       - .:/app
       - bun-install-cache:/root/.bun/install/cache
