@@ -1,5 +1,3 @@
-import type { IncomingMessage } from 'node:http';
-
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
@@ -21,6 +19,16 @@ function resolveWorldApiProxyTarget(worldName: string): string {
   );
 }
 
+function createWorldApiProxy(worldName: 'utopia' | 'stillness') {
+  return {
+    target: resolveWorldApiProxyTarget(worldName),
+    changeOrigin: true,
+    secure: true,
+    rewrite: (path: string) =>
+      path.replace(new RegExp(`^/world-api/${worldName}`, 'i'), '').replace(/^\/world-api/, ''),
+  };
+}
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
@@ -34,19 +42,8 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
-      '/world-api': {
-        target: defaultWorldApiProxyTargets.utopia,
-        changeOrigin: true,
-        secure: true,
-        router: (request: IncomingMessage) => {
-          const match = request.url?.match(/^\/world-api\/(utopia|stillness)(?:\/|$)/i);
-          const worldName =
-            match?.[1]?.toLowerCase() ?? process.env.VITE_EVE_SERVER_NAME ?? 'utopia';
-          return resolveWorldApiProxyTarget(worldName);
-        },
-        rewrite: (path) =>
-          path.replace(/^\/world-api\/(?:utopia|stillness)/i, '').replace(/^\/world-api/, ''),
-      },
+      '/world-api/utopia': createWorldApiProxy('utopia'),
+      '/world-api/stillness': createWorldApiProxy('stillness'),
     },
   },
   test: {
