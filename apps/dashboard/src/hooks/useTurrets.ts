@@ -1,4 +1,5 @@
 import {
+  type EveWorldName,
   GET_CHARACTER_AND_OWNED_OBJECTS,
   type TurretData,
   isTurretData,
@@ -6,15 +7,15 @@ import {
 } from '@frontier-sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
+import { resolveTurretPackageId } from '../world';
+
 interface UseTurretsOptions {
   owner?: string;
+  world?: EveWorldName;
   endpoint?: string;
   enabled?: boolean;
   refreshTick?: number;
 }
-
-const DEFAULT_TURRET_PACKAGE_ID =
-  '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75';
 const CHARACTER_PLAYER_PROFILE_SUFFIX = '::character::PlayerProfile';
 const OWNER_CAP_SUFFIX = '::access::OwnerCap<';
 const TURRET_TYPE_SUFFIX = '::turret::Turret>';
@@ -135,6 +136,7 @@ function parseCharacterName(characterJson: Record<string, unknown> | undefined):
 
 export function useTurrets({
   owner,
+  world = 'utopia',
   endpoint = '/graphql',
   enabled = true,
   refreshTick = 0,
@@ -158,7 +160,7 @@ export function useTurrets({
       return;
     }
 
-    const queryKey = `${enabled ? '1' : '0'}|${owner}|${endpoint}`;
+    const queryKey = `${enabled ? '1' : '0'}|${owner}|${world}|${endpoint}`;
     if (queryKeyRef.current !== queryKey) {
       queryKeyRef.current = queryKey;
       hasLoadedOnceRef.current = false;
@@ -172,7 +174,7 @@ export function useTurrets({
 
     const loadTurrets = async (): Promise<void> => {
       try {
-        const turretPackageId = import.meta.env.VITE_TURRET_PACKAGE_ID ?? DEFAULT_TURRET_PACKAGE_ID;
+        const turretPackageId = resolveTurretPackageId(world);
         const characterPlayerProfileType = `${turretPackageId}${CHARACTER_PLAYER_PROFILE_SUFFIX}`;
         const ownerCapType = `${turretPackageId}${OWNER_CAP_SUFFIX}${turretPackageId}${TURRET_TYPE_SUFFIX}`;
         const objects: Record<string, unknown>[] = [];

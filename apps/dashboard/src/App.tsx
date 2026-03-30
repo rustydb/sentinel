@@ -1,6 +1,6 @@
 import { useConnection } from '@evefrontier/dapp-kit';
 import { useCurrentWallet } from '@mysten/dapp-kit-react';
-import type { TurretData } from '@frontier-sentinel/shared-types';
+import type { EveWorldName, TurretData } from '@frontier-sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
 import frontierSentinelLogo from '../../../assets/logo.png';
@@ -16,6 +16,8 @@ import { useTurretFilters } from './hooks/useTurretFilters';
 import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
 import { useTurretTypeCatalog } from './hooks/useTurretTypeCatalog';
 import { useTurrets } from './hooks/useTurrets';
+import { resolveWorldFromAccount } from './world';
+import { WorldProvider } from './worldContext';
 
 const EVE_WALLET_DOWNLOAD_URL =
   'https://github.com/evefrontier/evevault/releases/latest/download/eve-vault-chrome.zip';
@@ -111,12 +113,14 @@ export default function App() {
 
   const usingSupportedWallet = isSupportedWalletName(currentWallet?.name);
   const connected = isConnected && usingSupportedWallet;
+  const currentWorld: EveWorldName = resolveWorldFromAccount(currentAccount);
   const walletAddress = currentAccount?.address ?? 'Not connected';
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
   const { refreshTick } = useDashboardRefresh({ enabled: connected });
 
   const { turrets, loading, error, characterName } = useTurrets({
     owner: connected ? currentAccount?.address : undefined,
+    world: currentWorld,
     endpoint: graphQlEndpoint,
     enabled: connected,
     refreshTick,
@@ -140,6 +144,7 @@ export default function App() {
     turrets: deferredTurrets,
     nodeMappings: networkNodes.mappings,
     apiBaseUrl: '',
+    world: currentWorld,
     enabled: connected,
     refreshTick,
   });
@@ -216,41 +221,43 @@ export default function App() {
   }
 
   return (
-    <DashboardScreen
-      turrets={turretFilters.filteredTurrets}
-      totalTurrets={deferredTurrets.length}
-      loading={loading}
-      error={error}
-      characterName={characterName ?? 'Syncing character'}
-      walletAddress={walletAddress}
-      onDisconnect={handleDisconnect}
-      selectedTurret={selectedTurret}
-      onSelectTurret={(turret) =>
-        setSelectedTurretId(toggleSelectedTurret(selectedTurretId, turret))
-      }
-      onCloseTurret={() => setSelectedTurretId(null)}
-      nodes={networkNodes.nodes}
-      drawerLoading={networkNodes.loading}
-      eventsState={eventsState}
-      solarSystemsByTurretId={turretSolarSystems.byTurretId}
-      turretIntelligenceByTurretId={turretIntelligence.byTurretId}
-      stats={turretIntelligence.stats}
-      onAssignSolarSystem={networkNodes.assignNode}
-      onUnassignSolarSystem={networkNodes.unassignNode}
-      onResetEvents={eventsState.reset}
-      filters={turretFilters.state}
-      hasActiveFilters={turretFilters.hasActiveFilters}
-      statusOptions={turretFilters.statusOptions}
-      classOptions={turretFilters.classOptions}
-      selectedNetworkNode={turretFilters.selectedNetworkNode}
-      onSearchTextChange={turretFilters.setSearchText}
-      onSolarSystemQueryChange={turretFilters.setSolarSystemQuery}
-      onAddSolarSystem={turretFilters.addSolarSystem}
-      onRemoveSolarSystem={turretFilters.removeSolarSystem}
-      onStatusChange={turretFilters.setStatus}
-      onClassNameChange={turretFilters.setClassName}
-      onSelectedNetworkNodeChange={turretFilters.setSelectedNetworkNode}
-      onClearAllFilters={turretFilters.clearAll}
-    />
+    <WorldProvider world={currentWorld}>
+      <DashboardScreen
+        turrets={turretFilters.filteredTurrets}
+        totalTurrets={deferredTurrets.length}
+        loading={loading}
+        error={error}
+        characterName={characterName ?? 'Syncing character'}
+        walletAddress={walletAddress}
+        onDisconnect={handleDisconnect}
+        selectedTurret={selectedTurret}
+        onSelectTurret={(turret) =>
+          setSelectedTurretId(toggleSelectedTurret(selectedTurretId, turret))
+        }
+        onCloseTurret={() => setSelectedTurretId(null)}
+        nodes={networkNodes.nodes}
+        drawerLoading={networkNodes.loading}
+        eventsState={eventsState}
+        solarSystemsByTurretId={turretSolarSystems.byTurretId}
+        turretIntelligenceByTurretId={turretIntelligence.byTurretId}
+        stats={turretIntelligence.stats}
+        onAssignSolarSystem={networkNodes.assignNode}
+        onUnassignSolarSystem={networkNodes.unassignNode}
+        onResetEvents={eventsState.reset}
+        filters={turretFilters.state}
+        hasActiveFilters={turretFilters.hasActiveFilters}
+        statusOptions={turretFilters.statusOptions}
+        classOptions={turretFilters.classOptions}
+        selectedNetworkNode={turretFilters.selectedNetworkNode}
+        onSearchTextChange={turretFilters.setSearchText}
+        onSolarSystemQueryChange={turretFilters.setSolarSystemQuery}
+        onAddSolarSystem={turretFilters.addSolarSystem}
+        onRemoveSolarSystem={turretFilters.removeSolarSystem}
+        onStatusChange={turretFilters.setStatus}
+        onClassNameChange={turretFilters.setClassName}
+        onSelectedNetworkNodeChange={turretFilters.setSelectedNetworkNode}
+        onClearAllFilters={turretFilters.clearAll}
+      />
+    </WorldProvider>
   );
 }

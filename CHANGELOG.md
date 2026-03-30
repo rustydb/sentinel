@@ -24,6 +24,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 ### Changed
 
 - Refined project layout to support Bun monorepo and Docker-first infrastructure.
+- Updated dashboard world resolution to derive the active EVE world from the connected Eve Vault tenant so turret package IDs, world API lookups, and solar-system catalogs switch between Utopia and Stillness per login.
 - Reworked the dashboard shell into a single inline command row with branded search, drawer-driven network-node filtering, badge-driven advanced filters, and a separate expandable metrics blind beneath it.
 - Updated the dashboard to use the EVE Frontier copy/tick assets, responsive address rendering, and richer interactive polish across cards, buttons, and wallet controls.
 - Updated turret rendering to follow the real EVE ownership chain and world type-info APIs for names and icons.

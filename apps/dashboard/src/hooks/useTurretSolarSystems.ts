@@ -55,7 +55,7 @@ export function useTurretSolarSystems({
   turrets,
   nodeMappings,
   apiBaseUrl = '',
-  world = (import.meta.env.VITE_EVE_SERVER_NAME ?? 'utopia') as EveWorldName,
+  world = 'utopia',
   enabled = true,
   refreshTick = 0,
 }: UseTurretSolarSystemsOptions) {

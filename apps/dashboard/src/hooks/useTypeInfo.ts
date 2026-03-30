@@ -1,4 +1,8 @@
+import type { EveWorldName } from '@frontier-sentinel/shared-types';
 import { useEffect, useState } from 'react';
+
+import { buildWorldApiPath } from '../world';
+import { useCurrentWorld } from '../worldContext';
 
 interface RawTypeInfo {
   id?: number | string;
@@ -23,12 +27,17 @@ export interface TypeInfo {
 export interface UseTypeInfoResult {
   typeInfo: TypeInfo | null;
   isLoading: boolean;
+  error: Error | null;
 }
 
 const typeCache = new Map<string, TypeInfo | null>();
-const inflight = new Map<string, Promise<TypeInfo | null>>();
-const TYPE_INFO_TIMEOUT_MS = 5000;
-const WORLD_API_BASE = import.meta.env.VITE_WORLD_API_URL ?? '/world-api';
+const errorCache = new Map<string, Error | null>();
+const inflight = new Map<string, Promise<{ typeInfo: TypeInfo | null; error: Error | null }>>();
+const TYPE_INFO_TIMEOUT_MS = 10000;
+
+function toCacheKey(world: EveWorldName, typeId: string): string {
+  return `${world}:${typeId}`;
+}
 
 function normalizeTypeInfo(typeId: string, payload: RawTypeInfo): TypeInfo {
   return {
@@ -57,17 +66,25 @@ function normalizeTypeInfo(typeId: string, payload: RawTypeInfo): TypeInfo {
   };
 }
 
-async function fetchTypeInfo(typeId: string): Promise<TypeInfo | null> {
+export async function fetchTypeInfo(
+  typeId: string,
+  world: EveWorldName,
+): Promise<{ typeInfo: TypeInfo | null; error: Error | null }> {
   if (!typeId) {
-    return null;
+    return { typeInfo: null, error: null };
   }
 
-  if (typeCache.has(typeId)) {
-    return typeCache.get(typeId) ?? null;
+  const cacheKey = toCacheKey(world, typeId);
+
+  if (typeCache.has(cacheKey)) {
+    return {
+      typeInfo: typeCache.get(cacheKey) ?? null,
+      error: errorCache.get(cacheKey) ?? null,
+    };
   }
 
-  if (inflight.has(typeId)) {
-    return inflight.get(typeId) ?? null;
+  if (inflight.has(cacheKey)) {
+    return inflight.get(cacheKey) ?? { typeInfo: null, error: null };
   }
 
   const request = (async () => {
@@ -75,58 +92,75 @@ async function fetchTypeInfo(typeId: string): Promise<TypeInfo | null> {
     const timeout = window.setTimeout(() => controller.abort(), TYPE_INFO_TIMEOUT_MS);
 
     try {
-      const response = await fetch(`${WORLD_API_BASE}/v2/types/${typeId}`, {
+      const response = await fetch(buildWorldApiPath(world, `/v2/types/${typeId}`), {
         signal: controller.signal,
       });
 
       if (!response.ok) {
-        typeCache.set(typeId, null);
-        return null;
+        typeCache.set(cacheKey, null);
+        const error = new Error(`Failed to resolve class metadata for ${typeId}`);
+        errorCache.set(cacheKey, error);
+        return { typeInfo: null, error };
       }
 
       const payload = (await response.json()) as RawTypeInfo;
       const normalized = normalizeTypeInfo(typeId, payload);
-      typeCache.set(typeId, normalized);
-      return normalized;
+      typeCache.set(cacheKey, normalized);
+      errorCache.set(cacheKey, null);
+      return { typeInfo: normalized, error: null };
     } catch {
-      typeCache.set(typeId, null);
-      return null;
+      typeCache.set(cacheKey, null);
+      const error = new Error(`Failed to resolve class metadata for ${typeId}`);
+      errorCache.set(cacheKey, error);
+      return { typeInfo: null, error };
     } finally {
       window.clearTimeout(timeout);
-      inflight.delete(typeId);
+      inflight.delete(cacheKey);
     }
   })();
 
-  inflight.set(typeId, request);
+  inflight.set(cacheKey, request);
   return request;
 }
 
-export function useTypeInfo(typeId: string | null | undefined): UseTypeInfoResult {
+export function useTypeInfo(
+  typeId: string | null | undefined,
+  worldOverride?: EveWorldName,
+): UseTypeInfoResult {
+  const currentWorld = useCurrentWorld();
+  const world = worldOverride ?? currentWorld;
   const normalizedTypeId = typeof typeId === 'string' ? typeId.trim() : '';
-  const hasCachedValue = normalizedTypeId ? typeCache.has(normalizedTypeId) : false;
+  const cacheKey = normalizedTypeId ? toCacheKey(world, normalizedTypeId) : '';
+  const hasCachedValue = normalizedTypeId ? typeCache.has(cacheKey) : false;
   const [typeInfo, setTypeInfo] = useState<TypeInfo | null>(
-    normalizedTypeId ? (typeCache.get(normalizedTypeId) ?? null) : null,
+    normalizedTypeId ? (typeCache.get(cacheKey) ?? null) : null,
+  );
+  const [error, setError] = useState<Error | null>(
+    normalizedTypeId ? (errorCache.get(cacheKey) ?? null) : null,
   );
   const [isLoading, setIsLoading] = useState<boolean>(normalizedTypeId ? !hasCachedValue : false);
 
   useEffect(() => {
     if (!normalizedTypeId) {
       setTypeInfo(null);
+      setError(null);
       setIsLoading(false);
       return;
     }
 
-    if (typeCache.has(normalizedTypeId)) {
-      setTypeInfo(typeCache.get(normalizedTypeId) ?? null);
+    if (typeCache.has(cacheKey)) {
+      setTypeInfo(typeCache.get(cacheKey) ?? null);
+      setError(errorCache.get(cacheKey) ?? null);
       setIsLoading(false);
       return;
     }
 
     let cancelled = false;
     setIsLoading(true);
-    void fetchTypeInfo(normalizedTypeId).then((result) => {
+    void fetchTypeInfo(normalizedTypeId, world).then((result) => {
       if (!cancelled) {
-        setTypeInfo(result);
+        setTypeInfo(result.typeInfo);
+        setError(result.error);
         setIsLoading(false);
       }
     });
@@ -134,7 +168,7 @@ export function useTypeInfo(typeId: string | null | undefined): UseTypeInfoResul
     return () => {
       cancelled = true;
     };
-  }, [normalizedTypeId]);
+  }, [cacheKey, normalizedTypeId, world]);
 
-  return { typeInfo, isLoading };
+  return { typeInfo, isLoading, error };
 }

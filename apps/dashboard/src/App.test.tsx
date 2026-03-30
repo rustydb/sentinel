@@ -96,7 +96,7 @@ describe('App', () => {
     });
 
     hooks.useConnection.mockReturnValue({
-      currentAccount: { address: WALLET_ADDRESS },
+      currentAccount: { address: WALLET_ADDRESS, key: { tenant: 'utopia' } },
       handleConnect: vi.fn(),
       handleDisconnect: disconnectMock,
       hasEveVault: true,
@@ -261,6 +261,25 @@ describe('App', () => {
     render(<App />);
 
     expect(screen.getByRole('button', { name: new RegExp(CHARACTER_NAME, 'i') })).toBeTruthy();
+  });
+  it('passes the tenant-derived world through the data hooks', () => {
+    hooks.useConnection.mockReturnValue({
+      currentAccount: { address: WALLET_ADDRESS, key: { tenant: 'stillness' } },
+      handleConnect: vi.fn(),
+      handleDisconnect: disconnectMock,
+      hasEveVault: true,
+      isConnected: true,
+    });
+
+    render(<App />);
+
+    expect(hooks.useTurrets).toHaveBeenCalledWith(expect.objectContaining({ world: 'stillness' }));
+    expect(hooks.useTurretSolarSystems).toHaveBeenCalledWith(
+      expect.objectContaining({ world: 'stillness' }),
+    );
+    expect(hooks.useTurretTypeCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({ world: 'stillness' }),
+    );
   });
 
   it('renders the updated disconnected landing page clearance terminal', () => {

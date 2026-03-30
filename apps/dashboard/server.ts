@@ -3,15 +3,19 @@ const port = Number(process.env.PORT ?? '5173');
 const distRoot = new URL('./dist/', import.meta.url);
 const apiProxyUrl = process.env.API_PROXY_URL ?? 'http://api:3001';
 const graphQlProxyUrl = process.env.GRAPHQL_PROXY_URL ?? 'https://graphql.testnet.sui.io';
-const eveServerName = process.env.EVE_SERVER_NAME ?? 'utopia';
 const defaultWorldApiProxyUrls: Record<string, string> = {
   stillness: 'https://world-api-stillness.live.tech.evefrontier.com',
   utopia: 'https://world-api-utopia.uat.pub.evefrontier.com',
 };
-const worldApiProxyUrl =
-  process.env.WORLD_API_PROXY_URL ??
-  defaultWorldApiProxyUrls[eveServerName] ??
-  defaultWorldApiProxyUrls.utopia;
+
+function resolveWorldApiProxyUrl(worldName: string): string {
+  return (
+    process.env[`WORLD_API_PROXY_URL_${worldName.toUpperCase()}`] ??
+    defaultWorldApiProxyUrls[worldName] ??
+    process.env.WORLD_API_PROXY_URL ??
+    defaultWorldApiProxyUrls.utopia
+  );
+}
 
 const contentTypes = new Map<string, string>([
   ['.css', 'text/css; charset=utf-8'],
@@ -68,6 +72,23 @@ async function proxyRequest(
   return fetch(targetUrl, init);
 }
 
+function resolveWorldApiRoute(pathname: string): { targetBaseUrl: string; strippedPrefix: string } {
+  const segments = pathname.split('/').filter(Boolean);
+  const worldName = segments[1];
+
+  if (worldName && worldName in defaultWorldApiProxyUrls) {
+    return {
+      targetBaseUrl: resolveWorldApiProxyUrl(worldName),
+      strippedPrefix: `/world-api/${worldName}`,
+    };
+  }
+
+  return {
+    targetBaseUrl: resolveWorldApiProxyUrl(process.env.EVE_SERVER_NAME ?? 'utopia'),
+    strippedPrefix: '/world-api',
+  };
+}
+
 Bun.serve({
   hostname: '0.0.0.0',
   port,
@@ -83,7 +104,8 @@ Bun.serve({
     }
 
     if (url.pathname === '/world-api' || url.pathname.startsWith('/world-api/')) {
-      return proxyRequest(request, worldApiProxyUrl, '/world-api');
+      const route = resolveWorldApiRoute(url.pathname);
+      return proxyRequest(request, route.targetBaseUrl, route.strippedPrefix);
     }
 
     const direct = await serveFile(url.pathname);

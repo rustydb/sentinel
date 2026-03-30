@@ -7,6 +7,7 @@ import { useTurrets } from './useTurrets';
 
 describe('useTurrets', () => {
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
@@ -89,7 +90,9 @@ describe('useTurrets', () => {
       .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify(ownerCapsPayload), { status: 200 }));
 
-    const { result } = renderHook(() => useTurrets({ owner: '0xfrontier', endpoint: '/graphql' }));
+    const { result } = renderHook(() =>
+      useTurrets({ owner: '0xfrontier', world: 'utopia', endpoint: '/graphql' }),
+    );
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -99,7 +102,13 @@ describe('useTurrets', () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       '/graphql',
-      expect.objectContaining({ method: 'POST', cache: 'no-store' }),
+      expect.objectContaining({
+        method: 'POST',
+        cache: 'no-store',
+        body: expect.stringContaining(
+          '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::character::PlayerProfile',
+        ),
+      }),
     );
     expect(result.current.characterName).toBe('Commander Nova');
     expect(result.current.turrets[0]?.name).toBe('Alpha Bastion');
@@ -262,7 +271,7 @@ describe('useTurrets', () => {
 
     const { result, rerender } = renderHook(
       ({ refreshTick }: { refreshTick: number }) =>
-        useTurrets({ owner: '0xfrontier', endpoint: '/graphql', refreshTick }),
+        useTurrets({ owner: '0xfrontier', world: 'utopia', endpoint: '/graphql', refreshTick }),
       {
         initialProps: { refreshTick: 0 },
       },
@@ -282,5 +291,44 @@ describe('useTurrets', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('uses the stillness package id when the active world is stillness', async () => {
+    vi.stubEnv(
+      'VITE_STILLNESS_TURRET_PACKAGE_ID',
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001',
+    );
+
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          data: {
+            address: {
+              objects: {
+                nodes: [],
+              },
+            },
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+
+    const { result } = renderHook(() =>
+      useTurrets({ owner: '0xfrontier', world: 'stillness', endpoint: '/graphql' }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/graphql',
+      expect.objectContaining({
+        body: expect.stringContaining(
+          '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
+        ),
+      }),
+    );
   });
 });
