@@ -1,8 +1,10 @@
 <p align="center">
-  <img src="./assets/logo.svg" alt="Sentinel logo" width="140" />
+  <img src="./assets/logo.png" alt="Sentinel logo" width="140" />
 </p>
 
-# Sentinel
+<h1 align="center">
+Sentinel
+</h1>
 
 <p align="center"><strong>Defensive telemetry for EVE Frontier turret operators.</strong></p>
 
