@@ -22,7 +22,7 @@ jobs:
         with:
           dockerfile: Dockerfile
           recursive: true
-          format: tty
+          format: sarif
           output-file: hadolint.sarif
           no-fail: true # Set to true to avoid failing pipeline immediately
 
