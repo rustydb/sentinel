@@ -14,6 +14,8 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Initial monorepo specifications for `001-bootstrap` and `002-local-demo-mode`.
 - Design constraints ensuring deterministic code generation and strict code formatting.
 - Root [AGENTS.md] guidance for future agent sessions.
+- A persistent lower-right dashboard build stamp showing version, commit hash, local dirty state, and a GitHub release-or-commit link for the running build, with the dashboard dev container now including `git` so the normal Podman workflow can resolve live build metadata.
+- Consolidated the local compose setup to `docker-compose-dev.yml` and removed the stale `docker-compose.yml` references from project docs and specs.
 - `003-responsive-sui-addresses`, including the shared `ResponsiveAddress` component and themed copy/tick feedback.
 - Podman-friendly local development stack via `docker-compose.dev.yml`.
 - EVE Wallet-first dashboard connection flow and ADR coverage for wallet-selection behavior.

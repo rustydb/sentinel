@@ -1,15 +1,16 @@
+name: sentinel-dev
+
 services:
   postgres:
     image: docker.io/library/postgres:16-alpine
-    container_name: sentinel-postgres
     environment:
       POSTGRES_DB: sentinel
       POSTGRES_USER: sentinel
       POSTGRES_PASSWORD: sentinel
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinel"]
       interval: 5s
@@ -17,38 +18,54 @@ services:
       retries: 20
 
   api:
-    image: localhost/frontier_api:latest
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
+    image: docker.io/oven/bun:1.3.11
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - bun install && bun run --filter @sentinel/api dev
     environment:
       PORT: 3001
       DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "3001:3001"
+      - "3002:3001"
+    volumes:
+      - .:/app
+      - bun-install-cache:/root/.bun/install/cache
 
   dashboard:
-    image: localhost/frontier_dashboard:latest
     build:
       context: .
-      dockerfile: apps/dashboard/Dockerfile
+      dockerfile: apps/dashboard/Dockerfile.dev
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - bun install && cd apps/dashboard && bunx vite --host 0.0.0.0 --port 5173
     environment:
-      VITE_GRAPHQL_URL: /graphql
-      API_PROXY_URL: http://api:3001
-      GRAPHQL_PROXY_URL: https://graphql.testnet.sui.io
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_API_PROXY_TARGET: http://api:3001
+      VITE_GRAPHQL_PROXY_TARGET: https://graphql.testnet.sui.io
     depends_on:
       - api
     ports:
       - "5173:5173"
+    volumes:
+      - .:/app
+      - bun-install-cache:/root/.bun/install/cache
 
   indexer:
-    image: localhost/frontier_indexer:latest
-    build:
-      context: .
-      dockerfile: apps/indexer/Dockerfile
+    image: docker.io/library/rust:1.94
+    working_dir: /app
+    command:
+      - cargo
+      - run
+      - --manifest-path
+      - apps/indexer/Cargo.toml
     environment:
       DATABASE_URL: postgres://sentinel:sentinel@postgres:5432/sentinel
       SUI_RPC_URL: https://fullnode.testnet.sui.io
@@ -56,6 +73,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - .:/app
+      - cargo-registry-cache:/usr/local/cargo/registry
+      - cargo-git-cache:/usr/local/cargo/git
+      - cargo-target-cache:/app/apps/indexer/target
 
 volumes:
-  postgres-data:
+  postgres-dev-data:
+  bun-install-cache:
+  cargo-registry-cache:
+  cargo-git-cache:
+  cargo-target-cache:

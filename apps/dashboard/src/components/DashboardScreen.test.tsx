@@ -3,6 +3,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { DashboardBuildInfo } from '../buildInfo';
 import { DashboardScreen } from './DashboardScreen';
 import { installResizeObserverMock } from '../test-utils/resizeObserver';
 
@@ -15,6 +16,14 @@ vi.mock('../hooks/useTypeInfo', () => ({
 }));
 
 describe('DashboardScreen', () => {
+  const buildInfo: DashboardBuildInfo = {
+    version: '0.2.0',
+    commitHash: 'a1b2c3d',
+    dirty: true,
+    href: 'https://github.com/rustydb/sentinel/commit/a1b2c3d',
+    linkLabel: 'Open the GitHub commit for dashboard build a1b2c3d',
+  };
+
   beforeEach(() => {
     installResizeObserverMock();
     hooks.useTypeInfo.mockReturnValue({
@@ -74,6 +83,7 @@ describe('DashboardScreen', () => {
           offlineTurrets: 0,
           aggressorsPast24Hours: 0,
         }}
+        buildInfo={buildInfo}
         onAssignSolarSystem={vi.fn().mockResolvedValue(undefined)}
         onUnassignSolarSystem={vi.fn().mockResolvedValue(undefined)}
         onResetEvents={vi.fn()}
@@ -85,6 +95,10 @@ describe('DashboardScreen', () => {
     expect(screen.getByRole('button', { name: /advanced search options/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();
     expect(screen.getByRole('button', { name: /collapse metrics/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: buildInfo.linkLabel }).getAttribute('href')).toBe(
+      buildInfo.href,
+    );
+    expect(screen.getByText('v0.2.0 (a1b2c3d-dirty)')).toBeTruthy();
   });
 
   it('collapses the metrics panel by default on mobile screens', () => {

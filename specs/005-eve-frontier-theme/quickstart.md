@@ -9,7 +9,7 @@ Validate the EVE Frontier theme overhaul, statistics panel, and recent target-in
 1. Start the local stack:
 
     ```bash
-    podman compose -f docker-compose.dev.yml up
+    podman compose -f docker-compose-dev.yml up
     ```
 
 2. Confirm the dashboard is available at `http://127.0.0.1:5174`.

@@ -62,8 +62,7 @@ The project combines a React dashboard, a Bun/Express support API, and a Rust in
 |-- docs/               # Product, domain, design system, ADRs
 |-- specs/              # Speckit specs, plans, tasks, quickstarts
 |-- assets/             # Shared branding assets
-|-- docker-compose.dev.yml
-`-- docker-compose.yml
+`-- docker-compose-dev.yml
 ```
 
 ## EVE Hackathon Notes
@@ -94,7 +93,7 @@ Access demo-mode by the `/demo` sub-path (e.g. `http://localhost:5173/demo`).
 The repo is designed to be iterated on with the development stack:
 
 ```bash
-podman compose -f docker-compose.dev.yml up
+podman compose -f docker-compose-dev.yml up
 ```
 
 Local services:
@@ -118,12 +117,12 @@ Notes:
 > - the demo route stays fixture-backed on purpose; it does not pretend to be live telemetry
 > - some older repo quickstarts still mention `5174`, but the checked-in dashboard runtime is currently configured for `5173`
 
-### Production-Style Stack
+### Rebuild Local Stack
 
-For a production-style container build, use the main compose file:
+For a fresh container rebuild of the current local stack, use:
 
 ```bash
-podman compose up --build
+podman compose -f docker-compose-dev.yml up --build
 ```
 
 ### Host-Native Workflow

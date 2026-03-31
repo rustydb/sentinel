@@ -23,18 +23,18 @@ Sentinel is a client-rendered single-page application (SPA) backed by a Backends
 
 ### Development - `podman-compose`
 
-For local development, the the full Sentinel project may be launched via `podman compose`/`docker compose`. The development compose files enable hot-reload for viewing live changes to any of the applications.
+For local development, the full Sentinel project may be launched via `podman compose`/`docker compose`. The checked-in compose file is the current local stack and enables hot-reload for viewing live changes to any of the applications.
 
 - Development (with hot-reload):
 
 ```bash
-podman compose -f docker-compose.dev.yml up -d
+podman compose -f docker-compose-dev.yml up -d
 ```
 
-- Production (no hot-reload):
+- Local rebuild (fresh images):
 
 ```bash
-podman compose up -d
+podman compose -f docker-compose-dev.yml up -d --build
 ```
 
 ## Production - Cloud Run + Cloud SQL

@@ -19,7 +19,7 @@
    Start the supporting services:
 
     ```bash
-    podman compose up -d postgres
+    podman compose -f docker-compose-dev.yml up -d postgres
     ```
 
     In separate terminals start the dashboard and API:
@@ -64,5 +64,5 @@
 5. **Container Verification**
    Validate the container stack end-to-end:
     ```bash
-    podman compose up --build
+    podman compose -f docker-compose-dev.yml up --build
     ```

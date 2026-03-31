@@ -8,7 +8,7 @@ Verify that all user-visible Sui addresses in the dashboard remain responsive to
 
 - Bun installed
 - Workspace dependencies installed with `bun install`
-- Dev dashboard available via `bun run --filter @sentinel/dashboard dev` or `podman compose -f docker-compose.dev.yml up`
+- Dev dashboard available via `bun run --filter @sentinel/dashboard dev` or `podman compose -f docker-compose-dev.yml up`
 
 ## Verification Steps
 

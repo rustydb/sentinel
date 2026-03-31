@@ -4,6 +4,7 @@ import type { EveWorldName, TurretData } from '@sentinel/shared-types';
 import { useDeferredValue, useEffect, useState } from 'react';
 
 import sentinelLogo from '../../../assets/logo.png';
+import { dashboardBuildInfo } from './buildInfo';
 import { DashboardScreen } from './components/DashboardScreen';
 import { useDashboardRefresh } from './hooks/useDashboardRefresh';
 import { useNetworkNodes } from './hooks/useNetworkNodes';
@@ -255,6 +256,7 @@ export default function App() {
         onClassNameChange={turretFilters.setClassName}
         onSelectedNetworkNodeChange={turretFilters.setSelectedNetworkNode}
         onClearAllFilters={turretFilters.clearAll}
+        buildInfo={dashboardBuildInfo}
       />
     </WorldProvider>
   );

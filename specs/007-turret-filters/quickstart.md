@@ -7,7 +7,7 @@ Verify the turret filtering experience end to end in the local dashboard.
 ## 1. Start The Dev Stack
 
 ```bash
-podman compose -f docker-compose.dev.yml up
+podman compose -f docker-compose-dev.yml up
 ```
 
 Open:

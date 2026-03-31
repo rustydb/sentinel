@@ -26,7 +26,7 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [x] T010 Setup `docker-compose.yml` with PostgreSQL and dependent services
+- [x] T010 Setup `docker-compose-dev.yml` with PostgreSQL and dependent services
 - [x] T011 Setup apps/indexer database schema and Diesel migrations for `turret_events`
 - [x] T012 Setup apps/api database connection pool and `network_node_mappings` table
 - [x] T013 [P] Implement `TurretData`, `TurretEvent`, and GraphQL constants in packages/shared-types/src/index.ts

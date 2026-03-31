@@ -5,7 +5,7 @@ Since this feature introduces standard UI text and standard GitHub issue templat
 1. Install dependencies and start the dashboard local stack normally:
 
 ```bash
-podman compose -f docker-compose.dev.yml up
+podman compose -f docker-compose-dev.yml up
 ```
 
 2. Navigate to `http://127.0.0.1:5174` and scroll to the bottom to verify the new prerelease disclaimer.

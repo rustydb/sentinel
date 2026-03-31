@@ -20,7 +20,7 @@ Expected result:
 ## 2. Start The Dev Stack
 
 ```bash
-podman compose -f docker-compose.dev.yml up
+podman compose -f docker-compose-dev.yml up
 ```
 
 Open:

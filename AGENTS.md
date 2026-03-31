@@ -37,7 +37,7 @@ Notes:
 Prefer the dev stack for iterative work:
 
 ```bash
-podman compose -f docker-compose.dev.yml up
+podman compose -f docker-compose-dev.yml up
 ```
 
 Key local endpoints:
@@ -46,10 +46,10 @@ Key local endpoints:
 - api: `http://127.0.0.1:3002`
 - postgres: `127.0.0.1:5433`
 
-Use the main compose file only for the production-style stack:
+Use the same compose file with `--build` when you want a fresh local container rebuild:
 
 ```bash
-podman compose up --build
+podman compose -f docker-compose-dev.yml up --build
 ```
 
 This project uses **Podman**, not Docker, even if shell aliases make them look interchangeable.

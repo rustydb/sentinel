@@ -14,6 +14,8 @@ import type {
   TurretFilterState,
 } from '../hooks/useTurretFilters';
 import type { ResolvedTurretSolarSystem } from '../hooks/useTurretSolarSystems';
+import type { DashboardBuildInfo } from '../buildInfo';
+import { dashboardBuildInfo } from '../buildInfo';
 import { MapEmbed } from './MapEmbed';
 import { NetworkNodeDrawer } from './NetworkNodeDrawer';
 import { ResponsiveAddress } from './ResponsiveAddress';
@@ -153,6 +155,7 @@ function WalletDropdown({
 interface DashboardScreenProps {
   turrets: TurretData[];
   totalTurrets?: number;
+  buildInfo?: DashboardBuildInfo;
   loading: boolean;
   error: Error | null;
   characterName: string;
@@ -191,6 +194,7 @@ interface DashboardScreenProps {
 export function DashboardScreen({
   turrets,
   totalTurrets = turrets.length,
+  buildInfo = dashboardBuildInfo,
   loading,
   error,
   characterName,
@@ -261,6 +265,10 @@ export function DashboardScreen({
   const detailPanelPaddingBottom = selectedTurret
     ? `${Math.max(detailPanelHeight + 96, 640)}px`
     : undefined;
+  const buildStampLabel = `v${buildInfo.version} (${buildInfo.commitHash}${buildInfo.dirty ? '-dirty' : ''})`;
+  const buildStampClassName =
+    'fixed bottom-4 right-4 z-20 border border-sentinel-line bg-sentinel-shell/92 px-3 py-2 text-[0.6rem] uppercase tracking-[0.28em] text-sentinel-muted shadow-[4px_4px_0_0_#050608] backdrop-blur-sm transition-[transform,color,border-color,box-shadow,background-color] duration-150';
+  const buildStampInteractiveClassName = `${buildStampClassName} sentinel-action-button hover:border-sentinel-accent hover:text-sentinel-glow`;
 
   useEffect(() => {
     if (!selectedTurret || !(detailPanelElement instanceof HTMLElement)) {
@@ -324,7 +332,7 @@ export function DashboardScreen({
 
   return (
     <main
-      className="min-h-screen bg-sentinel-canvas px-6 py-8 text-sentinel-ink"
+      className="relative min-h-screen bg-sentinel-canvas px-6 py-8 text-sentinel-ink"
       style={detailPanelPaddingBottom ? { paddingBottom: detailPanelPaddingBottom } : undefined}
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-8">
@@ -447,6 +455,21 @@ export function DashboardScreen({
           </p>
         </footer>
       </div>
+
+      {buildInfo.href ? (
+        <a
+          href={buildInfo.href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={buildInfo.linkLabel}
+          title={buildInfo.linkLabel}
+          className={buildStampInteractiveClassName}
+        >
+          {buildStampLabel}
+        </a>
+      ) : (
+        <div className={buildStampClassName}>{buildStampLabel}</div>
+      )}
 
       <NetworkNodeDrawer
         open={drawerOpen}
