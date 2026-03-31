@@ -24,6 +24,9 @@ release/
 *.log
 *.tmp
 
+# Gcloud
+gha-creds-*.json
+
 # OS
 *.swp
 .env

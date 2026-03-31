@@ -5,6 +5,7 @@ build/
 coverage/
 target/
 *.log
+gha-creds-*.json
 .env
 .env.*
 Dockerfile*

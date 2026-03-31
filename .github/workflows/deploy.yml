@@ -96,12 +96,11 @@ jobs:
           # Skip shared-types as it doesn't have a Dockerfile
           IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
           BUILD_DIRTY="false"
-          if [[ -n "$(git status --short)" ]]; then
+          if [ -n "$(git status --short)" ]; then
             BUILD_DIRTY="true"
           fi
-          echo "BUILD_DIRTY=${BUILD_DIRTY}"
-          git status --short
-          exit 1
+
+          echo "Build dirty: $BUILD_DIRTY"
           docker build \
             --build-arg SENTINEL_BUILD_COMMIT=${{ github.sha }} \
             --build-arg SENTINEL_BUILD_DIRTY=${BUILD_DIRTY} \
