@@ -1,9 +1,20 @@
 name: Deploy to Cloud Run
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'apps/**-v*'
+      - 'packages/**-v*'
   workflow_dispatch:
+    inputs:
+      component:
+        description: 'Component to deploy (api, dashboard, indexer)'
+        required: true
+        default: 'api'
+      version:
+        description: 'Version tag (e.g., v0.1.1)'
+        required: true
+        default: 'latest'
 
 env:
   VPC_CONNECTOR: ${{ secrets.GCP_VPC_CONNECTOR }}
@@ -15,18 +26,37 @@ env:
   SUI_NETWORK: testnet
 
 jobs:
+  parse-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      component: ${{ steps.parse.outputs.component }}
+      version: ${{ steps.parse.outputs.version }}
+    steps:
+      - id: parse
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "component=${{ github.event.inputs.component }}" >> $GITHUB_OUTPUT
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            # Tag format: apps/api-v0.1.1
+            TAG=${{ github.ref_name }}
+            COMPONENT=$(echo $TAG | cut -d'/' -f2 | cut -d'-' -f1)
+            VERSION=$(echo $TAG | cut -d'-' -f2)
+            echo "component=$COMPONENT" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
   deploy:
+    needs: parse-tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for Workload Identity Federation
-
+      id-token: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
       - name: Authenticate to Google Cloud
-        id: auth
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
@@ -39,22 +69,27 @@ jobs:
         run: |-
           gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
 
-      - name: Build Images
+      - name: Build and Push Image
         run: |
-          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest -f apps/api/Dockerfile .
-          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest -f apps/dashboard/Dockerfile .
-          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest -f apps/indexer/Dockerfile .
-
-      - name: Push Images
-        run: |
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest
+          COMPONENT=${{ needs.parse-tag.outputs.component }}
+          VERSION=${{ needs.parse-tag.outputs.version }}
+          # Determine path for indexer which is not in the tag path for shared types
+          if [[ "$COMPONENT" == "api" ]]; then DOCKERFILE="apps/api/Dockerfile"; fi
+          if [[ "$COMPONENT" == "dashboard" ]]; then DOCKERFILE="apps/dashboard/Dockerfile"; fi
+          if [[ "$COMPONENT" == "indexer" ]]; then DOCKERFILE="apps/indexer/Dockerfile"; fi
+          
+          # Skip shared-types as it doesn't have a Dockerfile
+          if [[ "$COMPONENT" != "shared-types" ]]; then
+            IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
+            docker build -t ${IMAGE_URL} -f ${DOCKERFILE} .
+            docker push ${IMAGE_URL}
+          fi
 
       - name: Deploy API
+        if: needs.parse-tag.outputs.component == 'api'
         run: |
           gcloud run deploy api \
-            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:${{ needs.parse-tag.outputs.version }} \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
@@ -64,10 +99,11 @@ jobs:
             --port 3001
 
       - name: Deploy Indexer
+        if: needs.parse-tag.outputs.component == 'indexer'
         run: |
           EVE_PACKAGE_ID="${{ env.EVE_PACKAGE_ID_STILLNESS }},${{ env.EVE_PACKAGE_ID_UTOPIA }}"
           gcloud run deploy indexer \
-            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:${{ needs.parse-tag.outputs.version }} \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
@@ -79,12 +115,11 @@ jobs:
             --port 8080
 
       - name: Deploy Dashboard
+        if: needs.parse-tag.outputs.component == 'dashboard'
         run: |
           API_URL=$(gcloud run services describe api --region ${{ secrets.GCP_REGION }} --format="value(status.url)")
-          echo "API deployed at $API_URL"
-
           gcloud run deploy dashboard \
-            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest \
+            --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:${{ needs.parse-tag.outputs.version }} \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
             --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \

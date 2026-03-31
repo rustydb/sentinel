@@ -26,6 +26,10 @@ We govern all commit history strictly:
     ```
 
 - **Conventional Commits**: Every commit message must adopt the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) structure (e.g., `feat:`, `fix:`, `docs:`, `chore:`).
+    - **Impact on Releases**: Your commits directly control our **Independent Versioning** strategy.
+        - **Path-Based**: Only components with files changed in your commit will receive a version bump.
+        - **Bump Types**: `fix:` triggers a patch bump (`0.1.0` -> `0.1.1`), `feat:` triggers a minor bump (`0.1.0` -> `0.2.0`), and `feat!:` triggers a major bump (`0.1.0` -> `1.0.0`).
+        - **Scope**: While optional, using scopes like `feat(api):` or `fix(dashboard):` helps generate cleaner changelogs.
 
 ## 3. Development Workflow
 
