@@ -1,0 +1,33 @@
+name: hadolint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Required to upload SARIF
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          recursive: true
+          format: tty
+          output-file: hadolint.sarif
+          no-fail: true # Set to true to avoid failing pipeline immediately
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: hadolint.sarif
+          category: hadolint
