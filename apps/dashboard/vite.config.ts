@@ -7,6 +7,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
+import { resolveDashboardReleaseTag } from './buildMeta';
+
 const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const dashboardPackageJson = JSON.parse(
   readFileSync(resolve(workspaceRoot, 'apps/dashboard/package.json'), 'utf8'),
@@ -212,7 +214,10 @@ const repositoryUrl = normalizeGitHubUrl(
     readGitOutput(['remote', 'get-url', 'origin']) ??
     (gitDir ? readGitRemoteUrlFromDir(gitDir, 'origin') : null),
 );
-const releaseTag = process.env.SENTINEL_BUILD_RELEASE_TAG?.trim() || `v${dashboardVersion}`;
+const releaseTag = resolveDashboardReleaseTag(
+  dashboardVersion,
+  process.env.SENTINEL_BUILD_RELEASE_TAG,
+);
 const hasReleaseTag =
   process.env.SENTINEL_BUILD_RELEASE_TAG?.trim() != null ||
   readGitOutput(['rev-parse', '--verify', '--quiet', `refs/tags/${releaseTag}`]) !== null ||

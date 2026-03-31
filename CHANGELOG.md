@@ -45,6 +45,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 
 ### Fixed
 
+- Fixed dashboard build-stamp version links to resolve the full `apps/dashboard-...` GitHub tag path even when the visible version is deduced from the shorter release tag.
 - Restored the Sentinel dashboard shell to the canonical SVG logo, loaded the intended Outfit and JetBrains Mono fonts, and replaced the remaining white copy controls with themed surfaces.
 - Removed stale `?demo=true` references in the dashboard workflow and wired `/demo` advanced filtering to the mocked status and class options.
 - Base task implementation formatting for automated spec-runners.
