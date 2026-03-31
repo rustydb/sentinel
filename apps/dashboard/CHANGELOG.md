@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.2.0...apps/dashboard-v0.3.0) (2026-03-31)
+
+
+### Features
+
+* **dashboard:** show version information ([6c61173](https://github.com/rustydb/sentinel/commit/6c61173d5775ce46f02bec3cdd3bd6a50778f575))
+
 ## [0.2.0](https://github.com/rustydb/sentinel/compare/dashboard-v0.1.0...dashboard-v0.2.0) (2026-03-31)
 
 
