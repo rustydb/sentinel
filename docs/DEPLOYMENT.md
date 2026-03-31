@@ -72,6 +72,43 @@ Each tier demands specific Cloud Run deployment configurations:
 
 ---
 
+## Release Process
+
+Sentinel uses an **Independent Versioning** strategy. Each component in the monorepo maintains its own version number and lifecycle, allowing for granular updates without forcing unnecessary bumps across the entire system.
+
+### Versioning Strategy
+
+- **Node.js/TypeScript Packages**: Automated via [Release Please](https://github.com/googleapis/release-please).
+- **Rust Indexer**: Manually versioned due to current limitations in polyglot monorepo automation.
+
+| Component    | Path                    | Automation     | Tag Pattern                    |
+| ------------ | ----------------------- | -------------- | ------------------------------ |
+| API          | `apps/api`              | Release Please | `apps/api-vX.Y.Z`              |
+| Dashboard    | `apps/dashboard`        | Release Please | `apps/dashboard-vX.Y.Z`        |
+| Shared Types | `packages/shared-types` | Release Please | `packages/shared-types-vX.Y.Z` |
+| Indexer      | `apps/indexer`          | **Manual**     | `apps/indexer-vX.Y.Z`          |
+
+### Automated Release Workflow (Node/TS)
+
+1.  **Conventional Commits**: All changes must use [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat(api): add new endpoint`).
+2.  **Release PR**: When a PR is merged to `main`, Release Please automatically opens or updates a "Release PR" for the affected packages.
+3.  **Merging Release PR**: Merging this PR will:
+    - Update the `package.json` version.
+    - Update the package's `CHANGELOG.md`.
+    - Create a GitHub Release and a corresponding Git tag (e.g., `apps/api-v0.1.1`).
+4.  **Deployment**: The creation of the GitHub Release tag triggers the deployment pipeline.
+
+### Manual Release Workflow (Rust Indexer)
+
+Due to a known [issue](https://github.com/googleapis/release-please/issues/2589) with Release Please's Cargo plugin in polyglot monorepos, the indexer is versioned manually:
+
+1.  **Update Version**: Manually update the `version` field in `apps/indexer/Cargo.toml`.
+2.  **Changelog**: Manually document changes in `apps/indexer/CHANGELOG.md` (optional but recommended).
+3.  **Tagging**: Create and push a tag following the pattern `apps/indexer-vX.Y.Z`.
+4.  **Release**: Manually create a GitHub Release for the tag to trigger the deployment pipeline.
+
+---
+
 ## Continuous Deployment (CI/CD)
 
 Sentinel utilizes **GitHub Actions** (`.github/workflows/deploy.yml`) for automated deployments to Google Cloud.
