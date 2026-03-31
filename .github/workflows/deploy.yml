@@ -99,7 +99,9 @@ jobs:
           if [[ -n "$(git status --short)" ]]; then
             BUILD_DIRTY="true"
           fi
-
+          echo "BUILD_DIRTY=${BUILD_DIRTY}"
+          git status --short
+          exit 1
           docker build \
             --build-arg SENTINEL_BUILD_COMMIT=${{ github.sha }} \
             --build-arg SENTINEL_BUILD_DIRTY=${BUILD_DIRTY} \
