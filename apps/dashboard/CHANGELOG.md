@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.1...apps/dashboard-v0.3.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* bad url links in prod for version tag ([7e81c8b](https://github.com/rustydb/sentinel/commit/7e81c8bcb57d41cac20e4b09c0457a6c16a693ea))
+
 ## [0.3.1](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.0...apps/dashboard-v0.3.1) (2026-03-31)
 
 
