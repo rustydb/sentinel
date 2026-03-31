@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.0...apps/dashboard-v0.3.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* **dashboard:** version hash was unknown in prod ([a862137](https://github.com/rustydb/sentinel/commit/a862137261b6b7d43534a35dae3c05150a2ac15e))
+
 ## [0.3.0](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.2.0...apps/dashboard-v0.3.0) (2026-03-31)
 
 
