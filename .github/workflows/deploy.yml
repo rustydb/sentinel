@@ -6,9 +6,10 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
-  REGION: ${{ secrets.GCP_REGION }}
+  VPC_CONNECTOR: ${{ secrets.GCP_VPC_CONNECTOR }}
   REPO: sentinel-repo
+  DB_NAME: sentinel-db
+  DB_URN: sentinel
   EVE_PACKAGE_ID_STILLNESS: '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
   EVE_PACKAGE_ID_UTOPIA: '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75'
   SUI_NETWORK: testnet
@@ -56,8 +57,9 @@ jobs:
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:latest \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
-            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
-            --set-env-vars DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
+            --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
+            --set-env-vars DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
             --allow-unauthenticated \
             --port 3001
 
@@ -68,8 +70,9 @@ jobs:
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:latest \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
-            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db \
-            --set-env-vars=^__^DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/sentinel?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:sentinel-db__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID} \
+            --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
+            --set-env-vars=^__^DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }}__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID} \
             --no-cpu-throttling \
             --min-instances 1 \
             --allow-unauthenticated \
@@ -84,6 +87,7 @@ jobs:
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/dashboard:latest \
             --region ${{ secrets.GCP_REGION }} \
             --project ${{ secrets.GCP_PROJECT }} \
+            --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
             --set-env-vars API_PROXY_URL=$API_URL,GRAPHQL_PROXY_URL=https://graphql.${{ env.SUI_NETWORK }}.sui.io \
             --allow-unauthenticated \
             --port 5173
