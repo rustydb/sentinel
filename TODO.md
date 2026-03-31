@@ -27,8 +27,8 @@
       that do not live at the project root
       (https://github.com/googleapis/release-please/issues/2589). Close this gap for
       automatic release management of `apps/indexer` after bug resolution.
-- [ ] **Deploy on tag** deploy Docker containers using tags instead of latest
+- [x] **Deploy on tag** deploy Docker containers using tags instead of latest
       to ensure a given deployment is pushing its own artifacts
-- [ ] **Build on changes** skip workflows if their relevant files were not in the
+- [x] **Build on changes** skip workflows if their relevant files were not in the
       change list for the branch (e.g. don't run `cargo` commands if only the TypeScript
       applications were updated)
