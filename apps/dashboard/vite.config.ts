@@ -197,24 +197,29 @@ function normalizeGitHubUrl(remoteUrl: string | null): string | null {
 
 const dashboardVersion = dashboardPackageJson.version ?? '0.0.0';
 const gitDir = resolveGitDir(workspaceRoot);
+const configuredCommitHash = process.env.SENTINEL_BUILD_COMMIT?.trim() || null;
 const fullCommitHash =
-  readGitOutput(['rev-parse', 'HEAD']) ?? (gitDir ? readGitHeadHashFromDir(gitDir) : null);
-const shortCommitHash =
-  readGitOutput(['rev-parse', '--short', 'HEAD']) ??
-  (fullCommitHash ? fullCommitHash.slice(0, 7) : 'unknown');
+  configuredCommitHash ??
+  readGitOutput(['rev-parse', 'HEAD']) ??
+  (gitDir ? readGitHeadHashFromDir(gitDir) : null);
+const shortCommitHash = fullCommitHash ? fullCommitHash.slice(0, 7) : 'unknown';
 const dirty =
   parseBooleanEnv(process.env.SENTINEL_BUILD_DIRTY) ??
   parseBooleanEnv(process.env.VITE_BUILD_DIRTY) ??
   (readGitOutput(['status', '--short']) !== null ? true : false);
 const repositoryUrl = normalizeGitHubUrl(
-  readGitOutput(['remote', 'get-url', 'origin']) ??
+  process.env.SENTINEL_BUILD_REPOSITORY_URL?.trim() ??
+    readGitOutput(['remote', 'get-url', 'origin']) ??
     (gitDir ? readGitRemoteUrlFromDir(gitDir, 'origin') : null),
 );
-const releaseTag = `v${dashboardVersion}`;
+const releaseTag = process.env.SENTINEL_BUILD_RELEASE_TAG?.trim() || `v${dashboardVersion}`;
 const hasReleaseTag =
+  process.env.SENTINEL_BUILD_RELEASE_TAG?.trim() != null ||
   readGitOutput(['rev-parse', '--verify', '--quiet', `refs/tags/${releaseTag}`]) !== null ||
   (gitDir ? readGitTagHashFromDir(gitDir, releaseTag) !== null : false);
-const releaseUrl = repositoryUrl ? `${repositoryUrl}/releases/tag/${releaseTag}` : null;
+const releaseUrl = repositoryUrl
+  ? `${repositoryUrl}/releases/tag/${encodeURIComponent(releaseTag)}`
+  : null;
 const commitUrl =
   repositoryUrl && fullCommitHash ? `${repositoryUrl}/commit/${fullCommitHash}` : null;
 const fallbackUrl = repositoryUrl ? `${repositoryUrl}/releases` : null;

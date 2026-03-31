@@ -41,17 +41,17 @@ jobs:
           else
             # Tag format: apps/api-v0.1.1 or packages/shared-types-v0.1.1
             TAG=${{ github.ref_name }}
-            
+
             # Extract everything before the last '-v'
             COMPONENT_PATH=$(echo $TAG | sed -E 's/-v[0-9]+\.[0-9]+\.[0-9]+.*$//')
             # Extract the component name (last part of the path)
             COMPONENT=$(echo $COMPONENT_PATH | rev | cut -d'/' -f1 | rev)
             # Extract the version (everything after the last '-v')
             VERSION=$(echo $TAG | sed -E 's/^.*-v//')
-            
+
             echo "component=$COMPONENT" >> $GITHUB_OUTPUT
             echo "version=v$VERSION" >> $GITHUB_OUTPUT
-            
+
             # Only deploy if it's in the 'apps/' directory
             if [[ "$TAG" == apps/* ]]; then
               echo "should_deploy=true" >> $GITHUB_OUTPUT
@@ -92,13 +92,23 @@ jobs:
           if [[ "$COMPONENT" == "api" ]]; then DOCKERFILE="apps/api/Dockerfile"; fi
           if [[ "$COMPONENT" == "dashboard" ]]; then DOCKERFILE="apps/dashboard/Dockerfile"; fi
           if [[ "$COMPONENT" == "indexer" ]]; then DOCKERFILE="apps/indexer/Dockerfile"; fi
-          
+
           # Skip shared-types as it doesn't have a Dockerfile
-          if [[ "$COMPONENT" != "shared-types" ]]; then
-            IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
-            docker build -t ${IMAGE_URL} -f ${DOCKERFILE} .
-            docker push ${IMAGE_URL}
+          IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
+          BUILD_DIRTY="false"
+          if [[ -n "$(git status --short)" ]]; then
+            BUILD_DIRTY="true"
           fi
+
+          docker build \
+            --build-arg SENTINEL_BUILD_COMMIT=${{ github.sha }} \
+            --build-arg SENTINEL_BUILD_DIRTY=${BUILD_DIRTY} \
+            --build-arg SENTINEL_BUILD_REPOSITORY_URL=https://github.com/${{ github.repository }} \
+            --build-arg SENTINEL_BUILD_RELEASE_TAG=${VERSION} \
+            -t ${IMAGE_URL} \
+            -f ${DOCKERFILE} \
+            .
+          docker push ${IMAGE_URL}
 
       - name: Deploy API
         if: needs.parse-tag.outputs.component == 'api'

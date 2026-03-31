@@ -16,6 +16,7 @@ Commits must follow the [Conventional Commits](https://www.conventionalcommits.o
 - Root [AGENTS.md] guidance for future agent sessions.
 - A persistent lower-right dashboard build stamp showing version, commit hash, local dirty state, and a GitHub release-or-commit link for the running build, with the dashboard dev container now including `git` so the normal Podman workflow can resolve live build metadata.
 - Consolidated the local compose setup to `docker-compose-dev.yml` and removed the stale `docker-compose.yml` references from project docs and specs.
+- Fixed Cloud Run dashboard builds to inject explicit GitHub commit and release metadata during Docker image builds so deployed version stamps no longer fall back to `unknown`.
 - `003-responsive-sui-addresses`, including the shared `ResponsiveAddress` component and themed copy/tick feedback.
 - Podman-friendly local development stack via `docker-compose.dev.yml`.
 - EVE Wallet-first dashboard connection flow and ADR coverage for wallet-selection behavior.
