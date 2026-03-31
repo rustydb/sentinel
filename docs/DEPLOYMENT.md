@@ -113,7 +113,7 @@ Due to a known [issue](https://github.com/googleapis/release-please/issues/2589)
 
 1.  **Update Version**: Manually update the `version` field in `apps/indexer/Cargo.toml`.
 2.  **Changelog**: Manually document changes in `apps/indexer/CHANGELOG.md` (optional but recommended).
-3.  **Tagging**: Create and push a tag following the pattern `apps/indexer-vX.Y.Z`.
+3.  **Tagging**: Create and push a tag following the pattern `apps/indexer-vX.Y.Z` (e.g., `apps/indexer-v0.1.2`).
 4.  **Release**: Manually create a GitHub Release for the tag to trigger the deployment pipeline.
 
 ---

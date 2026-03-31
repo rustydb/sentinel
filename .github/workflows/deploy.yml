@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'apps/**-v*'
-      - 'packages/**-v*'
   workflow_dispatch:
     inputs:
       component:
@@ -31,23 +30,39 @@ jobs:
     outputs:
       component: ${{ steps.parse.outputs.component }}
       version: ${{ steps.parse.outputs.version }}
+      should_deploy: ${{ steps.parse.outputs.should_deploy }}
     steps:
       - id: parse
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "component=${{ github.event.inputs.component }}" >> $GITHUB_OUTPUT
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
           else
-            # Tag format: apps/api-v0.1.1
+            # Tag format: apps/api-v0.1.1 or packages/shared-types-v0.1.1
             TAG=${{ github.ref_name }}
-            COMPONENT=$(echo $TAG | cut -d'/' -f2 | cut -d'-' -f1)
-            VERSION=$(echo $TAG | cut -d'-' -f2)
+            
+            # Extract everything before the last '-v'
+            COMPONENT_PATH=$(echo $TAG | sed -E 's/-v[0-9]+\.[0-9]+\.[0-9]+.*$//')
+            # Extract the component name (last part of the path)
+            COMPONENT=$(echo $COMPONENT_PATH | rev | cut -d'/' -f1 | rev)
+            # Extract the version (everything after the last '-v')
+            VERSION=$(echo $TAG | sed -E 's/^.*-v//')
+            
             echo "component=$COMPONENT" >> $GITHUB_OUTPUT
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "version=v$VERSION" >> $GITHUB_OUTPUT
+            
+            # Only deploy if it's in the 'apps/' directory
+            if [[ "$TAG" == apps/* ]]; then
+              echo "should_deploy=true" >> $GITHUB_OUTPUT
+            else
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
   deploy:
     needs: parse-tag
+    if: needs.parse-tag.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read

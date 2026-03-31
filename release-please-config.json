@@ -4,16 +4,19 @@
   "packages": {
     "apps/api": {
       "package-name": "@sentinel/api",
+      "component": "apps/api",
       "changelog-path": "CHANGELOG.md",
       "release-type": "node"
     },
     "apps/dashboard": {
       "package-name": "@sentinel/dashboard",
+      "component": "apps/dashboard",
       "changelog-path": "CHANGELOG.md",
       "release-type": "node"
     },
     "packages/shared-types": {
       "package-name": "@sentinel/shared-types",
+      "component": "packages/shared-types",
       "changelog-path": "CHANGELOG.md",
       "release-type": "node"
     }
