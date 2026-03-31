@@ -9,7 +9,37 @@ on:
   pull_request:
 
 jobs:
-  web:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      indexer: ${{ steps.filter.outputs.indexer }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            web:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - '**/*.js'
+              - '**/*.jsx'
+              - 'package.json'
+              - 'bun.lock'
+              - 'eslint.config.*'
+              - '.eslintrc*'
+              - 'apps/dashboard/**'
+              - 'apps/api/**'
+              - 'packages/shared-types/**'
+            indexer:
+              - 'apps/indexer/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+
+  web-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -19,13 +49,53 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            apps/dashboard/node_modules
+            apps/api/node_modules
+            packages/shared-types/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - run: bun install
       - run: bun run lint
+
+  web-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.11
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            apps/dashboard/node_modules
+            apps/api/node_modules
+            packages/shared-types/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - run: bun install
       - run: bun run test:shared
       - run: bun run test:api
       - run: bun run test:dashboard
 
   indexer:
+    needs: changes
+    if: ${{ needs.changes.outputs.indexer == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -34,6 +104,8 @@ jobs:
         working-directory: apps/indexer
 
   rustfmt:
+    needs: changes
+    if: ${{ needs.changes.outputs.indexer == 'true' }}
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
@@ -46,6 +118,8 @@ jobs:
         working-directory: apps/indexer
 
   clippy:
+    needs: changes
+    if: ${{ needs.changes.outputs.indexer == 'true' }}
     name: Clippy
     runs-on: ubuntu-latest
     steps:
