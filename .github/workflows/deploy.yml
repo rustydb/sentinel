@@ -26,6 +26,8 @@ env:
 
 jobs:
   parse-tag:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       component: ${{ steps.parse.outputs.component }}
