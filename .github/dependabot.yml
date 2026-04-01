@@ -12,7 +12,6 @@ updates:
       - "/apps/api"
       - "/apps/dashboard"
       - "/packages/shared-types"
-      - "/tools/scripts"
     schedule:
       interval: "daily"
     groups:
