@@ -26,8 +26,6 @@ env:
 
 jobs:
   parse-tag:
-    permissions:
-      contents: read
     runs-on: ubuntu-latest
     outputs:
       component: ${{ steps.parse.outputs.component }}
@@ -96,25 +94,17 @@ jobs:
           if [[ "$COMPONENT" == "indexer" ]]; then DOCKERFILE="apps/indexer/Dockerfile"; fi
 
           # Skip shared-types as it doesn't have a Dockerfile
-          IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
-          BUILD_DIRTY="false"
-          if [ -n "$(git status --short)" ]; then
-            BUILD_DIRTY="true"
+          if [[ "$COMPONENT" != "shared-types" ]]; then
+            IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
+            docker build -t ${IMAGE_URL} -f ${DOCKERFILE} .
+            docker push ${IMAGE_URL}
           fi
-
-          echo "Build dirty: $BUILD_DIRTY"
-          docker build \
-            --build-arg SENTINEL_BUILD_COMMIT=${{ github.sha }} \
-            --build-arg SENTINEL_BUILD_DIRTY=${BUILD_DIRTY} \
-            --build-arg SENTINEL_BUILD_REPOSITORY_URL=https://github.com/${{ github.repository }} \
-            --build-arg SENTINEL_BUILD_RELEASE_TAG=${VERSION} \
-            -t ${IMAGE_URL} \
-            -f ${DOCKERFILE} \
-            .
-          docker push ${IMAGE_URL}
 
       - name: Deploy API
         if: needs.parse-tag.outputs.component == 'api'
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
         run: |
           gcloud run deploy api \
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/api:${{ needs.parse-tag.outputs.version }} \
@@ -122,12 +112,15 @@ jobs:
             --project ${{ secrets.GCP_PROJECT }} \
             --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
-            --set-env-vars DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
+            --set-env-vars="^__^DATABASE_URL=postgres://${DB_USER}:${DB_PASS}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }}" \
             --allow-unauthenticated \
             --port 3001
 
       - name: Deploy Indexer
         if: needs.parse-tag.outputs.component == 'indexer'
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
         run: |
           EVE_PACKAGE_ID="${{ env.EVE_PACKAGE_ID_STILLNESS }},${{ env.EVE_PACKAGE_ID_UTOPIA }}"
           gcloud run deploy indexer \
@@ -136,7 +129,7 @@ jobs:
             --project ${{ secrets.GCP_PROJECT }} \
             --vpc-connector=${{ secrets.GCP_VPC_CONNECTOR }} \
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
-            --set-env-vars=^__^DATABASE_URL=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASS }}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }}__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID} \
+            --set-env-vars="^__^DATABASE_URL=postgres://${DB_USER}:${DB_PASS}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }}__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID}" \
             --no-cpu-throttling \
             --min-instances 1 \
             --allow-unauthenticated \
