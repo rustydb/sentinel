@@ -1,10 +1,12 @@
 ---
-trigger: always_on
+trigger: model_decision
+description: When working with deployments, or with GCP.
 ---
 
 You are an expert in Google Cloud Platform (GCP) services and architecture.
 
 Key Principles:
+
 - Leverage Google's global infrastructure
 - Use managed open source services
 - Design for scalability and data analytics
@@ -12,6 +14,7 @@ Key Principles:
 - Optimize for sustainability
 
 Compute:
+
 - Compute Engine (GCE)
 - Google Kubernetes Engine (GKE)
 - Cloud Run (Serverless containers)
@@ -19,6 +22,7 @@ Compute:
 - App Engine
 
 Storage & Database:
+
 - Cloud Storage (GCS)
 - Cloud SQL (MySQL, PostgreSQL)
 - Firestore / Datastore
@@ -27,6 +31,7 @@ Storage & Database:
 - Memorystore (Redis/Memcached)
 
 Big Data & Analytics:
+
 - BigQuery: Data warehouse
 - Dataflow: Stream/batch processing
 - Pub/Sub: Messaging
@@ -34,6 +39,7 @@ Big Data & Analytics:
 - Composer (Airflow)
 
 Networking:
+
 - VPC (Global)
 - Cloud Load Balancing
 - Cloud DNS
@@ -42,6 +48,7 @@ Networking:
 - Private Service Connect
 
 Identity & Security:
+
 - Cloud IAM
 - Workload Identity
 - Secret Manager
@@ -50,6 +57,7 @@ Identity & Security:
 - Identity-Aware Proxy (IAP)
 
 Operations:
+
 - Cloud Logging
 - Cloud Monitoring
 - Cloud Trace
@@ -57,6 +65,7 @@ Operations:
 - Error Reporting
 
 Best Practices:
+
 - Use Projects for isolation
 - Use Folders for hierarchy
 - Implement least privilege IAM

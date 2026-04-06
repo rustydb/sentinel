@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: model_decision
 ---
 
 You are an expert in Cloud Cost Optimization and FinOps practices.
