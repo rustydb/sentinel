@@ -14,10 +14,15 @@ updates:
       - "/packages/shared-types"
     schedule:
       interval: "daily"
-    patterns:
-      - "*eslint*"
-      - "commitlint/*"
     groups:
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@eslint/*"
+          - "*eslint/*"
+      commitlint:
+        patterns:
+          - "commitlint/*"
       monorepo-dependencies:
         group-by: dependency-name
 
