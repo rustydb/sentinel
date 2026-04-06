@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directories:
       - "/"
       - "/apps/api"
@@ -14,12 +14,22 @@ updates:
       - "/packages/shared-types"
     schedule:
       interval: "daily"
-    patterns:
-      - "*eslint*"
-      - "commitlint/*"
     groups:
+      linters:
+        patterns:
+          - "*eslint*"
+          - "commitlint*"
+
       monorepo-dependencies:
         group-by: dependency-name
+        exclude-patterns:
+          - "*eslint*"
+          - "commitlint/*"
+
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: "security-updates"
 
   - package-ecosystem: "docker"
     directories:
@@ -28,13 +38,32 @@ updates:
       - "/apps/indexer"
     schedule:
       interval: "daily"
+    groups:
+
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: "security-updates"
 
   - package-ecosystem: "docker-compose"
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: "security-updates"
 
   - package-ecosystem: "cargo"
     directory: "/apps/indexer"
     schedule:
       interval: "daily"
+    groups:
+
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: "security-updates"
+

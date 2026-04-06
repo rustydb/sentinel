@@ -1,3 +1,10 @@
 #!/usr/bin/env sh
+
+# Skip checks for Dependabot commits; Dependabot will fix commits before PR.
+if [ "$GIT_AUTHOR_NAME" = "dependabot[bot]" ]; then
+  echo "dependabot build - commitlint handled during PR"
+  exit 0
+fi
+
 bunx --no-install lint-staged
 
