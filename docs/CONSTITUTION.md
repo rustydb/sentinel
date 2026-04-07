@@ -19,7 +19,7 @@ This document serves as the absolute source of truth for all development, archit
 ## 2. Core Intent & Philosophy
 
 - **Respect the Architecture:** Follow established patterns and directory layouts as they are created. Extend existing abstractions before inventing new ones.
-- **Explicit over Clever:** Prefer readable, explicit solutions over clever shortcuts. Code should be clean, focused, and prioritise maintainability.
+- **Explicit over Clever:** Prefer readable, explicit solutions over clever shortcuts. Code should be clean, focused, and prioritize maintainability.
 - **Clean State:** Favor immutable data and pure functions when practical. Avoid dynamic code execution from user input to maintain code generation security.
 
 ---
@@ -34,7 +34,7 @@ This document serves as the absolute source of truth for all development, archit
 
 ## 4. UI & Design System Standards
 
-Our application strictly adheres to the core aesthetic and theming principles outlined in the [Design System](./DESIGN-SYSTEM.md). This establishes a high-contrast, technical, "sci-fi industrial" aesthetic inspired by **EVE Frontier**.
+Our application strictly adheres to the core aesthetic and theming principles outlined in the [Design System](./DESIGN_SYSTEM.md). This establishes a high-contrast, technical, "sci-fi industrial" aesthetic inspired by **EVE Frontier**.
 
 ### 4.1 Aesthetic & Theming
 
@@ -54,7 +54,7 @@ Our application strictly adheres to the core aesthetic and theming principles ou
 ## 6. Testing Expectations
 
 - **Comprehensive Unit Tests:** Unit tests are **mandatory**. ALWAYS include tests for utilities, layout algorithms, and code generators. Cover both the happy-path and the not-happy-path.
-- **UI Tests:** Visual and interaction tests ALWAYS accompany changes to the User Experience. Playwright is recommended for End-to-End browser testing of canvas dragging and UI workflows.
+- **UI Tests:** Visual and interaction tests ALWAYS accompany changes to the User Experience. Playwright is recommended for End-to-End browser testing for UI workflows.
 - **Avoid Brittle Tests:** Do not rely on timing assertions. Prefer fake timers, mock clocks, or injected dependencies.
 
 ---
@@ -73,5 +73,5 @@ Our application strictly adheres to the core aesthetic and theming principles ou
 
 - **PascalCase** for React components, interfaces, classes, enums, and TS type aliases (e.g., `AggressionNode.tsx`).
 - **camelCase** for variable names, utility functions, and utility filenames (e.g., `codeGenerator.ts`).
-- **kebab-case** for purely organisational directories unless the standard dictates otherwise.
+- **kebab-case** for purely organizational directories unless the standard dictates otherwise.
 - **Interface Naming:** Skip the 'I' prefix for interfaces (e.g., `SocketDefinition`, not `ISocketDefinition`). Name entities based on behaviour, not implementation.
