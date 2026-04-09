@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "imagetracerjs": "^1.2.6",
-    "jimp": "^1.6.0",
+    "jimp": "^1.6.1",
     "pngjs": "^7.0.0"
   }
 }
