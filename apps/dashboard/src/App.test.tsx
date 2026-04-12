@@ -255,6 +255,7 @@ describe('App', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    window.history.replaceState({}, '', '/');
   });
 
   it('shows the character name in the wallet dropdown trigger', () => {
@@ -265,6 +266,27 @@ describe('App', () => {
   it('passes the tenant-derived world through the data hooks', () => {
     hooks.useConnection.mockReturnValue({
       currentAccount: { address: WALLET_ADDRESS, key: { tenant: 'stillness' } },
+      handleConnect: vi.fn(),
+      handleDisconnect: disconnectMock,
+      hasEveVault: true,
+      isConnected: true,
+    });
+
+    render(<App />);
+
+    expect(hooks.useTurrets).toHaveBeenCalledWith(expect.objectContaining({ world: 'stillness' }));
+    expect(hooks.useTurretSolarSystems).toHaveBeenCalledWith(
+      expect.objectContaining({ world: 'stillness' }),
+    );
+    expect(hooks.useTurretTypeCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({ world: 'stillness' }),
+    );
+  });
+
+  it('prefers the URL tenant when resolving the active world', () => {
+    window.history.replaceState({}, '', '/?tenant=stillness');
+    hooks.useConnection.mockReturnValue({
+      currentAccount: { address: WALLET_ADDRESS },
       handleConnect: vi.fn(),
       handleDisconnect: disconnectMock,
       hasEveVault: true,

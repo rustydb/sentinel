@@ -331,5 +331,193 @@ describe('useTurrets', () => {
     expect(getRequestBody(stillnessFetchCall?.[1])).toContain(
       '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
     );
+    expect(result.current.world).toBe('stillness');
+  });
+
+  it('reloads character sync when the active world changes after mount', async () => {
+    vi.stubEnv(
+      'VITE_STILLNESS_TURRET_PACKAGE_ID',
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001',
+    );
+
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: {
+              address: {
+                objects: {
+                  nodes: [],
+                },
+              },
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: {
+              address: {
+                objects: {
+                  nodes: [],
+                },
+              },
+            },
+          }),
+          { status: 200 },
+        ),
+        { status: 200 },
+      );
+
+    const { result, rerender } = renderHook(
+      ({ world }: { world: 'utopia' | 'stillness' }) =>
+        useTurrets({ owner: '0xfrontier', world, endpoint: '/graphql' }),
+      {
+        initialProps: { world: 'utopia' },
+      },
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    act(() => {
+      rerender({ world: 'stillness' });
+    });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    const stillnessFetchCall = fetchMock.mock.calls[1];
+
+    expect(stillnessFetchCall).toBeDefined();
+    expect(getRequestBody(stillnessFetchCall?.[1])).toContain(
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
+    );
+  });
+
+  it('resolves the active world from the matching character profile when the hint is wrong', async () => {
+    vi.stubEnv(
+      'VITE_STILLNESS_TURRET_PACKAGE_ID',
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001',
+    );
+
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: {
+              address: {
+                objects: {
+                  nodes: [],
+                },
+              },
+            },
+          }),
+          { status: 200 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            data: {
+              address: {
+                objects: {
+                  nodes: [
+                    {
+                      contents: {
+                        extract: {
+                          asAddress: {
+                            asObject: {
+                              address: '0xcharacter',
+                              asMoveObject: {
+                                contents: {
+                                  json: {
+                                    name: 'Commander Nova',
+                                  },
+                                },
+                              },
+                            },
+                            objects: {
+                              pageInfo: {
+                                hasNextPage: false,
+                                endCursor: null,
+                              },
+                              nodes: [
+                                {
+                                  contents: {
+                                    extract: {
+                                      asAddress: {
+                                        asObject: {
+                                          asMoveObject: {
+                                            contents: {
+                                              type: {
+                                                repr: '0xstillness::turret::Turret',
+                                              },
+                                              json: {
+                                                id: '0xturret',
+                                                key: {
+                                                  item_id: '1001',
+                                                  tenant: 'stillness',
+                                                },
+                                                status: {
+                                                  status: {
+                                                    '@variant': 'ONLINE',
+                                                  },
+                                                },
+                                                type_id: 'turret.mk1',
+                                                energy_source_id: 'node-7',
+                                                location: {
+                                                  location_hash: 'J101',
+                                                },
+                                                metadata: {
+                                                  name: 'Stillness Bastion',
+                                                },
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }),
+          { status: 200 },
+        ),
+      );
+
+    const { result } = renderHook(() =>
+      useTurrets({ owner: '0xfrontier', world: 'utopia', endpoint: '/graphql' }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(getRequestBody(fetchMock.mock.calls[0]?.[1])).toContain(
+      '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75::character::PlayerProfile',
+    );
+    expect(getRequestBody(fetchMock.mock.calls[1]?.[1])).toContain(
+      '0xstillnesspackage0000000000000000000000000000000000000000000000000001::character::PlayerProfile',
+    );
+    expect(result.current.world).toBe('stillness');
+    expect(result.current.characterName).toBe('Commander Nova');
+    expect(result.current.turrets[0]?.name).toBe('Stillness Bastion');
   });
 });

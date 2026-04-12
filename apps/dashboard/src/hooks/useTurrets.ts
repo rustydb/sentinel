@@ -7,7 +7,7 @@ import {
 } from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
-import { resolveTurretPackageId } from '../world';
+import { prioritizeWorlds, resolveTurretPackageId } from '../world';
 
 interface UseTurretsOptions {
   owner?: string;
@@ -70,6 +70,13 @@ interface OwnerCapsQueryPayload {
   errors?: Array<{
     message?: string;
   }>;
+}
+
+interface LoadedTurretWorldData {
+  world: EveWorldName;
+  characterName: string | null;
+  characterAddress: string | null;
+  turrets: TurretData[];
 }
 
 function readString(value: unknown, fallback = ''): string {
@@ -146,6 +153,7 @@ export function useTurrets({
   const [error, setError] = useState<Error | null>(null);
   const [characterName, setCharacterName] = useState<string | null>(null);
   const [characterAddress, setCharacterAddress] = useState<string | null>(null);
+  const [resolvedWorld, setResolvedWorld] = useState<EveWorldName>(world);
   const hasLoadedOnceRef = useRef(false);
   const queryKeyRef = useRef<string | null>(null);
 
@@ -155,6 +163,7 @@ export function useTurrets({
       setLoading(false);
       setCharacterName(null);
       setCharacterAddress(null);
+      setResolvedWorld(world);
       hasLoadedOnceRef.current = false;
       queryKeyRef.current = null;
       return;
@@ -164,6 +173,7 @@ export function useTurrets({
     if (queryKeyRef.current !== queryKey) {
       queryKeyRef.current = queryKey;
       hasLoadedOnceRef.current = false;
+      setResolvedWorld(world);
     }
 
     let cancelled = false;
@@ -172,89 +182,120 @@ export function useTurrets({
     }
     setError(null);
 
+    async function loadTurretWorldData(
+      candidateWorld: EveWorldName,
+    ): Promise<LoadedTurretWorldData> {
+      const turretPackageId = resolveTurretPackageId(candidateWorld);
+      const characterPlayerProfileType = `${turretPackageId}${CHARACTER_PLAYER_PROFILE_SUFFIX}`;
+      const ownerCapType = `${turretPackageId}${OWNER_CAP_SUFFIX}${turretPackageId}${TURRET_TYPE_SUFFIX}`;
+      const objects: Record<string, unknown>[] = [];
+      let after: string | null = null;
+      let hasNextPage = true;
+      let nextCharacterName: string | null = null;
+      let nextCharacterAddress: string | null = null;
+
+      while (hasNextPage) {
+        const ownerCapsResponse = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          cache: 'no-store',
+          body: JSON.stringify({
+            query: GET_CHARACTER_AND_OWNED_OBJECTS,
+            variables: { owner, characterPlayerProfileType, ownerCapType, after },
+          }),
+        });
+
+        if (!ownerCapsResponse.ok) {
+          throw new Error('Failed to load turret owner caps');
+        }
+
+        const ownerCapsPayload = (await ownerCapsResponse.json()) as OwnerCapsQueryPayload;
+        if (ownerCapsPayload.errors?.length) {
+          throw new Error(
+            ownerCapsPayload.errors[0]?.message ?? 'Failed to load turret owner caps',
+          );
+        }
+
+        const characterConnection = ownerCapsPayload.data?.address?.objects;
+        const characterProfile =
+          characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.asObject;
+        const characterJson = characterProfile?.asMoveObject?.contents?.json;
+
+        nextCharacterName =
+          characterJson && typeof characterJson === 'object'
+            ? parseCharacterName(characterJson)
+            : nextCharacterName;
+        nextCharacterAddress =
+          typeof characterProfile?.address === 'string'
+            ? characterProfile.address
+            : nextCharacterAddress;
+
+        const ownedObjectsConnection =
+          characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.objects;
+        const pageNodes = ownedObjectsConnection?.nodes ?? [];
+
+        for (const pageNode of pageNodes) {
+          const contents = pageNode.contents?.extract?.asAddress?.asObject?.asMoveObject?.contents;
+          if (contents?.json && typeof contents.json === 'object') {
+            const json = contents.json;
+            objects.push({
+              address: readString(json.id),
+              asMoveObject: {
+                contents,
+              },
+            });
+          }
+        }
+
+        hasNextPage = ownedObjectsConnection?.pageInfo?.hasNextPage === true;
+        after = ownedObjectsConnection?.pageInfo?.endCursor ?? null;
+
+        if (!hasNextPage || after == null) {
+          break;
+        }
+      }
+
+      return {
+        world: candidateWorld,
+        characterName: nextCharacterName,
+        characterAddress: nextCharacterAddress,
+        turrets: objects
+          .map(mapNodeToTurret)
+          .filter((turret): turret is TurretData => turret !== null),
+      };
+    }
+
     const loadTurrets = async (): Promise<void> => {
       try {
-        const turretPackageId = resolveTurretPackageId(world);
-        const characterPlayerProfileType = `${turretPackageId}${CHARACTER_PLAYER_PROFILE_SUFFIX}`;
-        const ownerCapType = `${turretPackageId}${OWNER_CAP_SUFFIX}${turretPackageId}${TURRET_TYPE_SUFFIX}`;
-        const objects: Record<string, unknown>[] = [];
-        let after: string | null = null;
-        let hasNextPage = true;
+        const candidateWorlds = prioritizeWorlds(world);
+        let loadedData: LoadedTurretWorldData | null = null;
 
-        while (hasNextPage) {
-          const ownerCapsResponse = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            cache: 'no-store',
-            body: JSON.stringify({
-              query: GET_CHARACTER_AND_OWNED_OBJECTS,
-              variables: { owner, characterPlayerProfileType, ownerCapType, after },
-            }),
-          });
-
-          if (!ownerCapsResponse.ok) {
-            throw new Error('Failed to load turret owner caps');
+        for (const candidateWorld of candidateWorlds) {
+          const candidateData = await loadTurretWorldData(candidateWorld);
+          if (loadedData === null) {
+            loadedData = candidateData;
           }
 
-          const ownerCapsPayload = (await ownerCapsResponse.json()) as OwnerCapsQueryPayload;
-          if (ownerCapsPayload.errors?.length) {
-            throw new Error(
-              ownerCapsPayload.errors[0]?.message ?? 'Failed to load turret owner caps',
-            );
-          }
-
-          const characterConnection = ownerCapsPayload.data?.address?.objects;
-          const characterProfile =
-            characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.asObject;
-          const characterJson = characterProfile?.asMoveObject?.contents?.json;
-          const nextCharacterName =
-            characterJson && typeof characterJson === 'object'
-              ? parseCharacterName(characterJson)
-              : null;
-          const nextCharacterAddress =
-            typeof characterProfile?.address === 'string' ? characterProfile.address : null;
-          const ownedObjectsConnection =
-            characterConnection?.nodes?.[0]?.contents?.extract?.asAddress?.objects;
-          const pageNodes = ownedObjectsConnection?.nodes ?? [];
-
-          if (!cancelled) {
-            setCharacterName(nextCharacterName);
-            setCharacterAddress(nextCharacterAddress);
-          }
-
-          for (const pageNode of pageNodes) {
-            const contents =
-              pageNode.contents?.extract?.asAddress?.asObject?.asMoveObject?.contents;
-            if (contents?.json && typeof contents.json === 'object') {
-              const json = contents.json;
-              objects.push({
-                address: readString(json.id),
-                asMoveObject: {
-                  contents,
-                },
-              });
-            }
-          }
-
-          hasNextPage = ownedObjectsConnection?.pageInfo?.hasNextPage === true;
-          after = ownedObjectsConnection?.pageInfo?.endCursor ?? null;
-
-          if (!hasNextPage || after == null) {
+          const hasCharacter =
+            candidateData.characterAddress !== null || candidateData.characterName !== null;
+          if (hasCharacter || candidateData.turrets.length > 0) {
+            loadedData = candidateData;
             break;
           }
         }
 
-        if (objects.length === 0) {
-          if (!cancelled) {
-            setTurrets([]);
-          }
-          return;
-        }
-        const mapped = objects
-          .map(mapNodeToTurret)
-          .filter((turret): turret is TurretData => turret !== null);
+        const finalData = loadedData ?? {
+          world,
+          characterName: null,
+          characterAddress: null,
+          turrets: [],
+        };
+
         if (!cancelled) {
-          setTurrets(mapped);
+          setCharacterName(finalData.characterName);
+          setCharacterAddress(finalData.characterAddress);
+          setResolvedWorld(finalData.world);
+          setTurrets(finalData.turrets);
           hasLoadedOnceRef.current = true;
         }
       } catch (reason: unknown) {
@@ -273,7 +314,7 @@ export function useTurrets({
     return () => {
       cancelled = true;
     };
-  }, [enabled, endpoint, owner, refreshTick]);
+  }, [enabled, endpoint, owner, refreshTick, world]);
 
-  return { turrets, loading, error, characterName, characterAddress };
+  return { turrets, loading, error, characterName, characterAddress, world: resolvedWorld };
 }

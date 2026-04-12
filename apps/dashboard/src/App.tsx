@@ -17,7 +17,7 @@ import { useTurretFilters } from './hooks/useTurretFilters';
 import { useTurretSolarSystems } from './hooks/useTurretSolarSystems';
 import { useTurretTypeCatalog } from './hooks/useTurretTypeCatalog';
 import { useTurrets } from './hooks/useTurrets';
-import { resolveWorldFromAccount } from './world';
+import { resolveCurrentWorld } from './world';
 import { WorldProvider } from './worldContext';
 
 const EVE_WALLET_DOWNLOAD_URL =
@@ -112,18 +112,25 @@ export default function App() {
 
   const usingSupportedWallet = isSupportedWalletName(currentWallet?.name);
   const connected = isConnected && usingSupportedWallet;
-  const currentWorld: EveWorldName = resolveWorldFromAccount(currentAccount);
+  const requestedWorld: EveWorldName = resolveCurrentWorld(currentAccount);
   const walletAddress = currentAccount?.address ?? 'Not connected';
   const graphQlEndpoint = import.meta.env.VITE_GRAPHQL_URL ?? '/graphql';
   const { refreshTick } = useDashboardRefresh({ enabled: connected });
 
-  const { turrets, loading, error, characterName } = useTurrets({
+  const {
+    turrets,
+    loading,
+    error,
+    characterName,
+    world: syncedWorld,
+  } = useTurrets({
     owner: connected ? currentAccount?.address : undefined,
-    world: currentWorld,
+    world: requestedWorld,
     endpoint: graphQlEndpoint,
     enabled: connected,
     refreshTick,
   });
+  const currentWorld: EveWorldName = syncedWorld ?? requestedWorld;
   const eventsState: UseTurretEventsResult = useTurretEvents({
     turretId: selectedTurretId ?? undefined,
     enabled: connected,
