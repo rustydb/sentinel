@@ -1,4 +1,4 @@
-FROM    docker.io/oven/bun:1.3.11 AS deps
+FROM    docker.io/oven/bun:1.3.12 AS deps
 WORKDIR /app
 COPY    package.json bun.lock tsconfig.base.json tsconfig.json ./
 COPY    apps/api/package.json apps/api/package.json
@@ -9,7 +9,7 @@ FROM    deps AS build
 COPY    . .
 RUN     bun run --filter @sentinel/api test
 
-FROM    docker.io/oven/bun:1.3.11 AS runner
+FROM    docker.io/oven/bun:1.3.12 AS runner
 WORKDIR /app
 COPY    --from=build /app /app
 ENV     PORT=3001
