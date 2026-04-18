@@ -47,6 +47,8 @@ updates:
     schedule:
       interval: "daily"
     groups:
+      monorepo-dependencies:
+        group-by: dependency-name
 
       security-updates:
         patterns:
