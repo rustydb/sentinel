@@ -132,7 +132,6 @@ jobs:
             --add-cloudsql-instances ${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }} \
             --set-env-vars="^__^DATABASE_URL=postgres://${DB_USER}:${DB_PASS}@/${{ env.DB_URN }}?host=/cloudsql/${{ secrets.GCP_PROJECT }}:${{ secrets.GCP_REGION }}:${{ env.DB_NAME }}__SUI_RPC_URL=https://fullnode.${{ env.SUI_NETWORK }}.sui.io__EVE_PACKAGE_ID=${EVE_PACKAGE_ID}" \
             --min-instances 1 \
-            --cpu 0.5 \
             --memory 256Mi \
             --allow-unauthenticated \
             --port 8080
