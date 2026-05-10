@@ -21,7 +21,6 @@ env:
   DB_NAME: sentinel-db
   DB_URN: sentinel
   EVE_PACKAGE_ID_STILLNESS: '0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c'
-  EVE_PACKAGE_ID_UTOPIA: '0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75'
   SUI_NETWORK: testnet
 
 jobs:
@@ -123,7 +122,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
         run: |
-          EVE_PACKAGE_ID="${{ env.EVE_PACKAGE_ID_STILLNESS }},${{ env.EVE_PACKAGE_ID_UTOPIA }}"
+          EVE_PACKAGE_ID="${{ env.EVE_PACKAGE_ID_STILLNESS }}"
           gcloud run deploy indexer \
             --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/indexer:${{ needs.parse-tag.outputs.version }} \
             --region ${{ secrets.GCP_REGION }} \
