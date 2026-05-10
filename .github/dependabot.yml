@@ -5,6 +5,14 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
+      security-updates:
+        patterns:
+          - "*"
+        applies-to: "security-updates"
 
   - package-ecosystem: "bun"
     directories:
@@ -26,8 +34,9 @@ updates:
           - "eslint*"
           - "@eslint/*"
 
-      monorepo-dependencies:
-        group-by: dependency-name
+      all-dependencies:
+        patterns:
+          - "*"
         exclude-patterns:
           - "eslint*"
           - "@eslint/*"
@@ -47,8 +56,9 @@ updates:
     schedule:
       interval: "daily"
     groups:
-      monorepo-dependencies:
-        group-by: dependency-name
+      all-dependencies:
+        patterns:
+          - "*"
 
       security-updates:
         patterns:
@@ -60,6 +70,9 @@ updates:
     schedule:
       interval: "daily"
     groups:
+      all-dependencies:
+        patterns:
+          - "*"
 
       security-updates:
         patterns:
@@ -71,6 +84,9 @@ updates:
     schedule:
       interval: "daily"
     groups:
+      all-dependencies:
+        patterns:
+          - "*"
 
       security-updates:
         patterns:
