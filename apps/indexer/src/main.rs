@@ -156,7 +156,8 @@ impl Database {
                 "#,
                 &[&pipeline_name],
             )
-            .await?;
+            .await
+            .context("failed to load cursor state from database")?;
 
         let Some(row) = row else {
             return Ok(CursorState::default());
@@ -212,7 +213,8 @@ impl Database {
                     &state.last_checkpoint_sequence_number,
                 ],
             )
-            .await?;
+            .await
+            .context("failed to save cursor state to database")?;
 
         Ok(())
     }
@@ -241,7 +243,8 @@ impl Database {
                     &event.timestamp,
                 ],
             )
-            .await?;
+            .await
+            .context("failed to insert event into database")?;
 
         Ok(())
     }
@@ -275,7 +278,9 @@ impl SuiRpcClient {
             false
         ]);
 
-        retry_rpc(|| self.call("suix_queryEvents", params.clone())).await
+        retry_rpc(|| self.call("suix_queryEvents", params.clone()))
+            .await
+            .context("RPC suix_queryEvents failed")
     }
 
     async fn transaction_context(&self, digest: &str) -> Result<TransactionContextData> {
@@ -292,8 +297,9 @@ impl SuiRpcClient {
             }
         ]);
 
-        let response: RpcTransactionBlock =
-            retry_rpc(|| self.call("sui_getTransactionBlock", params.clone())).await?;
+        let response: RpcTransactionBlock = retry_rpc(|| self.call("sui_getTransactionBlock", params.clone()))
+            .await
+            .context("RPC sui_getTransactionBlock failed")?;
         let checkpoint_sequence_number = parse_i64(
             response
                 .checkpoint
@@ -325,8 +331,10 @@ impl SuiRpcClient {
                 "params": params,
             }))
             .send()
-            .await?
-            .error_for_status()?;
+            .await
+            .context("HTTP request failed")?
+            .error_for_status()
+            .context("HTTP response indicates error")?;
 
         let envelope: RpcEnvelope<T> = response.json().await?;
 
@@ -523,7 +531,8 @@ async fn process_page(
             state.cursor.as_ref(),
             config.page_size,
         )
-        .await?;
+        .await
+        .context("query_events failed in process_page")?;
     let next_cursor = cursor_from_page(&page)?;
     let mut tx_context_cache: HashMap<String, TransactionContextData> = HashMap::new();
     let mut indexed = 0_usize;
@@ -537,14 +546,14 @@ async fn process_page(
         let tx_context = match tx_context_cache.get(&event.id.tx_digest) {
             Some(tx_context) => tx_context.clone(),
             None => {
-                let tx_context = rpc.transaction_context(&event.id.tx_digest).await?;
+                let tx_context = rpc.transaction_context(&event.id.tx_digest).await.context("transaction_context failed in process_page")?;
                 tx_context_cache.insert(event.id.tx_digest.clone(), tx_context.clone());
                 tx_context
             }
         };
 
         let incoming = to_incoming_event(event, &tx_context)?;
-        database.insert_event(&incoming).await?;
+        database.insert_event(&incoming).await.context("insert_event failed in process_page")?;
         indexed += 1;
         max_checkpoint = Some(
             max_checkpoint
@@ -554,7 +563,7 @@ async fn process_page(
     }
 
     let next_state = merge_state(state, next_cursor, max_checkpoint);
-    database.save_state(pipeline_name, &next_state).await?;
+    database.save_state(pipeline_name, &next_state).await.context("save_state failed in process_page")?;
 
     Ok(PageOutcome {
         fetched: page.data.len(),
@@ -579,7 +588,9 @@ async fn poll_until_caught_up(
     };
 
     for _ in 0..config.max_pages_per_poll {
-        let outcome = process_page(rpc, database, config, state, package_id, pipeline_name).await?;
+        let outcome = process_page(rpc, database, config, state, package_id, pipeline_name)
+            .await
+            .context("process_page failed in poll_until_caught_up")?;
         *state = outcome.next_state;
         summary.fetched += outcome.fetched;
         summary.indexed += outcome.indexed;
