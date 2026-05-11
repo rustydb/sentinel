@@ -297,9 +297,10 @@ impl SuiRpcClient {
             }
         ]);
 
-        let response: RpcTransactionBlock = retry_rpc(|| self.call("sui_getTransactionBlock", params.clone()))
-            .await
-            .context("RPC sui_getTransactionBlock failed")?;
+        let response: RpcTransactionBlock =
+            retry_rpc(|| self.call("sui_getTransactionBlock", params.clone()))
+                .await
+                .context("RPC sui_getTransactionBlock failed")?;
         let checkpoint_sequence_number = parse_i64(
             response
                 .checkpoint
@@ -546,14 +547,20 @@ async fn process_page(
         let tx_context = match tx_context_cache.get(&event.id.tx_digest) {
             Some(tx_context) => tx_context.clone(),
             None => {
-                let tx_context = rpc.transaction_context(&event.id.tx_digest).await.context("transaction_context failed in process_page")?;
+                let tx_context = rpc
+                    .transaction_context(&event.id.tx_digest)
+                    .await
+                    .context("transaction_context failed in process_page")?;
                 tx_context_cache.insert(event.id.tx_digest.clone(), tx_context.clone());
                 tx_context
             }
         };
 
         let incoming = to_incoming_event(event, &tx_context)?;
-        database.insert_event(&incoming).await.context("insert_event failed in process_page")?;
+        database
+            .insert_event(&incoming)
+            .await
+            .context("insert_event failed in process_page")?;
         indexed += 1;
         max_checkpoint = Some(
             max_checkpoint
@@ -563,7 +570,10 @@ async fn process_page(
     }
 
     let next_state = merge_state(state, next_cursor, max_checkpoint);
-    database.save_state(pipeline_name, &next_state).await.context("save_state failed in process_page")?;
+    database
+        .save_state(pipeline_name, &next_state)
+        .await
+        .context("save_state failed in process_page")?;
 
     Ok(PageOutcome {
         fetched: page.data.len(),
