@@ -96,7 +96,12 @@ jobs:
           # Skip shared-types as it doesn't have a Dockerfile
           if [[ "$COMPONENT" != "shared-types" ]]; then
             IMAGE_URL="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.REPO }}/${COMPONENT}:${VERSION}"
-            docker build -t ${IMAGE_URL} -f ${DOCKERFILE} .
+            docker build -t ${IMAGE_URL} -f ${DOCKERFILE} \
+              --build-arg SENTINEL_BUILD_COMMIT="${{ github.sha }}" \
+              --build-arg SENTINEL_BUILD_DIRTY="false" \
+              --build-arg SENTINEL_BUILD_REPOSITORY_URL="${{ github.server_url }}/${{ github.repository }}" \
+              --build-arg SENTINEL_BUILD_RELEASE_TAG="${VERSION}" \
+              .
             docker push ${IMAGE_URL}
           fi
 
