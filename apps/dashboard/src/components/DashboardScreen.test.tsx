@@ -298,7 +298,7 @@ describe('DashboardScreen', () => {
           right: 600,
           bottom: 880,
           toJSON: () => ({}),
-        } as DOMRect;
+        };
       }
 
       if (this.dataset.testid === 'turret-detail') {
@@ -312,7 +312,7 @@ describe('DashboardScreen', () => {
           right: 1200,
           bottom: 840,
           toJSON: () => ({}),
-        } as DOMRect;
+        };
       }
 
       if (this.tagName === 'HEADER') {
@@ -326,7 +326,7 @@ describe('DashboardScreen', () => {
           right: 1200,
           bottom: 196,
           toJSON: () => ({}),
-        } as DOMRect;
+        };
       }
 
       return Reflect.apply(originalGetBoundingClientRect, this, []);
