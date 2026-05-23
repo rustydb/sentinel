@@ -2,6 +2,7 @@ use std::{collections::HashMap, env, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
+use deadpool_postgres::{ManagerConfig, Pool, RecyclingMethod, Runtime};
 use reqwest::Client as HttpClient;
 use sentinel_indexer::handlers::retry_rpc;
 use sentinel_indexer::models::IncomingTurretEvent;
@@ -11,7 +12,7 @@ use serde_json::{json, Value};
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpListener;
 use tokio::time::{interval, Duration};
-use tokio_postgres::{Client as PgClient, NoTls};
+use tokio_postgres::NoTls;
 
 const DEFAULT_POLL_INTERVAL_MS: u64 = 5_000;
 const DEFAULT_PAGE_SIZE: u64 = 50;
@@ -100,25 +101,37 @@ struct PageOutcome {
 }
 
 struct Database {
-    client: PgClient,
+    pool: Pool,
 }
 
 impl Database {
     async fn connect(database_url: &str) -> Result<Self> {
-        let (client, connection) = tokio_postgres::connect(database_url, NoTls).await?;
-        tokio::spawn(async move {
-            if let Err(error) = connection.await {
-                eprintln!("postgres connection error: {error}");
-            }
+        let mut config = deadpool_postgres::Config::new();
+        config.url = Some(database_url.to_string());
+        config.manager = Some(ManagerConfig {
+            recycling_method: RecyclingMethod::Fast,
         });
 
-        let database = Self { client };
+        let pool_size = env::var("DATABASE_POOL_SIZE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(4);
+        config.pool = Some(deadpool_postgres::PoolConfig::new(pool_size));
+
+        let pool = config.create_pool(Some(Runtime::Tokio1), NoTls)?;
+
+        let database = Self { pool };
         database.ensure_schema().await?;
         Ok(database)
     }
 
     async fn ensure_schema(&self) -> Result<()> {
-        self.client
+        let client = self
+            .pool
+            .get()
+            .await
+            .context("failed to check out database connection")?;
+        client
             .batch_execute(
                 r#"
                 CREATE TABLE IF NOT EXISTS turret_events (
@@ -146,8 +159,12 @@ impl Database {
     }
 
     async fn load_state(&self, pipeline_name: &str) -> Result<CursorState> {
-        let row = self
-            .client
+        let client = self
+            .pool
+            .get()
+            .await
+            .context("failed to check out database connection")?;
+        let row = client
             .query_opt(
                 r#"
                 SELECT cursor_tx_digest, cursor_event_seq, last_checkpoint_sequence_number
@@ -188,7 +205,12 @@ impl Database {
             .map(|cursor| cursor.tx_digest.as_str());
         let cursor_event_seq = state.cursor.as_ref().map(|cursor| cursor.event_seq);
 
-        self.client
+        let client = self
+            .pool
+            .get()
+            .await
+            .context("failed to check out database connection")?;
+        client
             .execute(
                 r#"
                 INSERT INTO indexer_cursors (
@@ -220,7 +242,12 @@ impl Database {
     }
 
     async fn insert_event(&self, event: &IncomingTurretEvent) -> Result<()> {
-        self.client
+        let client = self
+            .pool
+            .get()
+            .await
+            .context("failed to check out database connection")?;
+        client
             .execute(
                 r#"
                 INSERT INTO turret_events (
