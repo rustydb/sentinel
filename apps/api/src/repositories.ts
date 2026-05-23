@@ -379,42 +379,43 @@ class PostgresTurretSolarSystemRepository implements TurretSolarSystemRepository
   }
 
   async sync(turrets: TurretNodeRelation[]): Promise<number> {
-    let updated = 0;
+    const withNodes = turrets.filter(
+      (t): t is { turretId: string; nodeId: string } => t.nodeId != null,
+    );
 
-    for (const turret of turrets) {
-      if (!turret.nodeId) {
-        continue;
-      }
-
-      const result = await this.pool.query(
-        `
-          INSERT INTO turret_solar_system_mappings (
-            turret_id,
-            solar_system_id,
-            solar_system_name,
-            source_node_id
-          )
-          SELECT
-            $1,
-            network_node_mappings.solar_system_id,
-            network_node_mappings.solar_system_name,
-            $2
-          FROM network_node_mappings
-          WHERE network_node_mappings.node_id = $2
-          ON CONFLICT (turret_id)
-          DO UPDATE SET
-            solar_system_id = EXCLUDED.solar_system_id,
-            solar_system_name = EXCLUDED.solar_system_name,
-            source_node_id = EXCLUDED.source_node_id,
-            updated_at = NOW()
-        `,
-        [turret.turretId, turret.nodeId],
-      );
-
-      updated += result.rowCount ?? 0;
+    if (withNodes.length === 0) {
+      return 0;
     }
 
-    return updated;
+    const turretIds = withNodes.map((t) => t.turretId);
+    const nodeIds = withNodes.map((t) => t.nodeId);
+
+    const result = await this.pool.query(
+      `
+        INSERT INTO turret_solar_system_mappings (
+          turret_id,
+          solar_system_id,
+          solar_system_name,
+          source_node_id
+        )
+        SELECT
+          t.turret_id,
+          n.solar_system_id,
+          n.solar_system_name,
+          t.node_id
+        FROM unnest($1::text[], $2::text[]) AS t(turret_id, node_id)
+        JOIN network_node_mappings n ON n.node_id = t.node_id
+        ON CONFLICT (turret_id)
+        DO UPDATE SET
+          solar_system_id = EXCLUDED.solar_system_id,
+          solar_system_name = EXCLUDED.solar_system_name,
+          source_node_id = EXCLUDED.source_node_id,
+          updated_at = NOW()
+      `,
+      [turretIds, nodeIds],
+    );
+
+    return result.rowCount ?? 0;
   }
 
   async clearBySourceNode(nodeId: string): Promise<number> {

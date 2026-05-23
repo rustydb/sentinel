@@ -140,6 +140,70 @@ describe('API', () => {
     expect(listResponse.headers['cache-control']).toBe('no-store');
   });
 
+  it('batch-syncs multiple turrets and skips entries with null or unknown nodes', async () => {
+    const handlers = createApiHandlers(createInMemoryRepositories());
+
+    await handlers.upsertNetworkNode(
+      {
+        params: { id: 'node-a' },
+        body: { solarSystemId: 30000142, solarSystemName: 'Jita' },
+      } as never,
+      createMockResponse() as never,
+    );
+    await handlers.upsertNetworkNode(
+      {
+        params: { id: 'node-b' },
+        body: { solarSystemId: 30002187, solarSystemName: 'Amarr' },
+      } as never,
+      createMockResponse() as never,
+    );
+
+    const syncResponse = createMockResponse();
+    await handlers.syncTurretSolarSystems(
+      {
+        body: {
+          turrets: [
+            { turretId: '0xturret-1', nodeId: 'node-a' },
+            { turretId: '0xturret-2', nodeId: 'node-b' },
+            { turretId: '0xturret-3', nodeId: null },
+            { turretId: '0xturret-4', nodeId: 'node-unknown' },
+          ],
+        },
+      } as never,
+      syncResponse as never,
+    );
+
+    expect(syncResponse.statusCode).toBe(200);
+    expect((syncResponse.body as { data: { updated: number } }).data.updated).toBe(2);
+
+    const listResponse = createMockResponse();
+    await handlers.listTurretSolarSystems(
+      { query: { ids: '0xturret-1,0xturret-2,0xturret-3,0xturret-4' } } as never,
+      listResponse as never,
+    );
+
+    const mappings = (
+      listResponse.body as {
+        data: Array<{ turretId: string; solarSystemName: string | null }>;
+      }
+    ).data;
+    expect(mappings).toHaveLength(2);
+    expect(mappings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          turretId: '0xturret-1',
+          solarSystemName: 'Jita',
+          sourceNodeId: 'node-a',
+        }),
+        expect.objectContaining({
+          turretId: '0xturret-2',
+          solarSystemName: 'Amarr',
+          sourceNodeId: 'node-b',
+        }),
+      ]),
+    );
+  });
+
   it('returns paginated turret events', async () => {
     const handlers = createApiHandlers(
       createInMemoryRepositories({
