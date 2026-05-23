@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/rustydb/sentinel/compare/apps/api-v0.2.0...apps/api-v0.2.1) (2026-05-23)
+
+
+### Bug Fixes
+
+* **indexer:** batch DB inserts ([#103](https://github.com/rustydb/sentinel/issues/103)) ([1f70b58](https://github.com/rustydb/sentinel/commit/1f70b58dd0937638f2505355cf1ce9ee3eda6b34))
+
 ## [0.2.0](https://github.com/rustydb/sentinel/compare/api-v0.1.0...api-v0.2.0) (2026-03-31)
 
 

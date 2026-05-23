@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.4](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.3...apps/dashboard-v0.3.4) (2026-05-23)
+
+
+### Bug Fixes
+
+* **web:** resolve lint errors ([#104](https://github.com/rustydb/sentinel/issues/104)) ([#106](https://github.com/rustydb/sentinel/issues/106)) ([cd4afa7](https://github.com/rustydb/sentinel/commit/cd4afa728ca7d30ccf11b3b5b85b0da09daa5930))
+* **web:** resolve lint errors caused by updated types ([cd4afa7](https://github.com/rustydb/sentinel/commit/cd4afa728ca7d30ccf11b3b5b85b0da09daa5930))
+
 ## [0.3.3](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.2...apps/dashboard-v0.3.3) (2026-04-12)
 
 
