@@ -33,7 +33,7 @@ export class ResizeObserverMock {
           },
         } as ResizeObserverEntry,
       ],
-      this as unknown as ResizeObserver,
+      this,
     );
   }
 }
