@@ -13,7 +13,7 @@
   "dependencies": {
     "@evefrontier/dapp-kit": "^0.1.0",
     "@sentinel/shared-types": "workspace:*",
-    "@mysten/dapp-kit-react": "^1.1.0",
+    "@mysten/dapp-kit-react": "^2.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
