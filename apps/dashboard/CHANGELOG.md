@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.5](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.4...apps/dashboard-v0.3.5) (2026-05-24)
+
+
+### Bug Fixes
+
+* **dashboard:** align @mysten/dapp-kit-react version ([33ba649](https://github.com/rustydb/sentinel/commit/33ba649fe547af45d2e4c19a7c7d7ab8e1142910))
+* **dashboard:** align @mysten/dapp-kit-react version to fix crash ([#110](https://github.com/rustydb/sentinel/issues/110)) ([33ba649](https://github.com/rustydb/sentinel/commit/33ba649fe547af45d2e4c19a7c7d7ab8e1142910))
+
 ## [0.3.4](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.3...apps/dashboard-v0.3.4) (2026-05-23)
 
 
