@@ -41,23 +41,18 @@ impl IndexerConfig {
         let database_url = env::var("DATABASE_URL").context("DATABASE_URL is required")?;
         let sui_rpc_url = env::var("SUI_RPC_URL")
             .unwrap_or_else(|_| "https://fullnode.testnet.sui.io:443".to_string());
-        
-        let mut turret_package_ids: Vec<String> = env::var("EVE_PACKAGE_ID")
+
+        let turret_package_ids: Vec<String> = env::var("EVE_PACKAGE_ID")
             .unwrap_or_default()
             .split(',')
             .map(|id| id.trim().to_string())
             .filter(|id| !id.is_empty())
             .map(normalize_object_id)
             .collect();
-            
-        // MVR placeholder resolution for Stillness/Utopia
-        // Fallback to static EVE_PACKAGE_ID if MVR fails or is not available
-        if turret_package_ids.is_empty() {
-            println!("No EVE_PACKAGE_ID provided, attempting MVR resolution for @evefrontier/world");
-            // Placeholder: MVR resolution would go here
-            turret_package_ids.push("0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75".to_string());
-        }
 
+        if turret_package_ids.is_empty() {
+            return Err(anyhow::anyhow!("EVE_PACKAGE_ID must be provided. Dynamic resolution (MVR/Registry) is not yet implemented."));
+        }
         let turret_event_module = DEFAULT_EVENT_MODULE.to_string();
 
         Ok(Self {

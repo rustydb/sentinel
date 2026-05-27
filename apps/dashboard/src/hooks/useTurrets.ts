@@ -7,7 +7,7 @@ import {
 } from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
-import { prioritizeWorlds, resolveTurretPackageId, resolveTurretPackageIdAsync } from '../world';
+import { prioritizeWorlds, resolveTurretPackageIdAsync } from '../world';
 
 interface UseTurretsOptions {
   owner?: string;

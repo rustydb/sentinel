@@ -5,9 +5,11 @@ description: When working with GCP.
 
 # Sentinel Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-30
+Auto-generated from all feature plans. Last updated: 2026-05-24
 
 ## Active Technologies
+
+- TypeScript (Dashboard), Rust 1.70+ (Indexer) + `@suins/mvr`, `@mysten/sui`, `sui-sdk` (105-mvr-upgrade)
 
 - TypeScript 5.8.x + React 19 for dashboard code, Markdown/YAML for GitHub templates + React, Tailwind CSS 4 for the UI (008-disclaimer-and-issue-templates)
 
@@ -44,11 +46,11 @@ TypeScript (Bun runtime), Rust (Edition 2021): Follow standard conventions
 
 ## Recent Changes
 
+- 105-mvr-upgrade: Added TypeScript (Dashboard), Rust 1.70+ (Indexer) + `@suins/mvr`, `@mysten/sui`, `sui-sdk`
+
 - 008-disclaimer-and-issue-templates: Added TypeScript 5.8.x + React 19 for dashboard code, Markdown/YAML for GitHub templates + React, Tailwind CSS 4 for the UI
 
 - 007-turret-filters: Added TypeScript 5.8.x in the dashboard and shared-types packages, with the existing React 19 / Vite 6 stack + React 19, Vite 6, Bun, `@sentinel/shared-types`, existing dashboard hooks, Testing Library, Vitest 3, Playwright
-
-- 006-hot-load-indexer-updates: Added TypeScript 5.8.x for dashboard/API code, SQL for the existing PostgreSQL-backed indexer data + React 19, Vite 6, Bun, Express, `pg`, `@evefrontier/dapp-kit`, `@mysten/dapp-kit-react`, Vitest 3, Testing Library, Playwright
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

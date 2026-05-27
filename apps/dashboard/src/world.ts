@@ -66,17 +66,14 @@ export function resolveTurretPackageId(world: EveWorldName): string {
   );
 }
 
-export async function resolveTurretPackageIdAsync(
-  world: EveWorldName,
-  mvrClient?: unknown,
-): Promise<string> {
+export function resolveTurretPackageIdAsync(world: EveWorldName): Promise<string> {
   const defaultId = resolveTurretPackageId(world);
 
   // TODO: Integrate actual MVR client once @suins/mvr or equivalent SDK is available.
   // The RPC `suix_resolveNameServiceAddress` does not support '@' prefix namespaces.
   // For now, we fallback to the static configuration which contains the latest deployed IDs.
 
-  return defaultId;
+  return Promise.resolve(defaultId);
 }
 
 export function buildWorldApiPath(world: EveWorldName, path: string): string {
