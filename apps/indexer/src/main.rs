@@ -18,10 +18,11 @@ const DEFAULT_POLL_INTERVAL_MS: u64 = 5_000;
 const DEFAULT_PAGE_SIZE: u64 = 50;
 const DEFAULT_MAX_PAGES_PER_POLL: usize = 10;
 const DEFAULT_EVENT_MODULE: &str = "turret";
-const SUPPORTED_TURRET_EVENTS: [&str; 3] = [
+const SUPPORTED_TURRET_EVENTS: [&str; 4] = [
     "TurretCreatedEvent",
     "PriorityListUpdatedEvent",
     "ExtensionAuthorizedEvent",
+    "ExtensionRevokedEvent",
 ];
 
 #[derive(Debug, Clone)]
@@ -36,17 +37,22 @@ struct IndexerConfig {
 }
 
 impl IndexerConfig {
-    fn from_env() -> Result<Self> {
+    async fn from_env_async() -> Result<Self> {
         let database_url = env::var("DATABASE_URL").context("DATABASE_URL is required")?;
         let sui_rpc_url = env::var("SUI_RPC_URL")
             .unwrap_or_else(|_| "https://fullnode.testnet.sui.io:443".to_string());
-        let turret_package_ids = env::var("EVE_PACKAGE_ID")
+
+        let turret_package_ids: Vec<String> = env::var("EVE_PACKAGE_ID")
             .unwrap_or_default()
             .split(',')
             .map(|id| id.trim().to_string())
             .filter(|id| !id.is_empty())
             .map(normalize_object_id)
             .collect();
+
+        if turret_package_ids.is_empty() {
+            return Err(anyhow::anyhow!("EVE_PACKAGE_ID must be provided. Dynamic resolution (MVR/Registry) is not yet implemented."));
+        }
         let turret_event_module = DEFAULT_EVENT_MODULE.to_string();
 
         Ok(Self {
@@ -669,7 +675,7 @@ async fn start_health_check_server() {
 async fn main() -> Result<()> {
     tokio::spawn(start_health_check_server());
 
-    let config = IndexerConfig::from_env()?;
+    let config = IndexerConfig::from_env_async().await?;
     let database = Arc::new(Database::connect(&config.database_url).await?);
     let rpc = SuiRpcClient::new(config.sui_rpc_url.clone());
 

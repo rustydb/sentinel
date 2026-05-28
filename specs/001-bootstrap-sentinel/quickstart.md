@@ -38,8 +38,12 @@
 
     The indexer polls `EVE_PACKAGE_ID::turret` and persists its RPC cursor in PostgreSQL so it can resume from the last processed page.
     Current world package IDs:
-    - `Utopia` (current sandbox default): `0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75`
-    - `Stillness` (planned later switch): `0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c`
+    - `Utopia` (current sandbox default):
+        - `0xd12a70c74c1e759445d6f209b01d43d860e97fcf2ef72ccbbd00afd828043f75`
+        - `0x07e6b810c2dff6df56ea7fbad9ff32f4d84cbee53e496267515887b712924bd1`
+    - `Stillness` (planned later switch):
+        - `0x28b497559d65ab320d9da4613bf2498d5946b2c0ae3597ccfda3072ce127448c`
+        - `0xd2fd1224f881e7a705dbc211888af11655c315f2ee0f03fe680fc3176e6e4780`
 
 3. **Verify Health**
    Check that the API is running at `http://localhost:3001/api/health`.

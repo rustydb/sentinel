@@ -7,7 +7,7 @@ import {
 } from '@sentinel/shared-types';
 import { useEffect, useRef, useState } from 'react';
 
-import { prioritizeWorlds, resolveTurretPackageId } from '../world';
+import { prioritizeWorlds, resolveTurretPackageIdAsync } from '../world';
 
 interface UseTurretsOptions {
   owner?: string;
@@ -185,7 +185,7 @@ export function useTurrets({
     async function loadTurretWorldData(
       candidateWorld: EveWorldName,
     ): Promise<LoadedTurretWorldData> {
-      const turretPackageId = resolveTurretPackageId(candidateWorld);
+      const turretPackageId = await resolveTurretPackageIdAsync(candidateWorld);
       const characterPlayerProfileType = `${turretPackageId}${CHARACTER_PLAYER_PROFILE_SUFFIX}`;
       const ownerCapType = `${turretPackageId}${OWNER_CAP_SUFFIX}${turretPackageId}${TURRET_TYPE_SUFFIX}`;
       const objects: Record<string, unknown>[] = [];
