@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.5...apps/dashboard-v0.4.0) (2026-05-28)
+
+
+### Features
+
+* upgrade dashboard to MVR & fallback indexer to manual polling ([#117](https://github.com/rustydb/sentinel/issues/117)) ([c32678a](https://github.com/rustydb/sentinel/commit/c32678a02be5a05199e93f1d574c8dee949a196e))
+
 ## [0.3.5](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.4...apps/dashboard-v0.3.5) (2026-05-24)
 
 

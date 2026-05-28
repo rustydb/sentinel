@@ -1,5 +1,5 @@
 {
   "apps/api": "0.2.1",
-  "apps/dashboard": "0.3.5",
+  "apps/dashboard": "0.4.0",
   "packages/shared-types": "0.2.0"
 }
