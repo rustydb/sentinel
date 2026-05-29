@@ -132,6 +132,7 @@ describe('TurretDetail', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    global.fetch = originalFetch;
   });
 
   it('renders drawer details and events', () => {
