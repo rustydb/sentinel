@@ -2,6 +2,7 @@ import * as z from 'zod';
 import type { Express, Request, Response } from 'express';
 
 import type { Repositories } from './types';
+import { searchSolarSystems as searchCatalog } from './solarSystems';
 
 const nodePayloadSchema = z.object({
   solarSystemId: z.number().int().positive(),
@@ -123,6 +124,15 @@ export function createApiHandlers(repositories: Repositories) {
         data: await repositories.turretIntelligence.listByTurretIds(turretIds),
       });
     },
+
+    searchSolarSystems(request: Request, response: Response) {
+      const query = typeof request.query.q === 'string' ? request.query.q : '';
+      const world = typeof request.query.world === 'string' ? request.query.world : 'utopia';
+      const limit = typeof request.query.limit === 'string' ? parseInt(request.query.limit, 10) : 8;
+
+      const results = searchCatalog(query, world, Number.isNaN(limit) ? 8 : limit);
+      applyNoStoreHeaders(response).json({ data: results });
+    },
   };
 }
 
@@ -162,5 +172,9 @@ export function registerRoutes(app: Express, repositories: Repositories): void {
 
   app.post('/api/turret-solar-systems/sync', async (request: Request, response: Response) => {
     await handlers.syncTurretSolarSystems(request, response);
+  });
+
+  app.get('/api/solar-systems/search', (request: Request, response: Response) => {
+    handlers.searchSolarSystems(request, response);
   });
 }

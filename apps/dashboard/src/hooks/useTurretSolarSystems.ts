@@ -1,5 +1,4 @@
 import {
-  resolveSolarSystemName,
   type EveWorldName,
   type NetworkNodeMapping,
   type TurretData,
@@ -55,7 +54,6 @@ export function useTurretSolarSystems({
   turrets,
   nodeMappings,
   apiBaseUrl = '',
-  world = 'utopia',
   enabled = true,
   refreshTick = 0,
 }: UseTurretSolarSystemsOptions) {
@@ -157,9 +155,7 @@ export function useTurretSolarSystems({
         const currentNodeId = isSuiAddress(turret.energySourceId) ? turret.energySourceId : null;
         const currentMapping = currentNodeId ? currentByNodeId.get(currentNodeId) : undefined;
         if (currentMapping) {
-          const solarSystemName =
-            currentMapping.solarSystemName ??
-            resolveSolarSystemName(currentMapping.solarSystemId, world);
+          const solarSystemName = currentMapping.solarSystemName ?? null;
           return [
             turret.id,
             {
@@ -178,9 +174,7 @@ export function useTurretSolarSystems({
             {
               turretId: turret.id,
               solarSystemId: retainedMapping.solarSystemId,
-              solarSystemName:
-                retainedMapping.solarSystemName ??
-                resolveSolarSystemName(retainedMapping.solarSystemId, world),
+              solarSystemName: retainedMapping.solarSystemName ?? null,
               resolutionSource: 'retained',
             },
           ];
@@ -197,7 +191,7 @@ export function useTurretSolarSystems({
         ];
       }),
     );
-  }, [nodeMappings, retainedMappings, turrets, world]);
+  }, [nodeMappings, retainedMappings, turrets]);
 
   return { byTurretId, loading, error };
 }

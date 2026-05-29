@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NetworkNodeDrawer } from './NetworkNodeDrawer';
 
@@ -14,8 +14,24 @@ vi.mock('../hooks/useTypeInfo', () => ({
 }));
 
 describe('NetworkNodeDrawer', () => {
+  let originalFetch: typeof global.fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [{ id: 30000004, name: 'O3H-1FN', world: 'utopia', matchText: 'O3H-1FN' }],
+          }),
+      }),
+    );
+  });
+
   afterEach(() => {
-    document.body.innerHTML = '';
+    cleanup();
+    global.fetch = originalFetch;
   });
 
   it('renders an empty state when no nodes are available', () => {
@@ -98,6 +114,11 @@ describe('NetworkNodeDrawer', () => {
     fireEvent.change(screen.getByPlaceholderText(/search by system name/i), {
       target: { value: 'O3H' },
     });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'O3H-1FN' })).toBeTruthy();
+    });
+
     fireEvent.click(screen.getByRole('button', { name: 'O3H-1FN' }));
 
     await waitFor(() => {
