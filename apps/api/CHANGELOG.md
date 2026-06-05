@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.2](https://github.com/rustydb/sentinel/compare/apps/api-v0.2.1...apps/api-v0.2.2) (2026-06-05)
+
+
+### Bug Fixes
+
+* resolve solar system data bundle bloat ([#36](https://github.com/rustydb/sentinel/issues/36)) ([#122](https://github.com/rustydb/sentinel/issues/122)) ([a4d5e09](https://github.com/rustydb/sentinel/commit/a4d5e09bb3f31099bcd163159ed5c1aefa8f370c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @sentinel/shared-types bumped to 0.2.1
+
 ## [0.2.1](https://github.com/rustydb/sentinel/compare/apps/api-v0.2.0...apps/api-v0.2.1) (2026-05-23)
 
 

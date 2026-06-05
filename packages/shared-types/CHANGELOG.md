@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/rustydb/sentinel/compare/packages/shared-types-v0.2.0...packages/shared-types-v0.2.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* resolve solar system data bundle bloat ([#36](https://github.com/rustydb/sentinel/issues/36)) ([#122](https://github.com/rustydb/sentinel/issues/122)) ([a4d5e09](https://github.com/rustydb/sentinel/commit/a4d5e09bb3f31099bcd163159ed5c1aefa8f370c))
+
 ## [0.2.0](https://github.com/rustydb/sentinel/compare/shared-types-v0.1.0...shared-types-v0.2.0) (2026-03-31)
 
 

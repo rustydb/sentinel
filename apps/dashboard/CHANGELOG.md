@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.4.0...apps/dashboard-v0.4.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* resolve solar system data bundle bloat ([#36](https://github.com/rustydb/sentinel/issues/36)) ([#122](https://github.com/rustydb/sentinel/issues/122)) ([a4d5e09](https://github.com/rustydb/sentinel/commit/a4d5e09bb3f31099bcd163159ed5c1aefa8f370c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @sentinel/shared-types bumped to 0.2.1
+
 ## [0.4.0](https://github.com/rustydb/sentinel/compare/apps/dashboard-v0.3.5...apps/dashboard-v0.4.0) (2026-05-28)
 
 
