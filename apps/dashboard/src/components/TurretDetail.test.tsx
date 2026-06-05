@@ -98,8 +98,20 @@ function createProps() {
 }
 
 describe('TurretDetail', () => {
+  let originalFetch: typeof global.fetch;
+
   beforeEach(() => {
     installResizeObserverMock();
+    originalFetch = global.fetch;
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [{ id: 30000004, name: 'O3H-1FN', world: 'utopia', matchText: 'O3H-1FN' }],
+          }),
+      }),
+    );
     hooks.useTypeInfo.mockReturnValue({
       typeInfo: {
         id: '92404',
@@ -120,6 +132,7 @@ describe('TurretDetail', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    global.fetch = originalFetch;
   });
 
   it('renders drawer details and events', () => {
@@ -258,6 +271,11 @@ describe('TurretDetail', () => {
     fireEvent.change(screen.getByPlaceholderText(/search by system name/i), {
       target: { value: 'O3H' },
     });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'O3H-1FN' })).toBeTruthy();
+    });
+
     fireEvent.click(screen.getByRole('button', { name: 'O3H-1FN' }));
 
     await waitFor(() => {

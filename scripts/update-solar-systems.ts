@@ -73,7 +73,7 @@ async function fetchWorldCatalog(
 async function main(): Promise<void> {
   const generatedFile = resolve(
     import.meta.dir,
-    '../packages/shared-types/src/solarSystems.generated.ts',
+    '../apps/api/src/data/solarSystems.generated.json',
   );
 
   const catalog = [
@@ -81,17 +81,8 @@ async function main(): Promise<void> {
     ...(await fetchWorldCatalog('utopia')),
   ];
 
-  const output = `export interface GeneratedSolarSystemRecord {
-  id: number;
-  name: string;
-  world: 'utopia' | 'stillness';
-}
-
-export const SOLAR_SYSTEM_CATALOG_DATA: GeneratedSolarSystemRecord[] = ${JSON.stringify(catalog, null, 2)} as const;
-`;
-
   await mkdir(dirname(generatedFile), { recursive: true });
-  await writeFile(generatedFile, output, 'utf8');
+  await writeFile(generatedFile, JSON.stringify(catalog, null, 2), 'utf8');
 
   console.log(`Wrote ${catalog.length} solar systems to ${generatedFile}`);
 }

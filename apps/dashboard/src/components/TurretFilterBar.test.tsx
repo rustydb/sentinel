@@ -1,16 +1,32 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TurretFilterBar } from './TurretFilterBar';
 
 describe('TurretFilterBar', () => {
-  afterEach(() => {
-    cleanup();
+  let originalFetch: typeof global.fetch;
+
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            data: [{ id: 30000004, name: 'O3H-1FN', world: 'utopia', matchText: 'O3H-1FN' }],
+          }),
+      }),
+    );
   });
 
-  it('renders active filter controls and allows clearing them', () => {
+  afterEach(() => {
+    cleanup();
+    global.fetch = originalFetch;
+  });
+
+  it('renders active filter controls and allows clearing them', async () => {
     const onClearAll = vi.fn();
     const onSearchTextChange = vi.fn();
     const onSolarSystemQueryChange = vi.fn();
@@ -83,6 +99,9 @@ describe('TurretFilterBar', () => {
     expect(onClassNameChange).toHaveBeenCalledWith('Heavy Turret');
 
     fireEvent.focus(screen.getByDisplayValue('O3H'));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'O3H-1FN' })).toBeTruthy();
+    });
     fireEvent.click(screen.getByRole('button', { name: 'O3H-1FN' }));
     expect(onAddSolarSystem).toHaveBeenCalledWith('O3H-1FN');
 

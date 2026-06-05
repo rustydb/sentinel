@@ -6,8 +6,6 @@ import {
   GET_TURRET_EVENTS,
   TURRET_STATUSES,
   isTurretData,
-  resolveSolarSystemName,
-  searchSolarSystems,
   toTurretStatus,
 } from './index';
 
@@ -36,10 +34,5 @@ describe('shared-types', () => {
     expect(TURRET_STATUSES).toContain('online');
     expect(toTurretStatus('online')).toBe('online');
     expect(toTurretStatus('mystery')).toBe('offline');
-  });
-
-  it('searches and resolves solar systems by bundled catalog data', () => {
-    expect(searchSolarSystems('jita', 'utopia', 5)).toEqual([]);
-    expect(resolveSolarSystemName(31002477, 'utopia')).toBeNull();
   });
 });
