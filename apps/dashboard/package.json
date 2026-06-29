@@ -12,16 +12,16 @@
   },
   "dependencies": {
     "@evefrontier/dapp-kit": "^0.1.0",
-    "@mysten/dapp-kit-react": "^2.0.1",
-    "@mysten/sui": "^2.17.0",
+    "@mysten/dapp-kit-react": "^2.1.5",
+    "@mysten/sui": "^2.20.1",
     "@sentinel/shared-types": "workspace:*",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.14",
-    "@vitejs/plugin-react": "^4.4.1",
-    "tailwindcss": "^4.1.14",
-    "vite": "^6.2.1"
+    "@tailwindcss/vite": "^4.3.1",
+    "@vitejs/plugin-react": "^6.0.3",
+    "tailwindcss": "^4.3.1",
+    "vite": "^8.1.0"
   }
 }
