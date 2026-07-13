@@ -59,7 +59,7 @@ services:
       - bun-install-cache:/root/.bun/install/cache
 
   indexer:
-    image: docker.io/library/rust:1.96
+    image: docker.io/library/rust:1.97
     working_dir: /app
     command:
       - cargo
