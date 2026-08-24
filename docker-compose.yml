@@ -18,7 +18,7 @@ services:
       retries: 20
 
   api:
-    image: docker.io/oven/bun:1.3.14
+    image: docker.io/oven/bun:1.4.0
     working_dir: /app
     command:
       - sh
@@ -59,7 +59,7 @@ services:
       - bun-install-cache:/root/.bun/install/cache
 
   indexer:
-    image: docker.io/library/rust:1.97
+    image: docker.io/library/rust:1.98
     working_dir: /app
     command:
       - cargo
