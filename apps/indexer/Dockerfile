@@ -1,4 +1,4 @@
-FROM    docker.io/library/rust:1.97 AS test
+FROM    docker.io/library/rust:1.98 AS test
 WORKDIR /app
 COPY    apps/indexer/Cargo.toml apps/indexer/Cargo.toml
 COPY    apps/indexer/Cargo.lock apps/indexer/Cargo.lock
@@ -6,7 +6,7 @@ COPY    apps/indexer/src apps/indexer/src
 COPY    apps/indexer/tests apps/indexer/tests
 RUN     cargo test --locked --manifest-path apps/indexer/Cargo.toml
 
-FROM    docker.io/library/rust:1.97 AS builder
+FROM    docker.io/library/rust:1.98 AS builder
 WORKDIR /app
 COPY    apps/indexer/Cargo.toml apps/indexer/Cargo.toml
 COPY    apps/indexer/Cargo.lock apps/indexer/Cargo.lock
